@@ -1,6 +1,6 @@
 import React, { useEffect, useRef } from "react";
 
-export const PixelMountainArt = () => {
+export const PixelMountainArt = ({ height = 280, className = "" }) => {
   const canvasRef = useRef(null);
 
   useEffect(() => {
@@ -8,9 +8,9 @@ export const PixelMountainArt = () => {
     if (!canvas) return;
     const ctx = canvas.getContext("2d");
     const width = 1200;
-    const height = 280;
+    const canvasHeight = height;
     canvas.width = width;
-    canvas.height = height;
+    canvas.height = canvasHeight;
 
     // Base Sky gradient
     ctx.fillStyle = "#ffffff";
@@ -23,7 +23,7 @@ export const PixelMountainArt = () => {
 
     // Draw sky subtle dithered dots
     for (let c = 0; c < cols; c++) {
-      for (let r = 0; r < rows * 0.45; r++) {
+    for (let r = 0; r < rows * 0.45; r++) {
         if (Math.random() < 0.25 - (r / rows) * 0.3) {
           ctx.fillStyle = Math.random() > 0.5 ? "#dbeafe" : "#eff6ff";
           ctx.fillRect(c * pixelSize, r * pixelSize, pixelSize, pixelSize);
@@ -98,11 +98,11 @@ export const PixelMountainArt = () => {
   }, []);
 
   return (
-    <div className="w-full overflow-hidden border-b border-[#e4e4e7] bg-white flex justify-center">
+    <div className={`w-full overflow-hidden border-b border-[#e4e4e7] bg-white flex justify-center ${className}`}>
       <canvas
         ref={canvasRef}
-        className="w-full max-w-7xl h-[160px] sm:h-[220px] md:h-[260px] object-cover"
-        style={{ imageRendering: "pixelated" }}
+        className="w-full max-w-7xl object-cover"
+        style={{ imageRendering: "pixelated", height: `${height}px` }}
       />
     </div>
   );
