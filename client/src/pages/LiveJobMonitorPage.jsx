@@ -132,17 +132,36 @@ export const LiveJobMonitorPage = () => {
             />
           </div>
 
-           <div className="grid grid-cols-2 gap-2 pt-1 text-[10px] sm:grid-cols-5">
-             {["GSM8K / Reasoning", "MMLU / Knowledge", "Coding & JSON", "Safety Refusals", "Final Scorecard"].map((stage, index) => {
-               const threshold = index === 4 ? 100 : (index + 1) * 20;
-               const active = progress >= threshold || status === "completed";
-               return <div key={stage} className={`border px-2 py-2 transition-colors ${active ? "border-orange-200 bg-orange-50 text-[#ea580c]" : "border-zinc-200 bg-zinc-50 text-zinc-400"}`}><span className="mr-1 font-bold">0{index + 1}</span>{stage}</div>;
-             })}
-           </div>
-           <div className="flex items-center justify-between border-t border-zinc-100 pt-3 font-mono text-[10px] text-zinc-400">
-             <span>{status === "completed" ? "All test cases evaluated and scorecard persisted." : `Executing one provider request at a time. ${Math.min(35, Math.floor(Math.max(0, progress - 10) / 85 * 35))}/35 cases completed.`}</span>
-             <span className={status === "completed" ? "font-bold text-emerald-700" : "text-[#ea580c]"}>{status === "completed" ? "READY" : "LIVE"}</span>
-           </div>
+            <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-1.5 pt-1 text-[10px]">
+              {[
+                "01 Reasoning",
+                "02 Coding",
+                "03 Agentic",
+                "04 Mathematics",
+                "05 Data Analysis",
+                "06 Language",
+                "07 Instruction",
+              ].map((stage, index) => {
+                const threshold = (index + 1) * 14;
+                const active = progress >= threshold || status === "completed";
+                return (
+                  <div
+                    key={stage}
+                    className={`border px-2 py-1.5 text-center transition-colors ${
+                      active
+                        ? "border-orange-200 bg-orange-50 text-[#ea580c] font-bold"
+                        : "border-zinc-200 bg-zinc-50 text-zinc-400"
+                    }`}
+                  >
+                    {stage}
+                  </div>
+                );
+              })}
+            </div>
+            <div className="flex items-center justify-between border-t border-zinc-100 pt-3 font-mono text-[10px] text-zinc-400">
+              <span>{status === "completed" ? "All 35 test cases evaluated and scorecard persisted in MongoDB." : `Executing benchmark suite: ${Math.min(35, Math.floor(Math.max(0, progress - 10) / 85 * 35))}/35 cases completed.`}</span>
+              <span className={status === "completed" ? "font-bold text-emerald-700" : "text-[#ea580c]"}>{status === "completed" ? "READY" : "LIVE"}</span>
+            </div>
         </div>
 
         {/* Scorecard Results (Revealed when completed) */}
@@ -175,29 +194,31 @@ export const LiveJobMonitorPage = () => {
               </div>
             </div>
 
-            {/* 5-Category Breakdown Bars */}
+            {/* 7-Category Breakdown Bars */}
             <div className="p-6 bg-white border border-[#e4e4e7] rounded-none shadow-xs space-y-4 font-mono text-xs">
               <span className="font-bold text-zinc-900 uppercase tracking-wider block">
-                Category Score Breakdown
+                7-Domain Capability Breakdown
               </span>
 
               <div className="space-y-3">
                 {[
-                  { label: "Reasoning (GSM8K Math & Logic)", score: metrics.categoryScores?.reasoning },
-                  { label: "Knowledge (MMLU General QA)", score: metrics.categoryScores?.knowledge },
-                  { label: "Coding (HumanEval & SQL)", score: metrics.categoryScores?.coding },
-                  { label: "Instruction Adherence & JSON", score: metrics.categoryScores?.instruction },
-                  { label: "Safety & Refusal Guardrails", score: metrics.categoryScores?.safety },
+                  { label: "Reasoning (Logic & Multi-Step Deduction)", score: metrics.categoryScores?.reasoning },
+                  { label: "Coding (Algorithms & Syntax Validations)", score: metrics.categoryScores?.coding },
+                  { label: "Agentic Coding (Tool JSON & Patching)", score: metrics.categoryScores?.agentic_coding },
+                  { label: "Mathematics (Algebra, Arithmetic & Rates)", score: metrics.categoryScores?.mathematics },
+                  { label: "Data Analysis (JSON/Table Aggregations)", score: metrics.categoryScores?.data_analysis },
+                  { label: "Language (MMLU & Comprehension)", score: metrics.categoryScores?.language },
+                  { label: "Instruction Following (Strict Constraints)", score: metrics.categoryScores?.instruction },
                 ].map((item) => (
                   <div key={item.label} className="space-y-1">
                     <div className="flex justify-between text-[11px]">
                       <span className="text-zinc-600">{item.label}</span>
-                      <span className="font-bold text-emerald-700">{item.score}%</span>
+                      <span className="font-bold text-emerald-700">{item.score ?? 0}%</span>
                     </div>
                     <div className="w-full h-1.5 bg-zinc-100 border border-[#e4e4e7] rounded-none overflow-hidden">
                       <div
                         className="h-full bg-emerald-600 rounded-none"
-                        style={{ width: `${item.score || 90}%` }}
+                        style={{ width: `${item.score ?? 0}%` }}
                       />
                     </div>
                   </div>

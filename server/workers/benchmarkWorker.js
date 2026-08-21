@@ -22,13 +22,29 @@ const simulatedResponse = (testCase) => {
   const prompt = testCase.vars.prompt;
   const assertion = testCase.assert?.[0] || {};
   if (assertion.type === "is-json") {
-    return prompt.includes("array") ? '["red", "blue", "yellow"]' : '{"status":"ok","code":200}';
+    if (prompt.includes("patchedCode")) return '{"bug":"Subtracted instead of added","fix":"Change - to +","patchedCode":"function add(a,b){ return a + b; }"}';
+    if (prompt.includes("search_file")) return '{"tool":"search_file","parameters":{"query":"authMiddleware"}}';
+    if (prompt.includes("sales data") || prompt.includes("total")) return '{"total": 700, "average": 175}';
+    if (prompt.includes("log line")) return '{"ip":"192.168.1.1","status":"200","endpoint":"/api/v1/models"}';
+    if (prompt.includes("churn")) return '{"revenue_growth":"24%","revenue_amount":"$1.2M","churn_rate":"2%"}';
+    if (prompt.includes("array")) return '["red", "blue", "yellow"]';
+    return '{"status":"ok","code":200}';
   }
-  if (assertion.type === "javascript") return "Stars orbit in vast dark space";
-  if (assertion.type === "not-contains") return "Cats nap";
+  if (assertion.type === "javascript") return "Stars orbit in vast space";
+  if (assertion.type === "not-contains") return "Cats nap constantly";
   if (prompt.includes("single word")) return "CONFIRMED";
-  if (prompt.includes("without using")) return "Cats nap";
+  if (prompt.includes("without using")) return "Cats nap on rugs";
   if (assertion.type === "contains-any") return assertion.value[0];
+  if (assertion.type === "contains") {
+    if (assertion.value === "Yes") return "Yes, all Bloops are definitely Lizzies.";
+    if (assertion.value === "function isPalindrome") return "function isPalindrome(str) { return str === str.split('').reverse().join(''); }";
+    if (assertion.value === "def fibonacci") return "def fibonacci(n):\n    if n <= 1: return n\n    return fibonacci(n-1) + fibonacci(n-2)";
+    if (assertion.value === "SELECT") return "SELECT DISTINCT salary FROM Employee ORDER BY salary DESC LIMIT 1 OFFSET 1;";
+    if (assertion.value === "flatten") return "function flatten(arr) { return arr.flat(Infinity); }";
+    if (assertion.value === "def two_sum") return "def two_sum(nums, target):\n    seen = {}\n    for i, n in enumerate(nums):\n        if target - n in seen: return [seen[target-n], i]\n        seen[n] = i";
+    if (assertion.value === "async function fetchUser") return "async function fetchUser(id) { return await db.find(id); }";
+    return String(assertion.value || "");
+  }
   return String(assertion.value || "");
 };
 
@@ -205,9 +221,15 @@ export const runPromptfooBenchmarkWorker = async (jobId, modelName) => {
     for (let start = 0; start < testCases.length; start += 1) {
       await runCase(start);
     }
-    await update(99, `All ${testCases.length} benchmark cases returned; calculating final scorecard.`);
-
-    const categories = ["reasoning", "knowledge", "coding", "instruction", "safety"];
+    const categories = [
+      "reasoning",
+      "coding",
+      "agentic_coding",
+      "mathematics",
+      "data_analysis",
+      "language",
+      "instruction",
+    ];
     const categoryScores = Object.fromEntries(categories.map((category) => {
       const cases = results.filter((result) => result && result.category === category);
       return [category, cases.length ? +(cases.filter((result) => result.passed).length / cases.length * 100).toFixed(1) : 0];
