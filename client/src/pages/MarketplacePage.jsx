@@ -203,6 +203,89 @@ const ModelAvatar = ({ creator, displayName }) => {
   );
 };
 
+// Intent Taxonomy & Semantic Keyword Dictionary for Natural Language Discovery
+const INTENT_TAXONOMY = [
+  {
+    id: "web_coding",
+    intent: "Web & Software Development",
+    icon: "💻",
+    description: "Frontend, Backend, React, APIs, and Full-Stack Engineering",
+    keywords: [
+      "website", "web", "frontend", "backend", "react", "html", "css", "javascript", "js", "ts", "typescript",
+      "code", "coding", "program", "programming", "developer", "software", "api", "script", "python",
+      "bug", "debug", "sql", "database", "app", "application", "build a", "create a", "site", "landing page",
+      "node", "express", "tailwind", "framework", "git", "web app", "landing"
+    ],
+    matchScore: (m) => {
+      const codeScore = (m.scores?.coding || 0) * 1.5 + (m.scores?.agentic_coding || 0) * 1.2;
+      const isCodeCat = String(m.category).toLowerCase().includes("cod") || String(m.name).toLowerCase().includes("code") || String(m.displayName).toLowerCase().includes("code");
+      return codeScore + (isCodeCat ? 60 : 0);
+    },
+  },
+  {
+    id: "math_logic",
+    intent: "Mathematics & Complex Reasoning",
+    icon: "📐",
+    description: "Calculations, Competition Math, Algebra & Step-by-Step Logic",
+    keywords: [
+      "math", "mathematics", "calculate", "calculation", "equation", "gsm8k", "logic", "logical",
+      "algebra", "calculus", "probability", "statistics", "finance", "financial", "accounting",
+      "numbers", "arithmetic", "formula", "proof", "solve", "algebraic"
+    ],
+    matchScore: (m) => {
+      return (m.scores?.mathematics || 0) * 1.6 + (m.scores?.reasoning || 0) * 1.2;
+    },
+  },
+  {
+    id: "data_extraction",
+    intent: "JSON Schema & Data Extraction",
+    icon: "📄",
+    description: "Parsing unstructured text into structured JSON, tables, and schemas",
+    keywords: [
+      "json", "extract", "extraction", "parse", "parsing", "data", "analytics", "sql", "table", "csv",
+      "scrape", "scraping", "document", "invoice", "logs", "schema", "entities", "structured", "format"
+    ],
+    matchScore: (m) => {
+      return (m.scores?.data_analysis || 0) * 1.6 + (m.scores?.instruction || 0) * 1.2;
+    },
+  },
+  {
+    id: "deep_reasoning",
+    intent: "Research & Multi-Step Deduction",
+    icon: "🧠",
+    description: "Multi-step deduction, research synthesis, and creative reasoning",
+    keywords: [
+      "reasoning", "reason", "think", "thinking", "research", "analysis", "analyze", "deep",
+      "compare", "strategy", "critical", "science", "medical", "clinical", "legal", "summary", "summarize"
+    ],
+    matchScore: (m) => {
+      return (m.scores?.reasoning || 0) * 1.6 + (m.scores?.language || 0) * 1.1;
+    },
+  },
+  {
+    id: "fast_edge",
+    intent: "Fast & Low-Latency Edge Inference",
+    icon: "⚡",
+    description: "Ultra-fast response time (<150ms) and lightweight token generation",
+    keywords: [
+      "fast", "speed", "quick", "cheap", "free", "small", "mini", "flash", "lightweight",
+      "edge", "latency", "realtime", "instant", "efficient", "low cost", "open source"
+    ],
+    matchScore: (m) => {
+      return Math.max(0, 500 - (m.latencyMs || 250)) / 2 + (m.tokensPerSecond || 50);
+    },
+  },
+];
+
+// Quick suggestions for one-click natural language discovery
+const QUICK_INTENT_SUGGESTIONS = [
+  { label: "🌐 Build a website / app", query: "i want to build a website with react and coding" },
+  { label: "📐 Solve math & logic", query: "solve mathematics equations and GSM8K logic" },
+  { label: "📄 Extract structured JSON", query: "extract unstructured text into clean JSON schema" },
+  { label: "⚡ Fastest models (<150ms)", query: "ultra fast low latency models" },
+  { label: "🆓 Open-weights local models", query: "open weights local models" },
+];
+
 export const MarketplacePage = () => {
   const [search, setSearch] = useState("");
   const [sortBy, setSortBy] = useState("relevant");
@@ -296,35 +379,106 @@ export const MarketplacePage = () => {
     };
   };
 
+  // Detect active semantic intent from query
+  const detectedIntent = useMemo(() => {
+    const q = search.toLowerCase().trim();
+    if (!q || q.length < 3) return null;
+
+    for (const item of INTENT_TAXONOMY) {
+      if (item.keywords.some((kw) => q.includes(kw))) {
+        return item;
+      }
+    }
+    return null;
+  }, [search]);
+
+  // Semantic Relevance & Multi-Factor Model Filtering
   const filtered = useMemo(() => {
-    let list = allMarketplaceModels.filter((m) => {
-      const q = search.toLowerCase().trim();
+    const q = search.toLowerCase().trim();
+    const queryWords = q.split(/\s+/).filter((w) => w.length > 1);
+
+    // Calculate semantic score for each model
+    const scoredList = allMarketplaceModels.map((m) => {
       const meta = getModelFilterMeta(m);
+      let matchScore = 0;
+      let matchedBy = "catalog";
 
-      const matchesSearch =
-        !q ||
-        m.name.toLowerCase().includes(q) ||
-        m.displayName.toLowerCase().includes(q) ||
-        m.creator.toLowerCase().includes(q) ||
-        m.description.toLowerCase().includes(q);
+      // 1. Direct Name/Creator/Description match
+      if (q) {
+        if (m.name.toLowerCase().includes(q) || m.displayName.toLowerCase().includes(q)) {
+          matchScore += 200;
+          matchedBy = "exact_name";
+        } else if (m.creator.toLowerCase().includes(q)) {
+          matchScore += 120;
+          matchedBy = "creator";
+        } else if (m.description.toLowerCase().includes(q)) {
+          matchScore += 80;
+          matchedBy = "description";
+        }
 
+        // Individual word hits
+        queryWords.forEach((word) => {
+          if (m.name.toLowerCase().includes(word) || m.displayName.toLowerCase().includes(word)) {
+            matchScore += 35;
+          }
+          if (m.description.toLowerCase().includes(word)) {
+            matchScore += 15;
+          }
+          if (m.category.toLowerCase().includes(word)) {
+            matchScore += 40;
+          }
+        });
+
+        // 2. Semantic Intent matching
+        if (detectedIntent) {
+          const intentBoost = detectedIntent.matchScore(m);
+          matchScore += intentBoost;
+          matchedBy = detectedIntent.intent;
+        }
+      } else {
+        // Default base score
+        matchScore = m.passRate || 50;
+      }
+
+      // Check sidebar filters
       const matchesFilters = Object.entries(selectedFilters).every(
         ([key, values]) =>
           values.length === 0 || values.some((value) => (meta[key] || []).includes(value))
       );
 
-      return matchesSearch && matchesFilters;
+      return {
+        ...m,
+        _matchScore: matchScore,
+        _matchedBy: matchedBy,
+        _matchesFilters: matchesFilters,
+      };
     });
 
-    if (sortBy === "rating" || sortBy === "score") list = [...list].sort((a, b) => b.passRate - a.passRate);
-    else if (sortBy === "benchmark") list = [...list].sort((a, b) => b.passRate - a.passRate);
-    else if (sortBy === "price") list = [...list].sort((a, b) => a.pricingPer1k - b.pricingPer1k);
-    else if (sortBy === "latency") list = [...list].sort((a, b) => a.latencyMs - b.latencyMs);
-    else if (sortBy === "tps") list = [...list].sort((a, b) => b.tokensPerSecond - a.tokensPerSecond);
-    else list = [...list].sort((a, b) => b.passRate - a.passRate);
+    // Filter by criteria
+    let list = scoredList.filter((m) => {
+      if (!m._matchesFilters) return false;
+      if (!q) return true;
+      // If query entered, keep any model with positive relevance score
+      return m._matchScore > 20 || m.name.toLowerCase().includes(q);
+    });
+
+    // Sorting
+    if (sortBy === "relevant") {
+      list.sort((a, b) => b._matchScore - a._matchScore);
+    } else if (sortBy === "rating" || sortBy === "score" || sortBy === "benchmark") {
+      list.sort((a, b) => b.passRate - a.passRate);
+    } else if (sortBy === "price") {
+      list.sort((a, b) => a.pricingPer1k - b.pricingPer1k);
+    } else if (sortBy === "latency") {
+      list.sort((a, b) => a.latencyMs - b.latencyMs);
+    } else if (sortBy === "tps") {
+      list.sort((a, b) => b.tokensPerSecond - a.tokensPerSecond);
+    } else {
+      list.sort((a, b) => b._matchScore - a._matchScore);
+    }
 
     return list;
-  }, [allMarketplaceModels, search, sortBy, selectedFilters]);
+  }, [allMarketplaceModels, search, sortBy, selectedFilters, detectedIntent]);
 
   return (
     <div className="min-h-screen bg-[#fafafa] text-zinc-900 font-sans selection:bg-[#ea580c] selection:text-white py-8 px-4 sm:px-8">
@@ -434,21 +588,71 @@ export const MarketplacePage = () => {
 
           {/* ==================== RIGHT MAIN MODELS CONTENT ==================== */}
           <main className="space-y-4">
-            {/* Search Box matching Agent Marketplace */}
-            <div className="relative bg-white border border-[#e4e4e7] shadow-xs">
-              <HiOutlineMagnifyingGlass className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-400 text-lg" />
-              <input
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                placeholder="Describe the model and we will search it for you"
-                className="w-full bg-white focus:border-[#ea580c] pl-11 pr-4 py-4 outline-none text-sm text-zinc-900 placeholder:text-zinc-400"
-              />
+            {/* Search Box with Natural Language Discovery */}
+            <div className="space-y-2">
+              <div className="relative bg-white border border-[#e4e4e7] shadow-xs">
+                <HiOutlineMagnifyingGlass className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-400 text-lg" />
+                <input
+                  value={search}
+                  onChange={(e) => setSearch(e.target.value)}
+                  placeholder="Describe your goal (e.g. 'i want to build a website', 'solve math logic', 'fastest models')..."
+                  className="w-full bg-white focus:border-[#ea580c] pl-11 pr-10 py-4 outline-none text-sm text-zinc-900 placeholder:text-zinc-400"
+                />
+                {search && (
+                  <button
+                    onClick={() => setSearch("")}
+                    className="absolute right-3.5 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-black font-mono text-xs px-1.5 py-0.5 border border-zinc-200"
+                  >
+                    ESC ×
+                  </button>
+                )}
+              </div>
+
+              {/* Quick Suggestion Chips */}
+              <div className="flex items-center gap-1.5 overflow-x-auto pb-1 text-[11px] font-mono scrollbar-none">
+                <span className="text-zinc-400 shrink-0 select-none">Suggestions:</span>
+                {QUICK_INTENT_SUGGESTIONS.map((item) => (
+                  <button
+                    key={item.label}
+                    onClick={() => setSearch(item.query)}
+                    className={`px-2.5 py-1 rounded-none border whitespace-nowrap transition-colors cursor-pointer ${
+                      search === item.query
+                        ? "bg-black text-white border-black font-bold"
+                        : "bg-white border-[#e4e4e7] text-zinc-600 hover:border-zinc-400 hover:text-black"
+                    }`}
+                  >
+                    {item.label}
+                  </button>
+                ))}
+              </div>
             </div>
+
+            {/* AI Intent Recommendation Banner */}
+            {detectedIntent && (
+              <div className="p-3.5 bg-[#eff6ff] border border-[#bfdbfe] flex items-center justify-between font-mono text-xs text-blue-950 shadow-xs animate-fadeIn">
+                <div className="flex items-center gap-2.5">
+                  <span className="text-lg select-none">{detectedIntent.icon}</span>
+                  <div>
+                    <div className="font-bold flex items-center gap-1.5">
+                      <span>Semantic Intent:</span>
+                      <span className="text-[#ea580c]">{detectedIntent.intent}</span>
+                    </div>
+                    <p className="text-[11px] text-blue-700 font-sans">
+                      Recommending top models ranked by verified domain capability ({detectedIntent.description}).
+                    </p>
+                  </div>
+                </div>
+                <span className="text-[10px] px-2 py-0.5 bg-blue-100 border border-blue-200 text-blue-800 font-bold shrink-0 hidden sm:inline">
+                  AI RECOMMENDATION ACTIVE
+                </span>
+              </div>
+            )}
 
             {/* Results Header Status */}
             <div className="flex items-center justify-between font-mono text-xs">
               <span className="text-zinc-500">
                 <strong className="text-zinc-900">{filtered.length}</strong> models found
+                {detectedIntent && <span className="text-blue-600 ml-1.5">(ranked by relevance)</span>}
               </span>
               <select
                 value={sortBy}
@@ -471,9 +675,10 @@ export const MarketplacePage = () => {
                 {search && (
                   <button
                     onClick={() => setSearch("")}
-                    className="px-2 py-1 bg-zinc-900 text-white cursor-pointer"
+                    className="px-2 py-1 bg-zinc-900 text-white cursor-pointer flex items-center gap-1"
                   >
-                    “{search}” ×
+                    <span>“{search}”</span>
+                    <span>×</span>
                   </button>
                 )}
                 {activeFilters.map(({ key, value }) => (
