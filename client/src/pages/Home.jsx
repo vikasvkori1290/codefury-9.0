@@ -45,8 +45,6 @@ const Home = () => (
         <ArtFrame><div className="flex items-center justify-between border-b border-zinc-200 pb-3 font-mono text-xs"><span>AGENT / READY</span><span className="text-emerald-600">● ONLINE</span></div><div className="flex items-center gap-3 mt-7"><div className="h-16 w-16 bg-zinc-950 text-white flex items-center justify-center text-3xl"><HiOutlineCommandLine /></div><div><h3 className="text-xl font-bold">OpenCode Agent</h3><p className="text-xs text-zinc-500 font-mono">OpenCode · Coding Copilot</p></div></div><p className="mt-5 text-sm leading-relaxed text-zinc-600">Plans, edits, tests, and ships changes across your repository from one task.</p><div className="mt-6 flex gap-2 font-mono text-[10px]"><span className="bg-[#fff0e8] text-[#ea580c] px-2 py-1">CODING COPILOT</span><span className="bg-[#e9f0fa] px-2 py-1">GITHUB</span><span className="bg-[#e9f0fa] px-2 py-1">TERMINAL</span></div></ArtFrame>
       </div>
     </section>
-
-    <footer className="bg-white px-4 sm:px-8 py-8"><div className="max-w-7xl mx-auto flex flex-col sm:flex-row justify-between items-center gap-5 text-xs text-zinc-500"><div className="flex items-center gap-2"><span className="w-6 h-6 bg-[#ea580c] text-white flex items-center justify-center font-bold">M</span><b className="text-zinc-900">ModelHub</b><span>© 2026</span></div><div className="flex items-center gap-5 font-medium"><Link to="/test" className="hover:text-[#ea580c]">Test Bench</Link><Link to="/models" className="hover:text-[#ea580c]">AI Models</Link><Link to="/agents" className="hover:text-[#ea580c]">Agents</Link><Link to="/about" className="hover:text-[#ea580c]">About</Link></div></div></footer>
   </main>
 );
 

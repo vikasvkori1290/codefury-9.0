@@ -2,6 +2,7 @@ import { BrowserRouter as Router, Routes, Route, useLocation } from "react-route
 import { Toaster } from "react-hot-toast";
 import { AuthProvider } from "./context/AuthContext";
 import Navbar from "./components/Navbar";
+import Footer from "./components/Footer";
 import Home from "./pages/Home";
 import About from "./pages/About";
 import TestPage from "./pages/TestPage";
@@ -20,31 +21,34 @@ function AppLayout() {
   const isAuthPage = location.pathname === "/login" || location.pathname === "/register";
 
   return (
-    <div className="min-h-screen bg-[#fafafa] text-zinc-900">
+    <div className="min-h-screen flex flex-col bg-[#fafafa] text-zinc-900">
       {!isAuthPage && <Navbar />}
-      <Routes>
-        <Route path="/" element={<Home />} />
-        {/* Test Bench Page (/test) contains the Creator Register & Benchmark Component */}
-        <Route path="/test" element={<TestPage />} />
-        <Route path="/creator/bench" element={<TestPage />} />
-        {/* Live Bench Page (/live-bench) is a dedicated workspace */}
-        <Route path="/live-bench" element={<LiveBenchPage />} />
-        {/* Benchmark Telemetry Monitor */}
-        <Route path="/creator/benchmark/:jobId" element={<LiveJobMonitorPage />} />
-        {/* AI Models / Marketplace Explorer */}
-        <Route path="/marketplace" element={<MarketplacePage />} />
-        <Route path="/models" element={<MarketplacePage />} />
-        <Route path="/models/:id" element={<ModelDetailPage />} />
-        <Route path="/compare" element={<ComparePage />} />
-        <Route path="/playground/:modelId" element={<PlaygroundPage />} />
-        {/* Agent Marketplace */}
-        <Route path="/agents" element={<AgentMarketplacePage />} />
-        <Route path="/agent-marketplace" element={<AgentMarketplacePage />} />
-        <Route path="/agents/:id" element={<AgentDetailPage />} />
-        <Route path="/about" element={<About />} />
-        <Route path="/login" element={<AuthPage />} />
-        <Route path="/register" element={<AuthPage />} />
-      </Routes>
+      <div className="flex-1">
+        <Routes>
+          <Route path="/" element={<Home />} />
+          {/* Test Bench Page (/test) contains the Creator Register & Benchmark Component */}
+          <Route path="/test" element={<TestPage />} />
+          <Route path="/creator/bench" element={<TestPage />} />
+          {/* Live Bench Page (/live-bench) is a dedicated workspace */}
+          <Route path="/live-bench" element={<LiveBenchPage />} />
+          {/* Benchmark Telemetry Monitor */}
+          <Route path="/creator/benchmark/:jobId" element={<LiveJobMonitorPage />} />
+          {/* AI Models / Marketplace Explorer */}
+          <Route path="/marketplace" element={<MarketplacePage />} />
+          <Route path="/models" element={<MarketplacePage />} />
+          <Route path="/models/:id" element={<ModelDetailPage />} />
+          <Route path="/compare" element={<ComparePage />} />
+          <Route path="/playground/:modelId" element={<PlaygroundPage />} />
+          {/* Agent Marketplace */}
+          <Route path="/agents" element={<AgentMarketplacePage />} />
+          <Route path="/agent-marketplace" element={<AgentMarketplacePage />} />
+          <Route path="/agents/:id" element={<AgentDetailPage />} />
+          <Route path="/about" element={<About />} />
+          <Route path="/login" element={<AuthPage />} />
+          <Route path="/register" element={<AuthPage />} />
+        </Routes>
+      </div>
+      {!isAuthPage && <Footer />}
     </div>
   );
 }
