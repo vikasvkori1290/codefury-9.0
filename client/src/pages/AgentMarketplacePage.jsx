@@ -217,40 +217,223 @@ export const AGENTS = [
     useCases: ["Alert fatigue reduction", "Incident first response", "Compliance check"],
     tags: ["SOC friendly", "Auto correlation", "Audit trail"],
   },
+  {
+    id: "claude-code",
+    name: "Claude Code",
+    displayName: "Claude Code",
+    company: "Anthropic",
+    creator: "Anthropic",
+    avatar: "CC",
+    category: "Coding",
+    type: "coding agent",
+    rating: 4.9,
+    installs: "125k",
+    installsRaw: 125000,
+    successRate: 97.4,
+    latencyMs: 510,
+    pricingPer1k: 0.003,
+    pricingFormatted: "Usage based",
+    priceTier: "Pro",
+    verified: true,
+    featured: true,
+    description: "Anthropic's terminal-native coding agent for understanding codebases, editing files, and running tests.",
+    longDescription: "Claude Code works directly in your terminal and uses Claude to inspect repositories, implement changes, run commands, and review diffs.",
+    capabilities: ["Code Generation", "Code Review", "Debugging", "Testing"],
+    tools: ["Terminal", "GitHub", "Docker", "VS Code"],
+    useCases: ["Fix failing tests", "Refactor a repository", "Open a pull request"],
+    tags: ["Claude", "Terminal", "GitHub"],
+  },
+  {
+    id: "openai-codex",
+    name: "Codex",
+    displayName: "OpenAI Codex",
+    company: "OpenAI",
+    creator: "OpenAI",
+    avatar: "CX",
+    category: "Coding",
+    type: "coding agent",
+    rating: 4.8,
+    installs: "98k",
+    installsRaw: 98000,
+    successRate: 95.9,
+    latencyMs: 460,
+    pricingPer1k: 0.003,
+    pricingFormatted: "Usage based",
+    priceTier: "Pro",
+    verified: true,
+    featured: true,
+    description: "OpenAI's software engineering agent for writing, reviewing, and shipping code across repositories.",
+    longDescription: "Codex can work on isolated coding tasks, make changes in a repository, and return reviewable results for developers.",
+    capabilities: ["Code Generation", "Code Review", "Debugging", "DevOps"],
+    tools: ["GitHub", "Terminal", "Docker", "VS Code"],
+    useCases: ["Implement a feature", "Review a pull request", "Diagnose CI failures"],
+    tags: ["GPT", "GitHub", "Cloud"],
+  },
+  {
+    id: "devin",
+    name: "Devin",
+    displayName: "Devin",
+    company: "Cognition",
+    creator: "Cognition",
+    avatar: "DV",
+    category: "Coding",
+    type: "autonomous agent",
+    rating: 4.7,
+    installs: "76k",
+    installsRaw: 76000,
+    successRate: 94.8,
+    latencyMs: 720,
+    pricingPer1k: 0.005,
+    pricingFormatted: "Team plan",
+    priceTier: "Enterprise",
+    verified: true,
+    featured: true,
+    description: "An autonomous software engineer with its own browser, shell, editor, and ability to complete larger tasks.",
+    longDescription: "Devin plans work, writes code, uses a browser and shell, and collaborates with engineers through reviewable progress.",
+    capabilities: ["Code Generation", "Browser Automation", "Testing", "DevOps"],
+    tools: ["GitHub", "Browser", "Terminal", "Docker"],
+    useCases: ["Build a feature end-to-end", "Migrate an application", "Investigate an issue"],
+    tags: ["Autonomous", "Browser", "Cloud"],
+  },
+  {
+    id: "cursor-agent",
+    name: "Cursor Agent",
+    displayName: "Cursor Agent",
+    company: "Cursor",
+    creator: "Cursor",
+    avatar: "CU",
+    category: "Coding",
+    type: "copilot",
+    rating: 4.8,
+    installs: "210k",
+    installsRaw: 210000,
+    successRate: 96.1,
+    latencyMs: 360,
+    pricingPer1k: 0.002,
+    pricingFormatted: "Subscription",
+    priceTier: "Pro",
+    verified: true,
+    featured: true,
+    description: "AI-first code editor agent that understands your codebase and applies multi-file changes from natural language.",
+    longDescription: "Cursor Agent combines repository context, inline editing, terminal commands, and multiple frontier models inside the editor.",
+    capabilities: ["Code Generation", "Code Review", "Refactoring", "Testing"],
+    tools: ["VS Code", "GitHub", "Terminal", "Docker"],
+    useCases: ["Generate a component", "Refactor multiple files", "Write tests from a spec"],
+    tags: ["Multi-model", "VS Code", "GitHub"],
+  },
+  {
+    id: "gemini-code-assist",
+    name: "Gemini Code Assist",
+    displayName: "Gemini Code Assist",
+    company: "Google",
+    creator: "Google",
+    avatar: "GC",
+    category: "Coding",
+    type: "copilot",
+    rating: 4.6,
+    installs: "142k",
+    installsRaw: 142000,
+    successRate: 93.8,
+    latencyMs: 390,
+    pricingPer1k: 0,
+    pricingFormatted: "Free tier",
+    priceTier: "Free",
+    verified: true,
+    featured: false,
+    description: "Google's coding assistant for IDE help, code generation, debugging, and Google Cloud development.",
+    longDescription: "Gemini Code Assist provides completions and chat-based coding help across popular IDEs with deep Google Cloud support.",
+    capabilities: ["Code Generation", "Debugging", "Code Review", "DevOps"],
+    tools: ["VS Code", "Google Cloud", "GitHub", "Terminal"],
+    useCases: ["Explain unfamiliar code", "Generate boilerplate", "Deploy to Google Cloud"],
+    tags: ["Gemini", "IDE", "Google Cloud"],
+  },
 ];
+
+const FILTER_GROUPS = [
+  { key: "capability", label: "Capability", options: ["Coding & Development", "Research & Web", "Writing & Content", "Data & Analytics", "Automation", "Customer Support", "Marketing & Sales", "Productivity", "Design & Creative", "Security", "Finance", "Education"] },
+  { key: "useCase", label: "Use case", options: ["Code Generation", "Code Review", "Debugging", "Testing", "Web Research", "Competitor Research", "Document Analysis", "PDF Analysis", "Data Extraction", "Report Generation", "Email Management", "Lead Generation", "Customer Support", "Browser Automation", "DevOps", "Content Creation", "Data Analysis"] },
+  { key: "type", label: "Agent type", options: ["Autonomous Agent", "Copilot", "Workflow Agent", "Chat Agent", "Browser Agent", "Coding Agent", "Multi-Agent", "API Agent"] },
+  { key: "integration", label: "Integrations", options: ["GitHub", "GitLab", "VS Code", "Docker", "Terminal", "Notion", "Slack", "Gmail", "Google Drive", "Google Calendar", "PostgreSQL", "MongoDB", "Google Sheets", "Snowflake", "Browser", "Tavily", "Search", "PDF Parser", "OCR"] },
+  { key: "model", label: "Model", options: ["GPT", "Claude", "Gemini", "Qwen", "Llama", "Mistral", "DeepSeek", "Custom Model"] },
+  { key: "provider", label: "Provider", options: ["OpenAI", "Anthropic", "Google", "Ollama", "OpenRouter", "Hugging Face", "Self-hosted", "Custom"] },
+  { key: "deployment", label: "Deployment", options: ["Cloud", "Local", "Self-hosted", "Docker", "API", "Browser", "Desktop"] },
+  { key: "pricing", label: "Pricing", options: ["Free", "Open Source", "Free Tier", "Pay per Use", "Subscription"] },
+  { key: "quality", label: "Quality", options: ["Verified", "Benchmarked", "Highly Rated", "Popular", "Recently Updated"] },
+  { key: "rating", label: "Rating", options: ["4+ Stars", "3+ Stars"] },
+  { key: "benchmark", label: "Benchmark score", options: ["90%+", "80%+", "70%+"] },
+  { key: "latency", label: "Latency", options: ["< 1 sec", "< 3 sec", "< 5 sec"] },
+  { key: "cost", label: "Cost / task", options: ["Free", "< $0.01 / task", "< $0.05 / task", "< $0.10 / task"] },
+];
+
+const AGENT_FILTER_META = {
+  "codepilot-autonomous": { capability: ["Coding & Development"], useCase: ["Code Generation", "Code Review", "Debugging", "Testing", "DevOps"], type: ["Autonomous Agent", "Coding Agent"], integration: ["GitHub", "VS Code", "Docker", "Terminal"], model: ["Qwen", "DeepSeek"], provider: ["Ollama", "Hugging Face"], deployment: ["Local", "Docker", "API"], pricing: ["Pay per Use"], benchmark: ["90%+"], latency: ["< 1 sec"], cost: ["< $0.05 / task"] },
+  "research-scout-pro": { capability: ["Research & Web"], useCase: ["Web Research", "Competitor Research", "PDF Analysis", "Report Generation"], type: ["Copilot", "API Agent"], integration: ["Tavily", "Notion", "PDF Parser", "Slack", "Search"], model: ["GPT", "Claude"], provider: ["OpenRouter", "Anthropic"], deployment: ["Cloud", "API", "Browser"], pricing: ["Pay per Use"], benchmark: ["90%+"], latency: ["< 3 sec"], cost: ["< $0.05 / task"] },
+  "ops-automator": { capability: ["Automation", "Productivity"], useCase: ["Email Management", "Browser Automation", "DevOps"], type: ["Workflow Agent", "Multi-Agent"], integration: ["Slack", "Gmail", "Google Sheets", "Browser"], model: ["GPT", "Claude"], provider: ["OpenAI", "Anthropic"], deployment: ["Cloud", "API", "Browser"], pricing: ["Free Tier", "Subscription"], benchmark: ["90%+"], latency: ["< 1 sec"], cost: ["< $0.01 / task"] },
+  "support-genius": { capability: ["Customer Support"], useCase: ["Customer Support", "Document Analysis"], type: ["Chat Agent", "Copilot"], integration: ["Slack", "Gmail", "Search"], model: ["GPT", "Claude"], provider: ["OpenAI", "Anthropic"], deployment: ["Cloud", "API"], pricing: ["Pay per Use", "Subscription"], benchmark: ["90%+"], latency: ["< 1 sec"], cost: ["< $0.01 / task"] },
+  "dataforge-analyst": { capability: ["Data & Analytics"], useCase: ["Data Extraction", "Data Analysis", "Report Generation"], type: ["Autonomous Agent", "API Agent"], integration: ["Snowflake", "Google Sheets", "PostgreSQL", "MongoDB"], model: ["Llama", "Mistral"], provider: ["Self-hosted", "Hugging Face"], deployment: ["Cloud", "Self-hosted", "API"], pricing: ["Pay per Use"], benchmark: ["90%+"], latency: ["< 3 sec"], cost: ["< $0.10 / task"] },
+  "legal-eagle": { capability: ["Research & Web", "Finance"], useCase: ["Document Analysis", "PDF Analysis", "Data Extraction"], type: ["Copilot", "Chat Agent"], integration: ["PDF Parser", "Notion", "Google Drive"], model: ["Claude", "GPT"], provider: ["Anthropic", "OpenAI"], deployment: ["Cloud", "API"], pricing: ["Pay per Use"], benchmark: ["80%+"], latency: ["< 3 sec"], cost: ["< $0.05 / task"] },
+  "growth-hacker": { capability: ["Marketing & Sales", "Automation"], useCase: ["Lead Generation", "Email Management", "Content Creation"], type: ["Workflow Agent", "Autonomous Agent"], integration: ["Gmail", "Google Sheets", "Search"], model: ["GPT", "Gemini"], provider: ["OpenAI", "Google"], deployment: ["Cloud", "API"], pricing: ["Free Tier", "Subscription"], benchmark: ["80%+"], latency: ["< 1 sec"], cost: ["< $0.01 / task"] },
+  "secops-guardian": { capability: ["Security", "Automation"], useCase: ["DevOps", "Data Analysis", "Report Generation"], type: ["Autonomous Agent", "Multi-Agent"], integration: ["Docker", "Terminal", "Search"], model: ["Llama", "DeepSeek"], provider: ["Self-hosted", "Ollama"], deployment: ["Self-hosted", "Docker", "API"], pricing: ["Subscription"], benchmark: ["90%+"], latency: ["< 1 sec"], cost: ["< $0.05 / task"] },
+};
+
+const getAgentFilterValues = (agent) => {
+  const meta = AGENT_FILTER_META[agent.id] || {};
+  const capabilityFallback = agent.category === "Coding" ? ["Coding & Development"] : [agent.category];
+  const typeFallback = agent.type === "autonomous" ? ["Autonomous Agent"] : agent.type === "assistant" ? ["Copilot"] : ["Workflow Agent"];
+  return {
+    ...meta,
+    capability: meta.capability || capabilityFallback,
+    type: meta.type || typeFallback,
+    integration: meta.integration || agent.tools,
+    pricing: meta.pricing || [agent.priceTier === "Free" ? "Free" : "Pay per Use"],
+    tags: agent.tags,
+    capabilities: agent.capabilities,
+    integrations: agent.tools,
+    name: agent.name,
+    company: agent.company || agent.creator,
+    creator: agent.creator,
+    description: agent.description,
+  };
+};
 
 export const AgentMarketplacePage = () => {
   const [search, setSearch] = useState("");
-  const [category, setCategory] = useState("All");
-  const [sortBy, setSortBy] = useState("popular"); // popular | rating | price | latency
-  const [toolFilter, setToolFilter] = useState("All");
+  const [sortBy, setSortBy] = useState("relevant");
+  const [selectedFilters, setSelectedFilters] = useState({});
+  const [showMoreFilters, setShowMoreFilters] = useState(false);
+  const [expandedGroups, setExpandedGroups] = useState({ capability: true, useCase: true });
 
-  const allTools = useMemo(() => {
-    const s = new Set();
-    AGENTS.forEach((a) => a.tools.forEach((t) => s.add(t)));
-    return ["All", ...Array.from(s).slice(0, 8)];
-  }, []);
+  const toggleFilter = (key, value) => setSelectedFilters((current) => {
+    const values = current[key] || [];
+    const nextValues = values.includes(value) ? values.filter((item) => item !== value) : [...values, value];
+    return { ...current, [key]: nextValues };
+  });
+
+  const clearFilters = () => { setSearch(""); setSelectedFilters({}); };
+
+  const activeFilters = Object.entries(selectedFilters).flatMap(([key, values]) => values.map((value) => ({ key, value })));
+  const primaryGroups = FILTER_GROUPS.filter((group) => group.key === "capability");
+  const advancedGroups = FILTER_GROUPS.filter((group) => ["pricing", "rating", "latency", "cost"].includes(group.key));
 
   const filtered = useMemo(() => {
     let list = AGENTS.filter((a) => {
-      const q = search.toLowerCase();
-      const matchesSearch =
-        !q ||
-        a.name.toLowerCase().includes(q) ||
-        a.displayName.toLowerCase().includes(q) ||
-        a.creator.toLowerCase().includes(q) ||
-        a.description.toLowerCase().includes(q) ||
-        a.tools.some((t) => t.toLowerCase().includes(q));
-      const matchesCat = category === "All" || a.category === category;
-      const matchesTool = toolFilter === "All" || a.tools.includes(toolFilter);
-      return matchesSearch && matchesCat && matchesTool;
+      const q = search.toLowerCase().trim();
+      const searchable = JSON.stringify(getAgentFilterValues(a)).toLowerCase();
+      const ignoredWords = new Set(["a", "an", "and", "for", "i", "in", "need", "the", "to", "with", "that", "can", "do"]);
+      const searchTerms = q.split(/\s+/).filter((term) => term.length > 1 && !ignoredWords.has(term));
+      const matchedTerms = searchTerms.filter((term) => searchable.includes(term)).length;
+      const matchesSearch = !q || searchable.includes(q) || matchedTerms >= Math.max(1, Math.ceil(searchTerms.length * 0.5));
+      const meta = getAgentFilterValues(a);
+      const matchesFilters = Object.entries(selectedFilters).every(([key, values]) => values.length === 0 || values.some((value) => (meta[key] || []).includes(value)));
+      return matchesSearch && matchesFilters;
     });
     if (sortBy === "rating") list = [...list].sort((a, b) => b.rating - a.rating);
+    else if (sortBy === "benchmark") list = [...list].sort((a, b) => b.successRate - a.successRate);
     else if (sortBy === "price") list = [...list].sort((a, b) => a.pricingPer1k - b.pricingPer1k);
     else if (sortBy === "latency") list = [...list].sort((a, b) => a.latencyMs - b.latencyMs);
     else list = [...list].sort((a, b) => b.installsRaw - a.installsRaw);
     return list;
-  }, [search, category, sortBy, toolFilter]);
+  }, [search, sortBy, selectedFilters]);
 
   return (
     <div className="min-h-screen bg-[#fafafa] text-zinc-900 font-sans selection:bg-[#ea580c] selection:text-white py-8 px-4 sm:px-8">
@@ -271,42 +454,60 @@ export const AgentMarketplacePage = () => {
           <aside className="bg-white border border-[#e4e4e7] p-4 shadow-xs space-y-5 font-mono text-xs lg:sticky lg:top-20">
             <div className="flex items-center justify-between border-b border-[#e4e4e7] pb-3">
               <h2 className="font-bold uppercase tracking-wide text-zinc-900">Filter agents</h2>
-              {(search || category !== "All" || toolFilter !== "All") && (
-                <button onClick={() => { setSearch(""); setCategory("All"); setToolFilter("All"); }} className="text-[#ea580c] font-bold hover:underline cursor-pointer">Reset</button>
+              {(search || activeFilters.length > 0) && (
+                <button onClick={clearFilters} className="text-[#ea580c] font-bold hover:underline cursor-pointer">Clear all</button>
               )}
             </div>
 
-            <label className="block space-y-1.5">
-              <span className="text-[10px] text-zinc-500 uppercase font-bold">Search</span>
-              <div className="relative">
-                <HiOutlineMagnifyingGlass className="absolute left-2.5 top-1/2 -translate-y-1/2 text-zinc-400" />
-                <input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Name or company" className="w-full bg-[#fafafa] border border-[#e4e4e7] focus:border-[#ea580c] pl-8 pr-2 py-2 outline-none text-xs" />
-              </div>
-            </label>
-
-            <div className="space-y-2">
-              <span className="text-[10px] text-zinc-500 uppercase font-bold">Category</span>
-              <div className="space-y-1">
-                {AGENT_CATEGORIES.map((cat) => (
-                  <button key={cat} onClick={() => setCategory(cat)} className={`w-full text-left px-2.5 py-1.5 border transition-all cursor-pointer ${category === cat ? "bg-zinc-900 text-white border-zinc-900 font-bold" : "bg-white text-zinc-600 border-transparent hover:bg-zinc-50 hover:border-[#e4e4e7]"}`}>{cat}</button>
-                ))}
-              </div>
+            <div className="space-y-2 max-h-[calc(100vh-235px)] overflow-y-auto pr-1">
+              {[...primaryGroups, ...(showMoreFilters ? advancedGroups : [])].map((group) => {
+                const selectedCount = (selectedFilters[group.key] || []).length;
+                const isExpanded = expandedGroups[group.key];
+                const visibleOptions = isExpanded ? group.options.slice(0, showMoreFilters ? group.options.length : 6) : [];
+                return (
+                  <div key={group.key} className="border-b border-[#f0f0f1] pb-2">
+                    <button
+                      type="button"
+                      onClick={() => setExpandedGroups((current) => ({ ...current, [group.key]: !current[group.key] }))}
+                      className="w-full flex items-center justify-between py-1.5 text-left cursor-pointer"
+                    >
+                      <span className="text-[10px] text-zinc-500 uppercase font-bold">{group.label}{selectedCount > 0 && <span className="ml-1.5 text-[#ea580c]">({selectedCount})</span>}</span>
+                      <span className="text-zinc-400 text-sm">{isExpanded ? "−" : "+"}</span>
+                    </button>
+                    {isExpanded && (
+                      <div className="grid grid-cols-1 gap-1 pb-1">
+                        {visibleOptions.map((option) => {
+                          const checked = (selectedFilters[group.key] || []).includes(option);
+                          return (
+                            <label key={option} className="flex items-center gap-2 text-[11px] text-zinc-600 hover:text-zinc-950 cursor-pointer py-0.5">
+                              <input type="checkbox" checked={checked} onChange={() => toggleFilter(group.key, option)} className="accent-[#ea580c]" />
+                              <span className="truncate">{option}</span>
+                            </label>
+                          );
+                        })}
+                        {!showMoreFilters && group.options.length > 6 && <span className="text-[10px] text-zinc-400 pt-1">+ {group.options.length - 6} more options</span>}
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
             </div>
 
-            <div className="space-y-2">
-              <span className="text-[10px] text-zinc-500 uppercase font-bold flex items-center gap-1"><HiOutlineWrenchScrewdriver /> Connected tool</span>
-              <div className="flex flex-wrap gap-1.5">
-                {allTools.map((tool) => (
-                  <button key={tool} onClick={() => setToolFilter(tool)} className={`px-2 py-1 border text-[10px] transition-all cursor-pointer ${toolFilter === tool ? "bg-[#ea580c] text-white border-[#ea580c] font-bold" : "bg-white text-zinc-600 border-[#e4e4e7] hover:border-zinc-400"}`}>{tool}</button>
-                ))}
-              </div>
-            </div>
+            <button
+              type="button"
+              onClick={() => setShowMoreFilters((current) => !current)}
+              className="w-full px-3 py-2 border border-[#e4e4e7] bg-[#fafafa] hover:bg-white text-zinc-700 font-bold text-[11px] cursor-pointer transition-colors"
+            >
+              {showMoreFilters ? "Hide advanced filters" : `More filters (${advancedGroups.length})`}
+            </button>
 
             <label className="block space-y-1.5 border-t border-[#e4e4e7] pt-4">
               <span className="text-[10px] text-zinc-500 uppercase font-bold">Sort by</span>
               <select value={sortBy} onChange={(e) => setSortBy(e.target.value)} className="w-full bg-[#fafafa] border border-[#e4e4e7] text-zinc-800 px-2 py-2 outline-none cursor-pointer focus:border-[#ea580c]">
+                <option value="relevant">Most Relevant</option>
                 <option value="popular">Most Popular</option>
                 <option value="rating">Highest Rated</option>
+                <option value="benchmark">Highest Benchmark</option>
                 <option value="price">Lowest Price</option>
                 <option value="latency">Lowest Latency</option>
               </select>
@@ -314,10 +515,29 @@ export const AgentMarketplacePage = () => {
           </aside>
 
           <main className="space-y-4">
+            <div className="relative bg-white border border-[#e4e4e7] shadow-xs">
+              <HiOutlineMagnifyingGlass className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-400 text-lg" />
+              <input
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                placeholder="Describe the agent and we will search it for you"
+                className="w-full bg-white focus:border-[#ea580c] pl-11 pr-4 py-4 outline-none text-sm text-zinc-900 placeholder:text-zinc-400"
+              />
+            </div>
+
             <div className="flex items-center justify-between font-mono text-xs">
-              <span className="text-zinc-500"><strong className="text-zinc-900">{filtered.length}</strong> agents available</span>
+              <span className="text-zinc-500"><strong className="text-zinc-900">{filtered.length}</strong> agents found</span>
               <span className="text-zinc-400">{AGENTS.filter((agent) => agent.verified).length} verified publishers</span>
             </div>
+
+            {(search || activeFilters.length > 0) && (
+              <div className="flex flex-wrap items-center gap-2 bg-white border border-[#e4e4e7] p-3 font-mono text-[11px]">
+                <span className="text-zinc-500 uppercase font-bold">Active filters:</span>
+                {search && <button onClick={() => setSearch("")} className="px-2 py-1 bg-zinc-900 text-white cursor-pointer">“{search}” ×</button>}
+                {activeFilters.map(({ key, value }) => <button key={`${key}-${value}`} onClick={() => toggleFilter(key, value)} className="px-2 py-1 bg-[#fff7ed] border border-orange-200 text-[#ea580c] cursor-pointer">{value} ×</button>)}
+                <button onClick={clearFilters} className="text-zinc-500 hover:text-[#ea580c] font-bold cursor-pointer">Clear all</button>
+              </div>
+            )}
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {filtered.map((agent) => (
@@ -328,7 +548,7 @@ export const AgentMarketplacePage = () => {
                       <div className="flex items-start justify-between gap-2">
                         <div className="min-w-0">
                           <h3 className="text-base font-bold text-zinc-950 group-hover:text-[#ea580c] transition-colors truncate">{agent.displayName}</h3>
-                          <p className="text-xs text-zinc-500 font-mono flex items-center gap-1 mt-0.5"><HiOutlinePuzzlePiece className="text-zinc-400" /> {agent.creator}</p>
+                          <p className="text-xs text-zinc-500 font-mono flex items-center gap-1 mt-0.5"><HiOutlinePuzzlePiece className="text-zinc-400" /> Built by {agent.company || agent.creator}</p>
                         </div>
                         {agent.verified && <HiOutlineShieldCheck className="text-emerald-600 text-lg shrink-0" title="Verified publisher" />}
                       </div>
@@ -337,23 +557,26 @@ export const AgentMarketplacePage = () => {
 
                   <p className="text-xs text-zinc-600 leading-relaxed mt-4 line-clamp-2">{agent.description}</p>
 
-                  <div className="flex flex-wrap gap-1.5 mt-4">
-                    <span className="px-2 py-1 bg-zinc-100 border border-[#e4e4e7] text-[10px] font-mono text-zinc-700">{agent.category}</span>
-                    <span className="px-2 py-1 bg-[#fff7ed] border border-orange-200 text-[10px] font-mono text-[#ea580c] font-bold uppercase">{agent.type}</span>
-                    {agent.tags.slice(0, 2).map((tag) => <span key={tag} className="px-2 py-1 bg-white border border-[#e4e4e7] text-[10px] font-mono text-zinc-600">{tag}</span>)}
+                  <div className="mt-4 pt-3 border-t border-[#e4e4e7] space-y-3">
+                    <div>
+                      <span className="text-[10px] font-mono text-zinc-400 uppercase font-bold">What it does</span>
+                      <div className="flex flex-wrap gap-1.5 mt-1.5">
+                        {agent.capabilities.slice(0, 3).map((capability) => <span key={capability} className="px-2 py-1 bg-zinc-100 border border-[#e4e4e7] text-[10px] font-mono text-zinc-700">{capability}</span>)}
+                      </div>
+                    </div>
+                    <div>
+                      <span className="text-[10px] font-mono text-zinc-400 uppercase font-bold flex items-center gap-1"><HiOutlineWrenchScrewdriver /> Works with</span>
+                      <div className="flex flex-wrap gap-1.5 mt-1.5">
+                        {agent.tools.slice(0, 4).map((tool) => <span key={tool} className="px-2 py-1 bg-white border border-[#e4e4e7] text-[10px] font-mono text-zinc-700">{tool}</span>)}
+                        {agent.tools.length > 4 && <span className="px-2 py-1 text-[10px] font-mono text-zinc-400">+{agent.tools.length - 4} more</span>}
+                      </div>
+                    </div>
                   </div>
 
-                  <div className="flex items-center gap-1.5 flex-wrap mt-4 pt-3 border-t border-[#e4e4e7]">
-                    <span className="text-[10px] font-mono text-zinc-400 uppercase font-bold flex items-center gap-1"><HiOutlineWrenchScrewdriver /> Tools</span>
-                    {agent.tools.slice(0, 3).map((tool) => <span key={tool} className="px-1.5 py-0.5 bg-[#fafafa] border border-[#e4e4e7] text-[10px] font-mono text-zinc-700">{tool}</span>)}
-                    {agent.tools.length > 3 && <span className="text-[10px] text-zinc-400">+{agent.tools.length - 3}</span>}
-                  </div>
-
-                  <div className="flex items-end justify-between gap-3 mt-4 font-mono">
-                    <div className="flex items-center gap-4 text-xs">
-                      <span><span className="block text-[10px] text-zinc-400 uppercase">Rating</span><strong>{agent.rating} ★</strong></span>
-                      <span><span className="block text-[10px] text-zinc-400 uppercase">Runs</span><strong>{agent.installs}</strong></span>
-                      <span><span className="block text-[10px] text-zinc-400 uppercase">Price</span><strong className="text-[#ea580c]">{agent.pricingFormatted}</strong></span>
+                  <div className="flex items-center justify-between gap-3 mt-4 pt-3 border-t border-[#e4e4e7] font-mono">
+                    <div className="flex items-center gap-2 text-[11px] text-zinc-500">
+                      <span className="px-2 py-1 bg-[#fff7ed] border border-orange-200 text-[#ea580c] font-bold uppercase">{agent.category}</span>
+                      <span>{agent.type}</span>
                     </div>
                     <Link to={`/agents/${agent.id}`} className="px-4 py-2 bg-zinc-900 hover:bg-[#ea580c] text-white text-xs font-bold transition-colors shrink-0">View Agent →</Link>
                   </div>
