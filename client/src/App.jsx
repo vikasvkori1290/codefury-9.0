@@ -12,6 +12,7 @@ import MarketplacePage from "./pages/MarketplacePage";
 import ModelDetailPage from "./pages/ModelDetailPage";
 import AgentMarketplacePage from "./pages/AgentMarketplacePage";
 import AgentDetailPage from "./pages/AgentDetailPage";
+import AgentSubmissionPage from "./pages/AgentSubmissionPage";
 import AuthPage from "./pages/AuthPage";
 import ComparePage from "./pages/ComparePage";
 import PlaygroundPage from "./pages/PlaygroundPage";
@@ -44,6 +45,7 @@ function AppLayout() {
           {/* Agent Marketplace */}
           <Route path="/agents" element={<AgentMarketplacePage />} />
           <Route path="/agent-marketplace" element={<AgentMarketplacePage />} />
+          <Route path="/agents/request" element={<AgentSubmissionPage />} />
           <Route path="/agents/:id" element={<AgentDetailPage />} />
           <Route path="/about" element={<About />} />
           <Route path="/login" element={<AuthPage />} />

@@ -20,7 +20,8 @@ const PLATFORM_LABELS = [
 
 export const AgentDetailPage = () => {
   const { id } = useParams();
-  const agent = AGENTS.find((item) => item.id === id);
+  const submittedAgents = (() => { try { return JSON.parse(localStorage.getItem("modelhub-submitted-agents") || "[]"); } catch { return []; } })();
+  const agent = [...submittedAgents, ...AGENTS].find((item) => item.id === id);
   const [platform, setPlatform] = useState("macos");
   const [method, setMethod] = useState("manager");
   const [copied, setCopied] = useState(false);
@@ -50,6 +51,11 @@ export const AgentDetailPage = () => {
       package: `curl -L https://downloads.modelhub.dev/agents/${agent.id}/windows.msi -o modelhub-agent.msi\nstart modelhub-agent.msi`,
     },
   };
+  if (agent.installCommand) {
+    commands.macos.manager = agent.installCommand;
+    commands.linux.manager = agent.installCommand;
+    commands.windows.manager = agent.installCommand;
+  }
 
   const methodLabels = {
     manager: platform === "macos" ? "Homebrew" : platform === "windows" ? "WinGet" : "Package manager",
@@ -81,13 +87,13 @@ export const AgentDetailPage = () => {
               <span className="px-2 py-1 bg-zinc-100 border border-[#e4e4e7] text-zinc-600 text-[11px] font-mono">{agent.type}</span>
             </div>
             <div className="flex items-center gap-3">
-              <div className="w-12 h-12 bg-zinc-900 text-white flex items-center justify-center font-mono font-bold text-lg">{agent.avatar}</div>
+              <div className="w-12 h-12 bg-white border border-[#e4e4e7] flex items-center justify-center overflow-hidden"><img src={agent.icon || `https://api.dicebear.com/9.x/initials/svg?seed=${encodeURIComponent(agent.company || agent.creator)}&backgroundColor=18181b&fontFamily=monospace&fontWeight=700`} alt="" className="h-full w-full object-contain p-1.5" /></div>
               <div>
                 <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-zinc-950">{agent.displayName}</h1>
                 <p className="text-xs text-zinc-500 font-mono mt-1">Built by <strong className="text-zinc-800">{agent.company || agent.creator}</strong></p>
               </div>
             </div>
-            <p className="max-w-2xl text-sm text-zinc-600 leading-relaxed">{agent.longDescription}</p>
+            <p className="max-w-2xl text-sm text-zinc-600 leading-relaxed">{agent.longDescription || agent.description}</p>
             <div className="flex flex-wrap gap-2">
               {agent.capabilities.slice(0, 4).map((capability) => <span key={capability} className="px-2 py-1 bg-white border border-[#e4e4e7] text-[11px] font-mono text-zinc-700">{capability}</span>)}
             </div>
@@ -97,6 +103,8 @@ export const AgentDetailPage = () => {
             <Link to="/live-bench" className="px-6 py-3 bg-white border border-zinc-300 text-zinc-800 text-xs font-mono font-bold text-center hover:bg-zinc-50">Try in Live Bench</Link>
           </div>
         </section>
+
+        {agent.links && <section className="flex flex-wrap gap-4 bg-white border border-[#e4e4e7] shadow-xs p-5 font-mono text-xs">{[[agent.links.website, "Website"], [agent.links.docs, "Documentation"], [agent.links.repository, "Source repository"]].filter(([url]) => url).map(([url, label]) => <a key={label} href={url} target="_blank" rel="noreferrer" className="text-[#ea580c] hover:underline">{label} ↗</a>)}</section>}
 
         <section className="bg-white border border-[#e4e4e7] shadow-xs p-6 sm:p-8 space-y-6">
           <div className="flex items-center gap-2 border-b border-[#e4e4e7] pb-4"><HiOutlinePuzzlePiece className="text-[#ea580c]" /><h2 className="text-base font-bold">Overview</h2></div>
