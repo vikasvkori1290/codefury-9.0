@@ -83,7 +83,6 @@ export const AGENTS = [
     latencyMs: 310,
     pricingPer1k: 0.0012,
     pricingFormatted: "$0.0012 / run",
-    priceTier: "Free",
     verified: true,
     featured: false,
     description: "No-code workflow agent: connects 200+ apps, retries, and self-heals failed runs.",

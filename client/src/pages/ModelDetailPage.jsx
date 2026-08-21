@@ -10,6 +10,8 @@ import {
   HiOutlineClock,
   HiOutlineCurrencyDollar,
   HiOutlineSparkles,
+  HiOutlineClipboard,
+  HiOutlineCheck,
 } from "react-icons/hi2";
 import {
   RadarChart,
@@ -25,7 +27,7 @@ import {
   Tooltip,
   Cell,
 } from "recharts";
-import { normalizeModel } from "./MarketplacePage";
+import { MARKETPLACE_MODELS, normalizeModel } from "./MarketplacePage";
 import DeployModal from "../components/modals/DeployModal";
 import API from "../api/axios";
 
@@ -35,11 +37,16 @@ export const ModelDetailPage = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [activeChartTab, setActiveChartTab] = useState("radar"); // 'radar' | 'bar'
   const [isDeployModalOpen, setIsDeployModalOpen] = useState(false);
+  const [installMode, setInstallMode] = useState("curl");
+  const [isSnippetCopied, setIsSnippetCopied] = useState(false);
 
   useEffect(() => {
     API.get("/models")
-      .then(({ data }) => setRawModel((data.models || []).find((item) => String(item._id || item.id || item.name) === id || item.name === id) || null))
-      .catch(() => setRawModel(null))
+      .then(({ data }) => {
+        const remote = (data.models || []).find((item) => String(item._id || item.id || item.name) === id || item.name === id);
+        setRawModel(remote || MARKETPLACE_MODELS.find((item) => item.id === id || item.name === id) || null);
+      })
+      .catch(() => setRawModel(MARKETPLACE_MODELS.find((item) => item.id === id || item.name === id) || null))
       .finally(() => setIsLoading(false));
   }, [id]);
 
@@ -47,6 +54,16 @@ export const ModelDetailPage = () => {
   if (!rawModel) return <div className="min-h-screen bg-[#fafafa] p-12 text-center font-mono text-xs text-zinc-500">Model not found in MongoDB. <Link to="/models" className="text-[#ea580c] underline">Return to marketplace</Link>.</div>;
 
   const model = normalizeModel(rawModel);
+  const installSnippets = {
+    curl: `curl -X POST https://api.modelhub.dev/v1/predict \\\n+  -H "Authorization: Bearer $MODELHUB_API_KEY" \\\n+  -H "Content-Type: application/json" \\\n+  -d '{"model":"${model.id}","prompt":"Your prompt here"}'`,
+    python: `import requests
+
+response = requests.post("https://api.modelhub.dev/v1/predict", headers={"Authorization": "Bearer $MODELHUB_API_KEY"}, json={"model": "${model.id}", "prompt": "Your prompt here"})
+print(response.json())`,
+    node: `const response = await fetch("https://api.modelhub.dev/v1/predict", { method: "POST", headers: { Authorization: \`Bearer \${process.env.MODELHUB_API_KEY}\` }, body: JSON.stringify({ model: "${model.id}", prompt: "Your prompt here" }) });
+console.log(await response.json());`,
+  };
+  const copyInstallSnippet = () => { navigator.clipboard.writeText(installSnippets[installMode]); setIsSnippetCopied(true); setTimeout(() => setIsSnippetCopied(false), 1800); };
 
   const radarData = [
     { category: "Reasoning", score: model.scores.reasoning ?? 90, fullMark: 100 },
@@ -175,17 +192,35 @@ export const ModelDetailPage = () => {
               <span className="text-[10px] text-zinc-400 block">35 Test Assertions Passed</span>
             </div>
 
-            <button
+             <button
               onClick={() => setIsDeployModalOpen(true)}
               className="px-6 py-3 bg-[#ea580c] hover:bg-[#c2410c] text-white font-bold text-xs font-mono rounded-none transition-all flex items-center gap-2 cursor-pointer shadow-xs active:scale-95 w-full sm:w-auto justify-center"
             >
               <HiOutlineRocketLaunch className="text-sm" />
-              <span>Deploy Model (1-Click)</span>
-            </button>
+               <span>Deploy Model (1-Click)</span>
+             </button>
+             <div className="flex gap-2 w-full sm:w-auto">
+               <Link to={`/playground/${model.id}`} className="flex-1 px-4 py-2.5 bg-zinc-950 text-white text-xs font-bold text-center">Try Playground</Link>
+               <Link to={`/compare?models=${model.id}`} className="flex-1 px-4 py-2.5 border border-zinc-300 text-zinc-800 text-xs font-bold text-center">Compare</Link>
+             </div>
           </div>
-        </div>
+         </div>
 
-        {/* 2. SPEED & THROUGHPUT STATS BAR */}
+         {/* API access and pricing belong to individual models, not agents. */}
+         <div className="bg-white border border-[#e4e4e7] p-6 sm:p-8 rounded-none shadow-xs space-y-6">
+           <div className="flex items-center justify-between border-b border-[#e4e4e7] pb-4">
+             <div><h2 className="text-base font-bold">API Access & Pricing</h2><p className="text-xs text-zinc-500 mt-1">Choose a usage tier, then copy the integration for this model.</p></div>
+             <button onClick={() => setIsDeployModalOpen(true)} className="bg-[#ea580c] text-white px-4 py-2 text-xs font-bold">Open API setup</button>
+           </div>
+           <div className="grid md:grid-cols-3 gap-4">
+             <div className="border-2 border-zinc-900 p-5 space-y-3"><span className="text-[10px] uppercase font-bold text-zinc-500">Starter</span><div className="text-2xl font-bold">Pay as you go</div><p className="text-xs text-zinc-500">{model.pricingFormatted} · standard access</p><button onClick={() => setIsDeployModalOpen(true)} className="w-full border border-zinc-300 py-2 text-xs font-bold">Use model</button></div>
+             <div className="border-2 border-[#ea580c] bg-[#fff7ed] p-5 space-y-3 relative"><span className="absolute -top-2 left-4 bg-[#ea580c] text-white px-2 py-0.5 text-[10px] font-bold">RECOMMENDED</span><span className="text-[10px] uppercase font-bold text-[#ea580c]">Production</span><div className="text-2xl font-bold">Hosted API</div><p className="text-xs text-zinc-500">Priority routing · usage metering</p><button onClick={() => setIsDeployModalOpen(true)} className="w-full bg-[#ea580c] text-white py-2 text-xs font-bold">Deploy API</button></div>
+             <div className="border border-zinc-200 p-5 space-y-3"><span className="text-[10px] uppercase font-bold text-zinc-500">Enterprise</span><div className="text-2xl font-bold">Private hosting</div><p className="text-xs text-zinc-500">VPC, audit logs and dedicated capacity</p><button onClick={() => setIsDeployModalOpen(true)} className="w-full bg-zinc-900 text-white py-2 text-xs font-bold">Configure API</button></div>
+           </div>
+           <div className="space-y-3"><div className="flex flex-wrap items-center justify-between gap-3"><h3 className="text-xs font-bold uppercase font-mono">Install via API / SDK</h3><div className="inline-flex border border-zinc-200 p-0.5 text-xs font-mono">{["curl", "python", "node"].map((mode) => <button key={mode} onClick={() => setInstallMode(mode)} className={`px-3 py-1 ${installMode === mode ? "bg-white border border-zinc-200 font-bold" : "text-zinc-500"}`}>{mode === "node" ? "Node" : mode}</button>)}</div></div><div className="bg-[#0c0c0e] border border-zinc-800"><div className="flex items-center justify-between px-3 py-2 text-[10px] text-zinc-400 border-b border-zinc-700"><span>{installMode.toUpperCase()}</span><button onClick={copyInstallSnippet} className="flex items-center gap-1 bg-zinc-800 text-white px-2 py-1">{isSnippetCopied ? <HiOutlineCheck /> : <HiOutlineClipboard />} {isSnippetCopied ? "Copied" : "Copy snippet"}</button></div><pre className="p-4 text-xs text-zinc-200 overflow-x-auto leading-5"><code>{installSnippets[installMode]}</code></pre></div></div>
+         </div>
+
+         {/* 2. SPEED & THROUGHPUT STATS BAR */}
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 font-mono">
           <div className="p-4 bg-white border border-[#e4e4e7] rounded-none shadow-xs space-y-1">
             <span className="text-[10px] text-zinc-400 block uppercase font-semibold">Avg Latency (TTFT)</span>
