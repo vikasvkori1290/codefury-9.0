@@ -6,11 +6,11 @@ import {
   HiOutlineCube,
   HiOutlineCpuChip,
   HiOutlineSparkles,
+  HiOutlinePlay,
   HiOutlineArrowDown,
 } from "react-icons/hi2";
 import MetricCard from "../components/atoms/MetricCard";
 import ModelBadge from "../components/atoms/ModelBadge";
-import WorkflowContainer from "../components/workflow/WorkflowContainer";
 
 const FEATURED_MODELS = [
   {
@@ -91,25 +91,25 @@ const Home = () => {
 
         {/* CTA Buttons */}
         <div className="flex flex-col sm:flex-row items-center justify-center gap-3 pt-2">
+          <Link
+            to="/test"
+            className="w-full sm:w-auto bg-[#ea580c] hover:bg-[#c2410c] text-white font-bold text-xs px-6 py-3 rounded-none transition-all flex items-center justify-center gap-2 shadow-xs cursor-pointer active:scale-95 font-mono"
+          >
+            <HiOutlinePlay className="text-sm" />
+            <span>Launch Test Benchmark</span>
+          </Link>
+
           <button
             onClick={scrollToAbout}
-            className="w-full sm:w-auto bg-[#ea580c] hover:bg-[#c2410c] text-white font-bold text-xs px-6 py-3 rounded-none transition-all flex items-center justify-center gap-2 shadow-xs cursor-pointer active:scale-95"
+            className="w-full sm:w-auto bg-white hover:bg-zinc-50 border border-zinc-300 text-zinc-800 font-bold text-xs px-6 py-3 rounded-none transition-all flex items-center justify-center gap-2 shadow-xs cursor-pointer active:scale-95 font-mono"
           >
-            <span>Explore About & How It Works</span>
-            <HiOutlineArrowDown className="text-sm" />
+            <span>Read About & Showcase</span>
+            <HiOutlineArrowDown className="text-sm text-zinc-500" />
           </button>
-
-          <Link
-            to="/register"
-            className="w-full sm:w-auto bg-black hover:bg-zinc-800 text-white font-bold text-xs px-6 py-3 rounded-none transition-all flex items-center justify-center gap-2 shadow-xs cursor-pointer active:scale-95"
-          >
-            <HiOutlineCube className="text-sm text-zinc-400" />
-            <span>Get Started Free</span>
-          </Link>
         </div>
       </section>
 
-      {/* ==================== ABOUT SECTION (ALL IN ONE PAGE) ==================== */}
+      {/* ==================== ABOUT / SHOWCASE SECTION ==================== */}
       <div id="about" className="border-t border-[#e4e4e7] bg-[#fbfbfb]">
         {/* Mission Statement */}
         <section className="py-14 px-4 sm:px-8 max-w-6xl mx-auto space-y-6">
@@ -162,23 +162,6 @@ const Home = () => {
           </div>
         </section>
 
-        {/* How It Works Workflow Container */}
-        <section className="py-10 px-4 sm:px-8 max-w-6xl mx-auto border-t border-[#e4e4e7] space-y-4">
-          <div>
-            <span className="text-xs font-mono font-bold text-[#ea580c] uppercase tracking-wider">
-              Workflow Overview
-            </span>
-            <h3 className="text-2xl sm:text-3xl font-bold tracking-tight text-zinc-900 mt-0.5">
-              How It Works
-            </h3>
-            <p className="text-sm text-zinc-500 mt-0.5">
-              Benchmark custom creator models against frontier APIs in 3 simple steps.
-            </p>
-          </div>
-
-          <WorkflowContainer />
-        </section>
-
         {/* High-Performance Creator Models Catalog */}
         <section className="py-14 px-4 sm:px-8 max-w-6xl mx-auto border-t border-[#e4e4e7] space-y-6">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-[#e4e4e7] pb-4">
@@ -190,9 +173,10 @@ const Home = () => {
                 High-Performance Creator Models
               </h3>
             </div>
-            <span className="text-xs text-zinc-500 font-mono">
-              340+ domain-specific models available on inference endpoints
-            </span>
+            <Link to="/test" className="text-xs text-[#ea580c] font-mono font-bold hover:underline flex items-center gap-1">
+              <span>Benchmark these models</span>
+              <span>→</span>
+            </Link>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -252,10 +236,11 @@ const Home = () => {
           </div>
 
           <div className="flex items-center gap-6 text-zinc-600 font-medium">
+            <Link to="/test" className="text-[#ea580c] font-bold hover:underline">Test Benchmark</Link>
             <button onClick={scrollToAbout} className="hover:text-black transition-colors cursor-pointer">About</button>
             <a href="https://github.com/vikasvkori1290/codefury-9.0" target="_blank" rel="noreferrer" className="hover:text-black transition-colors">Docs</a>
             <Link to="/login" className="hover:text-black transition-colors">Log in</Link>
-            <Link to="/register" className="text-[#ea580c] font-semibold hover:underline">Sign up</Link>
+            <Link to="/register" className="text-zinc-900 font-semibold hover:underline">Sign up</Link>
           </div>
         </div>
       </footer>

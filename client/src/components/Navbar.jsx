@@ -17,7 +17,7 @@ const Navbar = () => {
   return (
     <header className="w-full bg-white border-b border-[#e4e4e7] sticky top-0 z-50 font-sans text-sm">
       <div className="max-w-6xl mx-auto px-4 sm:px-8 h-14 flex items-center justify-between">
-        {/* Left: Brand Logo & Links */}
+        {/* Left: Brand Logo & Navigation */}
         <div className="flex items-center gap-6">
           <Link to="/" className="flex items-center gap-2 group">
             <div className="w-6 h-6 rounded-none bg-[#ea580c] text-white flex items-center justify-center font-bold text-xs font-mono shadow-xs">
@@ -28,17 +28,31 @@ const Navbar = () => {
             </span>
           </Link>
 
-          <Link
-            to="/#about"
-            onClick={handleAboutClick}
-            className="text-xs font-medium text-zinc-600 hover:text-black transition-colors px-2 py-1 cursor-pointer"
-          >
-            About
-          </Link>
+          <nav className="flex items-center gap-2 text-xs font-mono">
+            <Link
+              to="/test"
+              className={`px-3 py-1.5 rounded-none transition-all flex items-center gap-1.5 ${
+                location.pathname === "/test"
+                  ? "bg-black text-white font-bold"
+                  : "text-zinc-700 hover:text-black hover:bg-zinc-100 font-medium"
+              }`}
+            >
+              <span className="w-1.5 h-1.5 bg-[#ea580c] rounded-none" />
+              <span>Test Benchmark</span>
+            </Link>
+
+            <Link
+              to="/#about"
+              onClick={handleAboutClick}
+              className="text-zinc-600 hover:text-black px-3 py-1.5 rounded-none transition-colors"
+            >
+              About
+            </Link>
+          </nav>
         </div>
 
         {/* Right Actions */}
-        <div className="flex items-center gap-4 text-xs">
+        <div className="flex items-center gap-4 text-xs font-sans">
           {user ? (
             <div className="flex items-center gap-3">
               <span className="text-zinc-700 font-medium hidden sm:inline">
@@ -66,11 +80,11 @@ const Navbar = () => {
                 Sign up
               </Link>
               <Link
-                to="/register"
-                className="bg-black hover:bg-zinc-800 text-white font-semibold px-4 py-1.5 rounded-none transition-all flex items-center gap-1 active:scale-95 shadow-xs"
+                to="/test"
+                className="bg-[#ea580c] hover:bg-[#c2410c] text-white font-semibold px-4 py-1.5 rounded-none transition-all flex items-center gap-1 active:scale-95 shadow-xs font-mono"
               >
-                <span>Get a demo</span>
-                <span className="text-zinc-400">›</span>
+                <span>Live Test</span>
+                <span className="text-white/80">›</span>
               </Link>
             </div>
           )}

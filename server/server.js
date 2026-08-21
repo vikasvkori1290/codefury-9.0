@@ -4,7 +4,7 @@ import cors from "cors";
 import morgan from "morgan";
 import connectDB from "./config/db.js";
 import authRoutes from "./routes/auth.routes.js";
-// import your other routes here
+import benchmarkRoutes from "./routes/benchmark.routes.js";
 
 // Load env vars
 dotenv.config();
@@ -34,7 +34,7 @@ app.get("/api/health", (req, res) => {
 });
 
 app.use("/api/auth", authRoutes);
-// app.use("/api/users", userRoutes);
+app.use("/api/benchmark", benchmarkRoutes);
 
 // --------------- Error Handler ---------------
 app.use((err, req, res, next) => {
