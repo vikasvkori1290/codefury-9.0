@@ -15,8 +15,15 @@ const Home = () => (
     <section id="about" className="relative overflow-hidden border-b border-[#cbd5e1] min-h-[680px] flex flex-col items-center text-center px-4 pt-24 sm:pt-32">
       <div className="absolute inset-0 bg-gradient-to-b from-[#e6f0fb]/95 via-[#e6f0fb]/55 to-transparent pointer-events-none" />
       <div className="relative z-10 max-w-4xl space-y-7">
-        <span className="inline-flex items-center gap-2 bg-white/70 border border-[#cbd5e1] px-3 py-1.5 text-[11px] font-mono uppercase tracking-wider text-zinc-700"><HiOutlineSparkles className="text-[#ea580c]" /> ModelHub 9.0 / AI platform</span>
-        <h1 className="text-5xl sm:text-7xl lg:text-8xl font-bold tracking-[-0.07em] leading-[0.95]">Find the model that <span className="bg-[#f4511e] text-white px-2">wins on your data.</span></h1>
+        <span className="inline-flex items-center gap-2 bg-white/70 border border-[#cbd5e1] px-3 py-1.5 text-[11px] font-mono uppercase tracking-wider text-zinc-700 select-none">
+          <HiOutlineSparkles className="text-[#ea580c]" /> ModelHub 9.0 / AI platform
+        </span>
+        <h1 className="text-5xl sm:text-7xl lg:text-[84px] font-extrabold tracking-[-0.05em] leading-[1.18] sm:leading-[1.14] flex flex-col items-center select-none">
+          <span className="text-zinc-950">Find the model that</span>
+          <span className="inline-block mt-3 sm:mt-4 bg-[#f4511e] text-white px-4 sm:px-6 py-1 sm:py-1.5 tracking-[-0.04em] shadow-xs">
+            wins on your data.
+          </span>
+        </h1>
         <p className="max-w-2xl mx-auto text-base sm:text-xl font-medium leading-relaxed text-zinc-700">Discover specialized AI, benchmark it against real workloads, and deploy the winner with confidence.</p>
         <div className="flex flex-col sm:flex-row justify-center gap-3">
           <Link to="/live-bench" className="inline-flex items-center justify-center gap-2 border border-zinc-900 bg-black px-5 py-2.5 text-sm font-bold text-white hover:bg-[#ea580c]">Get started in Live Bench <HiOutlineArrowRight /></Link>
