@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from "react";
+import React, { useEffect, useState, useMemo } from "react";
 import { Link } from "react-router-dom";
 import {
   HiOutlineMagnifyingGlass,
@@ -414,10 +414,15 @@ const getAgentFilterValues = (agent) => {
 };
 
 export const AgentMarketplacePage = () => {
+  const [submittedAgents, setSubmittedAgents] = useState([]);
   const [search, setSearch] = useState("");
   const [sortBy, setSortBy] = useState("relevant");
   const [selectedFilters, setSelectedFilters] = useState({});
   const [expandedGroups, setExpandedGroups] = useState({ capability: true, useCase: true });
+
+  useEffect(() => {
+    try { setSubmittedAgents(JSON.parse(localStorage.getItem("modelhub-submitted-agents") || "[]")); } catch { setSubmittedAgents([]); }
+  }, []);
 
   const toggleFilter = (key, value) => setSelectedFilters((current) => {
     const values = current[key] || [];
@@ -432,7 +437,7 @@ export const AgentMarketplacePage = () => {
   const advancedGroups = FILTER_GROUPS.filter((group) => ["pricing", "rating", "latency", "cost"].includes(group.key));
 
   const filtered = useMemo(() => {
-    let list = AGENTS.filter((a) => {
+    let list = [...submittedAgents, ...AGENTS].filter((a) => {
       const q = search.toLowerCase().trim();
       const searchable = JSON.stringify(getAgentFilterValues(a)).toLowerCase();
       const ignoredWords = new Set(["a", "an", "and", "for", "i", "in", "need", "the", "to", "with", "that", "can", "do"]);
@@ -449,7 +454,7 @@ export const AgentMarketplacePage = () => {
     else if (sortBy === "latency") list = [...list].sort((a, b) => a.latencyMs - b.latencyMs);
     else list = [...list].sort((a, b) => b.installsRaw - a.installsRaw);
     return list;
-  }, [search, sortBy, selectedFilters]);
+  }, [search, sortBy, selectedFilters, submittedAgents]);
 
   return (
     <div className="min-h-screen bg-[#fafafa] text-zinc-900 font-sans selection:bg-[#ea580c] selection:text-white py-8 px-4 sm:px-8">
