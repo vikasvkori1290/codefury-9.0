@@ -1,5 +1,7 @@
 import jwt from "jsonwebtoken";
 import User from "../models/User.model.js";
+import mongoose from "mongoose";
+import jobStore from "../services/jobStore.js";
 
 const protect = async (req, res, next) => {
   let token;
@@ -13,8 +15,12 @@ const protect = async (req, res, next) => {
   }
 
   try {
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    req.user = await User.findById(decoded.id);
+    const secret = process.env.JWT_SECRET || "codefury-local-development-secret";
+    const decoded = jwt.verify(token, secret);
+    req.user = mongoose.connection.readyState === 1
+      ? await User.findById(decoded.id)
+      : jobStore.getUser(decoded.id);
+    if (!req.user) return res.status(401).json({ success: false, message: "Not authorized, user not found" });
     next();
   } catch (error) {
     return res.status(401).json({ success: false, message: "Not authorized, token failed" });

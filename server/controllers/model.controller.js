@@ -1,9 +1,9 @@
-import { spawn } from "child_process";
 import mongoose from "mongoose";
 import ModelListing from "../models/ModelListing.model.js";
 import BenchmarkJob from "../models/BenchmarkJob.model.js";
 import { addBenchmarkJob } from "../config/queue.js";
 import jobStore from "../services/jobStore.js";
+import { runCommand } from "../services/command.service.js";
 
 /**
  * @desc Register a new AI Model (JSON or Modelfile/GGUF upload) and trigger benchmark job
@@ -39,20 +39,10 @@ export const registerModel = async (req, res, next) => {
       uploadedFilePath = uploadedFile.path;
 
       try {
-        console.log(`🚀 [Ollama] Spawning 'ollama create ${finalModelName.trim()} -f ${uploadedFilePath}'...`);
-        const ollamaProcess = spawn("ollama", ["create", finalModelName.trim(), "-f", uploadedFilePath], {
-          shell: true,
-        });
-
-        ollamaProcess.stdout?.on("data", (data) => {
-          console.log(`[Ollama stdout]: ${data.toString().trim()}`);
-        });
-
-        ollamaProcess.stderr?.on("data", (data) => {
-          console.warn(`[Ollama stderr]: ${data.toString().trim()}`);
-        });
+        console.log(`[Ollama] Creating model '${finalModelName.trim()}'...`);
+        await runCommand("ollama", ["create", finalModelName.trim(), "-f", uploadedFilePath], { timeoutMs: 10 * 60 * 1000 });
       } catch (ollamaErr) {
-        console.warn("⚠️ Ollama CLI spawn notice:", ollamaErr.message);
+        console.warn("Ollama create unavailable or failed:", ollamaErr.message);
       }
     }
 

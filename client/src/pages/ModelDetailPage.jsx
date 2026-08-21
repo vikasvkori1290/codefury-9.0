@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useParams, Link } from "react-router-dom";
 import {
   HiOutlineArrowLeft,
@@ -27,7 +27,8 @@ import {
   Tooltip,
   Cell,
 } from "recharts";
-import { MARKETPLACE_MODELS } from "./MarketplacePage";
+import { MARKETPLACE_MODELS, normalizeModel } from "./MarketplacePage";
+import API from "../api/axios";
 import DeployModal from "../components/modals/DeployModal";
 
 export const ModelDetailPage = () => {
@@ -35,10 +36,36 @@ export const ModelDetailPage = () => {
   const [activeChartTab, setActiveChartTab] = useState("radar"); // 'radar' | 'bar'
   const [isDeployModalOpen, setIsDeployModalOpen] = useState(false);
   const [expandedRow, setExpandedRow] = useState(null);
+  const [apiModel, setApiModel] = useState(null);
+  const [isLoading, setIsLoading] = useState(true);
 
-  const model =
-    MARKETPLACE_MODELS.find((m) => m.id === id || m.name === id) ||
-    MARKETPLACE_MODELS[0];
+  useEffect(() => {
+    API.get("/models")
+      .then(({ data }) => {
+        const found = data.models?.find((item) => String(item._id || item.id || item.name) === id || item.name === id);
+        if (found) setApiModel(normalizeModel(found));
+      })
+      .catch(() => {})
+      .finally(() => setIsLoading(false));
+  }, [id]);
+
+  const model = apiModel || MARKETPLACE_MODELS.find((m) => m.id === id || m.name === id);
+
+  if (isLoading && !model) {
+    return <div className="min-h-screen bg-[#09090b] text-zinc-400 p-12 font-mono text-sm">Loading model scorecard...</div>;
+  }
+
+  if (!model) {
+    return (
+      <div className="min-h-screen bg-[#09090b] text-zinc-100 p-12 font-mono">
+        <div className="max-w-xl mx-auto border border-[#27272a] bg-[#18181b] p-6 space-y-4">
+          <h1 className="text-xl font-bold text-white">Model not found</h1>
+          <p className="text-sm text-zinc-400">No marketplace listing exists for model ID <code>{id}</code>.</p>
+          <Link to="/marketplace" className="inline-block text-emerald-400 hover:text-emerald-300">Back to Marketplace →</Link>
+        </div>
+      </div>
+    );
+  }
 
   const radarData = [
     { category: "Reasoning", score: model.scores.reasoning, fullMark: 100 },

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import toast from "react-hot-toast";
 import {
   HiOutlineXMark,
@@ -12,27 +12,36 @@ import {
   HiOutlineDocumentArrowDown,
 } from "react-icons/hi2";
 import ModelBadge from "../atoms/ModelBadge";
+import API, { API_BASE_URL } from "../../api/axios";
 
 export const DeployModal = ({ isOpen, onClose, selectedModel, prompt, priority }) => {
   const [activeLang, setActiveLang] = useState("python"); // 'python' | 'curl' | 'node'
-  const [apiKey, setApiKey] = useState("mhub_live_8f93b2a4c10e97d");
+  const [apiKey, setApiKey] = useState("");
+  const [isDeploying, setIsDeploying] = useState(false);
+  const [deployError, setDeployError] = useState("");
   const [isCopiedKey, setIsCopiedKey] = useState(false);
   const [isCopiedCode, setIsCopiedCode] = useState(false);
+
+  useEffect(() => {
+    if (!isOpen || !selectedModel) return;
+    setApiKey("");
+    setDeployError("");
+    setIsDeploying(true);
+    API.post("/deploy", { modelId: selectedModel.model_id || selectedModel.id })
+      .then(({ data }) => {
+        if (!data.apiKey) throw new Error("Deployment did not return an API key");
+        setApiKey(data.apiKey);
+        toast.success("Deployment created. Your live API key is ready.");
+      })
+      .catch((error) => setDeployError(error.response?.data?.message || error.message || "Could not deploy this model."))
+      .finally(() => setIsDeploying(false));
+  }, [isOpen, selectedModel]);
 
   if (!isOpen || !selectedModel) return null;
 
   const modelIdentifier = selectedModel.is_creator
     ? "creator/mistral-7b-niche"
     : selectedModel.model_id;
-
-  const generateNewKey = () => {
-    const randomHex = Array.from({ length: 16 }, () =>
-      Math.floor(Math.random() * 16).toString(16)
-    ).join("");
-    const newKey = `mhub_live_${randomHex}`;
-    setApiKey(newKey);
-    toast.success("Generated new live API Key!");
-  };
 
   const copyKey = () => {
     navigator.clipboard.writeText(apiKey);
@@ -45,33 +54,30 @@ export const DeployModal = ({ isOpen, onClose, selectedModel, prompt, priority }
     const cleanPrompt = prompt ? prompt.slice(0, 48).replace(/"/g, '\\"') : "Your data here";
 
     if (activeLang === "curl") {
-      return `curl -X POST https://api.modelhub.ai/v1/predict \\
+      return `curl -X POST ${API_BASE_URL}/proxy/predict \\
   -H "Authorization: Bearer ${apiKey}" \\
   -H "Content-Type: application/json" \\
   -d '{"model": "${modelIdentifier}", "prompt": "${cleanPrompt}..."}'`;
     }
 
     if (activeLang === "node") {
-      return `import { ModelHub } from "@modelhub/sdk";
-
-const client = new ModelHub({
-  apiKey: "${apiKey}",
+      return `const response = await fetch("${API_BASE_URL}/proxy/predict", {
+  method: "POST",
+  headers: {
+    "Authorization": "Bearer ${apiKey}",
+    "Content-Type": "application/json",
+  },
+  body: JSON.stringify({ model: "${modelIdentifier}", prompt: "${cleanPrompt}..." }),
 });
 
-const response = await client.models.generate({
-  model: "${modelIdentifier}",
-  prompt: "${cleanPrompt}...",
-});
-
-console.log("Output:", response.output);
-console.log("Latency:", response.latency_ms + "ms");`;
+console.log(await response.json());`;
     }
 
     // Python (default)
     return `import requests
 
 response = requests.post(
-    "https://api.modelhub.ai/v1/predict",
+     "${API_BASE_URL}/proxy/predict",
     headers={"Authorization": "Bearer ${apiKey}"},
     json={
         "model": "${modelIdentifier}",
@@ -154,27 +160,24 @@ print(response.json())`;
               <label className="font-bold text-zinc-900 uppercase tracking-wider">
                 Unified ModelHub API Key
               </label>
-              <button
-                onClick={generateNewKey}
-                className="text-[11px] text-[#ea580c] hover:underline font-semibold cursor-pointer"
-              >
-                + Generate New Key
-              </button>
+               <span className="text-[11px] text-zinc-500">Generated securely by the backend</span>
             </div>
 
             <div className="flex items-center gap-2">
               <div className="flex-1 bg-[#fafafa] border border-[#e4e4e7] px-3.5 py-2 font-mono text-xs text-zinc-900 rounded-none truncate select-all">
-                {apiKey}
+                 {isDeploying ? "Generating deployment key..." : apiKey || "No key generated"}
               </div>
               <button
-                onClick={copyKey}
+                 onClick={copyKey}
+                 disabled={!apiKey}
                 className="px-3.5 py-2 bg-zinc-900 hover:bg-black text-white text-xs font-mono font-medium rounded-none transition-all flex items-center gap-1.5 cursor-pointer shadow-xs"
               >
                 {isCopiedKey ? <HiOutlineCheck className="text-emerald-400" /> : <HiOutlineClipboard />}
                 <span>{isCopiedKey ? "Copied" : "Copy"}</span>
               </button>
-            </div>
-          </div>
+             </div>
+             {deployError && <p className="text-xs text-red-600 font-mono">{deployError}</p>}
+           </div>
 
           {/* Interactive Code Snippets */}
           <div className="space-y-2">

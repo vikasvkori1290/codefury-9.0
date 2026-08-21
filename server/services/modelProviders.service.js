@@ -1,4 +1,5 @@
 import { performance } from "perf_hooks";
+import { runCommand } from "./command.service.js";
 
 // Token estimation utility (~4 chars per token average in English/code)
 const estimateTokenCount = (text) => {
@@ -452,4 +453,32 @@ export const runAnthropicClaudeModel = async ({ prompt, category, expectedOutput
       is_live_call: false,
     };
   }
+};
+
+// Unified deployment inference: use the registered local model when possible.
+export const runModelInference = async ({ model, prompt }) => {
+  const started = performance.now();
+  let output = "";
+  let provider = "deterministic-simulation";
+  try {
+    if (["ollama_local", "modelfile_upload"].includes(model.provider)) {
+      const models = await runCommand("ollama", ["list"], { timeoutMs: 5000, maxOutputBytes: 64 * 1024 });
+      if (!models.stdout.split("\n").some((line) => line.trim().startsWith(model.name))) {
+        throw new Error(`Ollama model '${model.name}' is not installed`);
+      }
+      const result = await runCommand("ollama", ["run", model.name, prompt], { timeoutMs: 60000, maxOutputBytes: 1024 * 1024 });
+      output = result.stdout.trim();
+      provider = "ollama";
+    }
+  } catch (error) {
+    console.warn(`[Proxy] Ollama inference unavailable: ${error.message}`);
+  }
+  if (!output) output = `Simulated response for ${model.name}: ${prompt}`;
+  return {
+    model: model.name,
+    output,
+    provider,
+    latencyMs: Math.round(performance.now() - started),
+    tokens: estimateTokenCount(prompt) + estimateTokenCount(output),
+  };
 };

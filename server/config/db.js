@@ -1,4 +1,5 @@
 import mongoose from "mongoose";
+import "dotenv/config";
 
 // Disable indefinite command buffering so queries fail fast when Atlas is disconnected
 mongoose.set("bufferCommands", false);

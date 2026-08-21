@@ -13,7 +13,7 @@ const loadData = () => {
       return JSON.parse(raw);
     }
   } catch (_) {}
-  return { models: {}, jobs: {} };
+  return { models: {}, jobs: {}, deployments: {} };
 };
 
 const saveData = (data) => {
@@ -44,6 +44,34 @@ export const jobStore = {
   getAllModels() {
     const data = loadData();
     return Object.values(data.models);
+  },
+  setDeployment(id, deployment) {
+    const data = loadData();
+    data.deployments = data.deployments || {};
+    data.deployments[id] = deployment;
+    saveData(data);
+  },
+  getDeployment(id) {
+    const data = loadData();
+    return data.deployments?.[id] || null;
+  },
+  getDeployments() {
+    const data = loadData();
+    return Object.values(data.deployments || {});
+  },
+  setUser(id, user) {
+    const data = loadData();
+    data.users = data.users || {};
+    data.users[id] = user;
+    saveData(data);
+  },
+  getUser(id) {
+    const data = loadData();
+    return data.users?.[id] || null;
+  },
+  getUserByEmail(email) {
+    const data = loadData();
+    return Object.values(data.users || {}).find((user) => user.email === email.toLowerCase()) || null;
   },
 };
 

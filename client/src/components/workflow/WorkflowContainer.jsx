@@ -8,6 +8,7 @@ import { useBenchmark } from "../../hooks/useBenchmark";
 import Step1InputConfig from "./Step1InputConfig";
 import Step3VerdictDashboard from "./Step3VerdictDashboard";
 import ModelBadge from "../atoms/ModelBadge";
+import API from "../../api/axios";
 
 export const WorkflowContainer = () => {
   const [currentStep, setCurrentStep] = useState(1);
@@ -48,24 +49,14 @@ export const WorkflowContainer = () => {
     }, 120);
 
     try {
-      const res = await fetch("http://localhost:5000/api/benchmark", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
+      const { data } = await API.post("/benchmark", {
           prompt: payload.prompt,
           category: payload.category,
           priority: payload.priority,
           expected_output: payload.expectedOutput,
+          test_cases: payload.datasetCases,
           selected_models: payload.models.map((m) => m.id),
-        }),
       });
-
-      if (!res.ok) {
-        const errData = await res.json().catch(() => ({}));
-        throw new Error(errData.message || `Server returned status ${res.status}`);
-      }
-
-      const data = await res.json();
       clearInterval(progressInterval);
       setBenchmarkProgress(100);
       setBenchmarkResponse(data);
@@ -115,6 +106,8 @@ export const WorkflowContainer = () => {
       setBenchmarkProgress(100);
       setBenchmarkResponse({
         success: true,
+        simulated: true,
+        simulationReason: "The benchmark backend is unavailable. Results below are illustrative only.",
         summary: {
           recommended_winner: fallbackWinner.model_name,
           fastest_latency_ms: fallbackWinner.latency_ms,
@@ -178,7 +171,7 @@ export const WorkflowContainer = () => {
                   </span>
                 )}
                 <span className="truncate">{item.title}</span>
-              </div>
+             </div>
               <span className="text-[10px] text-zinc-400 font-sans hidden sm:block mt-0.5">
                 {item.desc}
               </span>
@@ -215,10 +208,15 @@ export const WorkflowContainer = () => {
         {/* STEP 2: LIVE BENCHMARK STREAMING */}
         {currentStep === 2 && (
           <div className="space-y-6 py-6 text-center">
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-none bg-orange-50 border border-orange-200 text-[#ea580c] text-xs font-mono font-bold">
+             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-none bg-orange-50 border border-orange-200 text-[#ea580c] text-xs font-mono font-bold">
               <HiOutlineSparkles className="animate-spin text-sm" />
-              <span>Orchestrating {activeModels.length} Models via /api/benchmark ({benchmarkProgress}%)</span>
-            </div>
+               <span>Orchestrating {activeModels.length} Models via /api/benchmark ({benchmarkProgress}%)</span>
+             </div>
+             {benchmarkResponse?.simulated && (
+               <div className="max-w-2xl mx-auto border border-amber-300 bg-amber-50 px-4 py-3 text-left text-xs text-amber-900 font-mono">
+                 <strong>SIMULATION MODE:</strong> {benchmarkResponse.simulationReason}
+               </div>
+             )}
 
             {/* Progress Bar */}
             <div className="max-w-md mx-auto w-full h-2 bg-zinc-100 rounded-none overflow-hidden border border-zinc-200">

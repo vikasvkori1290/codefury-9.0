@@ -98,6 +98,17 @@
       "uploadedFilePath": null,
       "latestBenchmark": "job_1787325268777_usi7rsioi",
       "createdAt": "2026-08-21T15:14:28.777Z"
+    },
+    "mem_1787327219484_psgipjkm2": {
+      "_id": "mem_1787327219484_psgipjkm2",
+      "name": "qwen2.5:3b",
+      "creator": "@tester",
+      "provider": "ollama_local",
+      "category": "Code",
+      "pricingPer1kTokens": 0.00015,
+      "uploadedFilePath": null,
+      "latestBenchmark": "job_1787327219484_qqp4vnv3h",
+      "createdAt": "2026-08-21T15:46:59.484Z"
     }
   },
   "jobs": {
@@ -221,6 +232,29 @@
         "[2026-08-21T15:14:29.148Z] Generating 35 test cases (Reasoning, Knowledge, Coding, Instruction, Safety)..."
       ],
       "createdAt": "2026-08-21T15:14:28.778Z"
+    },
+    "job_1787327219484_qqp4vnv3h": {
+      "_id": "job_1787327219484_qqp4vnv3h",
+      "modelListingId": "mem_1787327219484_psgipjkm2",
+      "modelName": "qwen2.5:3b",
+      "status": "running",
+      "progress": 12,
+      "logs": [
+        "[2026-08-21T15:46:59.484Z] Benchmark job queued for model 'qwen2.5:3b'.",
+        "[2026-08-21T15:46:59.535Z] Initializing 35-case benchmark for 'qwen2.5:3b'.",
+        "[2026-08-21T15:46:59.621Z] Ollama CLI detected; executing the generated suite against the model.",
+        "[2026-08-21T15:47:59.625Z] Case 1/35 failed: Command timed out after 60000ms"
+      ],
+      "createdAt": "2026-08-21T15:46:59.484Z"
+    }
+  },
+  "deployments": {
+    "mhub_live_9a13f2cc": {
+      "modelListingId": "mem_1787327219484_psgipjkm2",
+      "keyHash": "caa34c1f4984592f5f756e48b38e5530ebbbc95e46e57d469131ade803c20289",
+      "keyPrefix": "mhub_live_9a13f2cc",
+      "active": true,
+      "createdAt": "2026-08-21T15:47:16.414Z"
     }
   }
 }

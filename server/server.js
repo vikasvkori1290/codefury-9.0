@@ -6,6 +6,7 @@ import connectDB from "./config/db.js";
 import authRoutes from "./routes/auth.routes.js";
 import benchmarkRoutes from "./routes/benchmark.routes.js";
 import modelRoutes from "./routes/model.routes.js";
+import deploymentRoutes from "./routes/deployment.routes.js";
 
 // Load env vars
 dotenv.config();
@@ -37,6 +38,7 @@ app.get("/api/health", (req, res) => {
 app.use("/api/auth", authRoutes);
 app.use("/api/models", modelRoutes);
 app.use("/api/benchmark", benchmarkRoutes);
+app.use("/api", deploymentRoutes);
 
 // --------------- Error Handler ---------------
 app.use((err, req, res, next) => {

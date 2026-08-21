@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useEffect } from "react";
 import { Link } from "react-router-dom";
 import {
   HiOutlineMagnifyingGlass,
@@ -13,6 +13,7 @@ import {
 } from "react-icons/hi2";
 import ModelBadge from "../components/atoms/ModelBadge";
 import DeployModal from "../components/modals/DeployModal";
+import API from "../api/axios";
 
 export const MARKETPLACE_MODELS = [
   {
@@ -177,14 +178,50 @@ export const MARKETPLACE_MODELS = [
 
 const CATEGORIES = ["All", "Coding", "Reasoning", "General"];
 
+export const normalizeModel = (model) => {
+  const benchmark = model.latestBenchmark || model.latest_benchmark || {};
+  const metrics = benchmark.metrics || {};
+  const scores = metrics.categoryScores || model.scores || {};
+  return {
+    ...model,
+    id: String(model.id || model._id || model.modelId || model.name),
+    name: model.name || model.modelName,
+    displayName: model.displayName || model.name || model.modelName,
+    creator: model.creator || "@anonymous_creator",
+    type: model.type || "creator",
+    provider: model.provider || "ModelHub",
+    category: model.category || "General",
+    pricingPer1k: Number(model.pricingPer1k || model.pricingPer1kTokens || model.pricing || 0.00015),
+    pricingFormatted: `$${Number(model.pricingPer1k || model.pricingPer1kTokens || model.pricing || 0.00015).toFixed(5)} / 1k`,
+    passRate: Number(model.passRate || metrics.overallPassRate || 0),
+    latencyMs: Number(model.latencyMs || metrics.avgLatencyMs || 0),
+    tokensPerSecond: Number(model.tokensPerSecond || metrics.tokensPerSecond || 0),
+    description: model.description || "Creator model registered on ModelHub.",
+    scores: { reasoning: 0, knowledge: 0, coding: 0, instruction: 0, safety: 0, ...scores },
+    sampleQueries: model.sampleQueries || [],
+  };
+};
+
 export const MarketplacePage = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("All");
   const [sortBy, setSortBy] = useState("score"); // 'score' | 'latency' | 'cheapest'
   const [deployModel, setDeployModel] = useState(null);
+  const [marketplaceModels, setMarketplaceModels] = useState(MARKETPLACE_MODELS);
+  const [isLoading, setIsLoading] = useState(true);
+  const [loadError, setLoadError] = useState("");
+
+  useEffect(() => {
+    API.get("/models")
+      .then(({ data }) => {
+        if (Array.isArray(data.models) && data.models.length) setMarketplaceModels(data.models.map(normalizeModel));
+      })
+      .catch(() => setLoadError("Marketplace API unavailable. Showing the curated seed catalog."))
+      .finally(() => setIsLoading(false));
+  }, []);
 
   const filteredModels = useMemo(() => {
-    return MARKETPLACE_MODELS.filter((m) => {
+    return marketplaceModels.filter((m) => {
       const matchesSearch =
         m.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
         m.displayName.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -200,11 +237,13 @@ export const MarketplacePage = () => {
       if (sortBy === "cheapest") return a.pricingPer1k - b.pricingPer1k;
       return b.passRate - a.passRate; // default score
     });
-  }, [searchQuery, selectedCategory, sortBy]);
+  }, [marketplaceModels, searchQuery, selectedCategory, sortBy]);
 
   return (
     <div className="min-h-screen bg-[#09090b] text-zinc-100 font-sans selection:bg-emerald-500 selection:text-black py-12 px-4 sm:px-8">
-      <div className="max-w-6xl mx-auto space-y-6">
+        <div className="max-w-6xl mx-auto space-y-6">
+        {isLoading && <div className="text-xs font-mono text-zinc-500">Loading live marketplace listings...</div>}
+        {loadError && <div className="border border-amber-500/40 bg-amber-500/10 px-4 py-3 text-xs font-mono text-amber-300">{loadError}</div>}
         {/* Hero Header Banner */}
         <div className="p-6 bg-[#18181b] border border-[#27272a] rounded-none shadow-2xl flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div className="space-y-1">

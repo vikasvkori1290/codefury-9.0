@@ -24,14 +24,14 @@ const storage = multer.diskStorage({
   },
 });
 
-// File filter accepting .gguf, Modelfile, .txt, .bin
+// Only accept the formats the model registration endpoint can process.
 const fileFilter = (req, file, cb) => {
-  const allowedExts = [".gguf", ".bin", ".modelfile", ".txt", ""];
+  const allowedExts = [".gguf", ".bin", ".modelfile", ".txt"];
   const ext = path.extname(file.originalname).toLowerCase();
   if (allowedExts.includes(ext) || file.originalname.toLowerCase().includes("modelfile")) {
     cb(null, true);
   } else {
-    cb(null, true); // Permissive for creator uploads
+    cb(new multer.MulterError("LIMIT_UNEXPECTED_FILE", file.fieldname));
   }
 };
 

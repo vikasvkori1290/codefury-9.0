@@ -1,5 +1,6 @@
 import { Queue, Worker } from "bullmq";
 import Redis from "ioredis";
+import "dotenv/config";
 import { runPromptfooBenchmarkWorker } from "../workers/benchmarkWorker.js";
 
 // Global persistent in-memory store for fallback
@@ -25,10 +26,16 @@ try {
     host: REDIS_HOST,
     port: REDIS_PORT,
     password: REDIS_PASSWORD,
-    maxRetriesPerRequest: 1,
+    // BullMQ requires unlimited request retries on worker connections.
+    maxRetriesPerRequest: null,
     connectTimeout: 1000,
     enableReadyCheck: false,
     lazyConnect: true,
+    retryStrategy: () => null,
+  });
+
+  redisConnection.on("error", () => {
+    isRedisAvailable = false;
   });
 
   redisConnection.connect().then(() => {

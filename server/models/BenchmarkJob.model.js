@@ -34,6 +34,11 @@ const benchmarkJobSchema = new mongoose.Schema(
         instruction: { type: Number, default: 0 },
         safety: { type: Number, default: 0 },
       },
+      totalCases: { type: Number, default: 0 },
+      passedCases: { type: Number, default: 0 },
+      failedCases: { type: Number, default: 0 },
+      evaluator: { type: String, default: null },
+      testResults: { type: mongoose.Schema.Types.Mixed, default: [] },
     },
     logs: [
       {
