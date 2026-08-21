@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useMemo } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import {
   HiOutlineTrophy,
   HiOutlineChevronDown,
@@ -19,6 +19,7 @@ const GLOBAL_FRONTIER_SCORES = [
 ];
 
 export const TestedModelsRankings = () => {
+  const navigate = useNavigate();
   const [testedModels, setTestedModels] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
@@ -185,18 +186,19 @@ export const TestedModelsRankings = () => {
                 return (
                   <React.Fragment key={model.id || model.name}>
                     <tr
-                      onClick={() => setExpandedModelId(isExpanded ? null : model.id)}
-                      className="hover:bg-[#f8faff] transition-colors cursor-pointer"
+                      onClick={() => navigate(`/creator/benchmark/${model.jobId || model.id}`)}
+                      className="hover:bg-[#f0f6ff] transition-colors cursor-pointer group"
+                      title="Click to view live benchmark telemetry, logs & ground-truth test breakdown"
                     >
                       {/* Model Name & Global Rank */}
                       <td className="py-3.5 px-4">
                         <div className="flex items-start gap-2">
-                          <span className="text-zinc-400 text-[10px] mt-0.5">
-                            {isExpanded ? <HiOutlineChevronDown /> : <HiOutlineChevronRight />}
+                          <span className="text-zinc-400 group-hover:text-[#ea580c] text-[11px] mt-0.5 transition-colors">
+                            <HiOutlineArrowTopRightOnSquare />
                           </span>
                           <div>
                             <div className="flex items-center gap-1.5 flex-wrap">
-                              <span className="font-bold text-zinc-950 text-xs">
+                              <span className="font-bold text-zinc-950 group-hover:text-[#ea580c] text-xs transition-colors underline-offset-2 group-hover:underline">
                                 {model.name}
                               </span>
                               {model.isOpen && (

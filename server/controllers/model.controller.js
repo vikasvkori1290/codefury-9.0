@@ -184,13 +184,14 @@ export const getBenchmarkStatus = async (req, res, next) => {
   try {
     const { jobId } = req.params;
     const isMongooseConnected = mongoose.connection.readyState === 1;
-    if (!isMongooseConnected) {
-      return res.status(503).json({ success: false, message: "MongoDB is unavailable." });
-    }
 
     let job = null;
     if (isMongooseConnected && mongoose.Types.ObjectId.isValid(jobId)) {
       job = await BenchmarkJob.findById(jobId).populate("modelListingId").catch(() => null);
+    }
+
+    if (!job) {
+      job = jobStore.getJob(jobId);
     }
 
     if (!job) {
@@ -200,17 +201,22 @@ export const getBenchmarkStatus = async (req, res, next) => {
       });
     }
 
-    return res.status(200).json({
-      success: true,
-      jobId: job._id,
+    const payload = {
+      jobId: job._id || job.jobId || jobId,
       modelName: job.modelName,
       status: job.status,
-      progress: job.progress,
+      progress: job.progress || 0,
       metrics: job.metrics || null,
       logs: job.logs || [],
       error: job.error || null,
       model: withoutCredential(job.modelListingId),
       updatedAt: job.updatedAt || new Date().toISOString(),
+    };
+
+    return res.status(200).json({
+      success: true,
+      job: payload,
+      ...payload,
     });
   } catch (error) {
     next(error);

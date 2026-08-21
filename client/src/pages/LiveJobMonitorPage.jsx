@@ -22,7 +22,7 @@ export default function LiveJobMonitorPage() {
   const [jobData, setJobData] = useState(null);
   const [isPolling, setIsPolling] = useState(true);
   const [expandedCaseId, setExpandedCaseId] = useState(null);
-  const terminalEndRef = useRef(null);
+  const terminalLogsContainerRef = useRef(null);
 
   // Poll BullMQ / MongoDB Job Status
   useEffect(() => {
@@ -30,9 +30,10 @@ export default function LiveJobMonitorPage() {
     const fetchStatus = async () => {
       try {
         const { data } = await API.get(`/benchmark/job/${jobId}`);
-        if (data && data.job) {
-          setJobData(data.job);
-          if (data.job.status === "completed" || data.job.status === "failed") {
+        const currentJob = data?.job || (data?.status ? data : null);
+        if (currentJob) {
+          setJobData(currentJob);
+          if (currentJob.status === "completed" || currentJob.status === "failed") {
             setIsPolling(false);
           }
         }
@@ -51,9 +52,11 @@ export default function LiveJobMonitorPage() {
     };
   }, [jobId, isPolling]);
 
-  // Auto-scroll terminal log viewer
+  // Auto-scroll terminal log viewer internally (without moving window scroll)
   useEffect(() => {
-    terminalEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    if (terminalLogsContainerRef.current) {
+      terminalLogsContainerRef.current.scrollTop = terminalLogsContainerRef.current.scrollHeight;
+    }
   }, [jobData?.logs]);
 
   const sanitizeDisplayName = (raw) => {
@@ -454,7 +457,10 @@ export default function LiveJobMonitorPage() {
             </span>
           </div>
 
-          <div className="p-4 max-h-72 overflow-y-auto space-y-1.5 text-zinc-300 font-mono text-[11px] leading-relaxed">
+          <div
+            ref={terminalLogsContainerRef}
+            className="p-4 max-h-72 overflow-y-auto space-y-1.5 text-zinc-300 font-mono text-[11px] leading-relaxed"
+          >
             {logs.map((log, idx) => (
               <div
                 key={idx}
@@ -472,7 +478,6 @@ export default function LiveJobMonitorPage() {
                 <span className="whitespace-pre-wrap">{log}</span>
               </div>
             ))}
-            <div ref={terminalEndRef} />
           </div>
         </div>
       </div>

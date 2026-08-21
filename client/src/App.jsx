@@ -16,6 +16,8 @@ import AuthPage from "./pages/AuthPage";
 import ComparePage from "./pages/ComparePage";
 import PlaygroundPage from "./pages/PlaygroundPage";
 
+import ScrollToTop from "./components/ScrollToTop";
+
 function AppLayout() {
   const location = useLocation();
   const isAuthPage = location.pathname === "/login" || location.pathname === "/register";
@@ -57,6 +59,7 @@ function App() {
   return (
     <AuthProvider>
       <Router>
+        <ScrollToTop />
         <AppLayout />
         <Toaster
           position="top-right"

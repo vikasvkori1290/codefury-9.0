@@ -30,7 +30,15 @@ const API_PROVIDERS = [
     id: "google",
     name: "Google Gemini",
     defaultModel: "gemini-2.0-flash",
-    models: ["gemini-2.0-flash", "gemini-1.5-flash", "gemini-2.5-flash", "gemini-1.5-pro", "gemini-3-flash-preview"],
+    models: [
+      "gemini-2.0-flash",
+      "gemini-1.5-flash",
+      "gemini-pro-latest",
+      "gemini-flash-latest",
+      "gemini-1.5-pro",
+      "gemini-3-flash-preview",
+      "gemini-2.5-flash",
+    ],
   },
   {
     id: "openai",
@@ -71,7 +79,8 @@ export const CreatorModelSubmitForm = () => {
   const navigate = useNavigate();
   const [submissionMode, setSubmissionMode] = useState("ollama"); // 'ollama' | 'file' | 'api_key'
   const [modelName, setModelName] = useState("qwen2.5:3b");
-  const [creatorHandle, setCreatorHandle] = useState("@AIArchitect");
+  const [isCustomModel, setIsCustomModel] = useState(false);
+  const [creatorHandle, setCreatorHandle] = useState("@my_creator_org");
   const [category, setCategory] = useState("Code");
   const [pricing, setPricing] = useState("0.00015");
   const [uploadedFile, setUploadedFile] = useState(null);
@@ -86,13 +95,17 @@ export const CreatorModelSubmitForm = () => {
 
   const handleSelectOllamaPreset = (m) => {
     setModelName(m.tag);
+    setIsCustomModel(false);
     setCategory(m.category);
   };
 
   const handleSelectApiProvider = (pId) => {
     setApiProvider(pId);
     const prov = API_PROVIDERS.find((p) => p.id === pId);
-    if (prov) setModelName(prov.defaultModel);
+    if (prov) {
+      setIsCustomModel(false);
+      setModelName(prov.defaultModel);
+    }
   };
 
   const handleFileDrop = (e) => {
@@ -367,33 +380,42 @@ export const CreatorModelSubmitForm = () => {
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               {/* AI Model Name / Selection */}
               <div className="space-y-1.5">
-                <label className="text-xs font-mono font-semibold text-zinc-800">
-                  AI Model:
-                </label>
-                <div className="space-y-2">
-                  <select
-                    value={selectedProviderObj.models.includes(modelName) ? modelName : "custom"}
-                    onChange={(e) => {
-                      if (e.target.value !== "custom") {
-                        setModelName(e.target.value);
-                      }
-                    }}
-                    className="w-full bg-[#fafafa] border border-[#e4e4e7] focus:border-[#ea580c] text-zinc-900 text-xs font-mono rounded-none px-3 py-2 outline-none cursor-pointer"
-                  >
-                    {selectedProviderObj.models.map((m) => (
-                      <option key={m} value={m}>
-                        {m}
-                      </option>
-                    ))}
-                    <option value="custom">Custom Model Name...</option>
-                  </select>
+                <div className="flex items-center justify-between">
+                  <label className="text-xs font-mono font-semibold text-zinc-800">
+                    AI Model:
+                  </label>
+                  {isCustomModel ? (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setIsCustomModel(false);
+                        setModelName(selectedProviderObj.defaultModel);
+                      }}
+                      className="text-[10px] font-mono text-[#ea580c] hover:underline cursor-pointer"
+                    >
+                      ← Back to Presets
+                    </button>
+                  ) : (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setIsCustomModel(true);
+                        setModelName("");
+                      }}
+                      className="text-[10px] font-mono text-zinc-500 hover:text-black cursor-pointer"
+                    >
+                      + Custom Name
+                    </button>
+                  )}
+                </div>
 
+                {isCustomModel ? (
                   <input
                     type="text"
                     value={modelName}
+                    autoFocus
                     onChange={(e) => {
                       const val = e.target.value;
-                      // Guard: If user accidentally pastes an API key into Model Name, auto-shift it to apiKey!
                       if (
                         val.startsWith("AIza") ||
                         val.startsWith("AQ.") ||
@@ -403,17 +425,37 @@ export const CreatorModelSubmitForm = () => {
                         val.length > 30
                       ) {
                         setApiKey(val);
-                        setModelName(selectedProviderObj.defaultModel || "gemini-1.5-flash");
+                        setModelName("");
                         toast.success("Detected API Key! Moved to Secret Key field.");
                       } else {
                         setModelName(val);
                       }
                     }}
-                    placeholder="e.g. gemini-1.5-flash, gpt-4o-mini"
-                    className="w-full bg-[#fafafa] border border-[#e4e4e7] focus:border-[#ea580c] text-zinc-900 text-xs font-mono rounded-none px-3 py-2 outline-none"
+                    placeholder="Type custom model name (e.g. gemini-pro-latest, gpt-4o-2024-08-06)..."
+                    className="w-full bg-[#fafafa] border border-[#ea580c] focus:ring-1 focus:ring-[#ea580c] text-zinc-900 text-xs font-mono rounded-none px-3 py-2.5 outline-none"
                     required
                   />
-                </div>
+                ) : (
+                  <select
+                    value={selectedProviderObj.models.includes(modelName) ? modelName : "__custom__"}
+                    onChange={(e) => {
+                      if (e.target.value === "__custom__") {
+                        setIsCustomModel(true);
+                        setModelName("");
+                      } else {
+                        setModelName(e.target.value);
+                      }
+                    }}
+                    className="w-full bg-[#fafafa] border border-[#e4e4e7] focus:border-[#ea580c] text-zinc-900 text-xs font-mono rounded-none px-3 py-2.5 outline-none cursor-pointer"
+                  >
+                    {selectedProviderObj.models.map((m) => (
+                      <option key={m} value={m}>
+                        {m}
+                      </option>
+                    ))}
+                    <option value="__custom__">+ Enter Custom Model Name...</option>
+                  </select>
+                )}
               </div>
 
               {/* API Key Input (Encrypted / Masked) */}

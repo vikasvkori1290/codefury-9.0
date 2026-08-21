@@ -2,7 +2,6 @@ import mongoose from "mongoose";
 
 const modelListingSchema = new mongoose.Schema(
   {
-    legacyId: { type: String, default: null, unique: true, sparse: true, index: true },
     name: {
       type: String,
       required: [true, "Model name is required"],

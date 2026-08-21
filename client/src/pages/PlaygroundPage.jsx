@@ -64,8 +64,8 @@ export default function PlaygroundPage() {
   const [copiedIndexA, setCopiedIndexA] = useState(null);
   const [copiedIndexB, setCopiedIndexB] = useState(null);
 
-  const messagesEndRefA = useRef(null);
-  const messagesEndRefB = useRef(null);
+  const messagesContainerRefA = useRef(null);
+  const messagesContainerRefB = useRef(null);
 
   // Fetch evaluated models live from MongoDB Atlas
   useEffect(() => {
@@ -166,10 +166,14 @@ export default function PlaygroundPage() {
     ]);
   }, [activeModelB.id]);
 
-  // Scroll to bottom
+  // Auto-scroll chat boxes internally without moving the browser window
   useEffect(() => {
-    messagesEndRefA.current?.scrollIntoView({ behavior: "smooth" });
-    messagesEndRefB.current?.scrollIntoView({ behavior: "smooth" });
+    if (messagesContainerRefA.current && messagesA.length > 1) {
+      messagesContainerRefA.current.scrollTop = messagesContainerRefA.current.scrollHeight;
+    }
+    if (messagesContainerRefB.current && messagesB.length > 1) {
+      messagesContainerRefB.current.scrollTop = messagesContainerRefB.current.scrollHeight;
+    }
   }, [messagesA, messagesB, loadingA, loadingB]);
 
   const saveApiKey = () => {
@@ -577,7 +581,10 @@ export default function PlaygroundPage() {
                 )}
 
                 {/* Model A Messages Box */}
-                <div className="bg-white border border-[#e4e4e7] shadow-xs min-h-[460px] max-h-[560px] overflow-y-auto p-4 space-y-4 flex-1">
+                <div
+                  ref={messagesContainerRefA}
+                  className="bg-white border border-[#e4e4e7] shadow-xs min-h-[460px] max-h-[560px] overflow-y-auto p-4 space-y-4 flex-1"
+                >
                   {messagesA.map((msg, idx) => {
                     const isUser = msg.role === "user";
                     return (
@@ -639,8 +646,6 @@ export default function PlaygroundPage() {
                       </div>
                     </div>
                   )}
-
-                  <div ref={messagesEndRefA} />
                 </div>
               </div>
 
@@ -694,7 +699,10 @@ export default function PlaygroundPage() {
                   </div>
 
                   {/* Model B Messages Box */}
-                  <div className="bg-white border border-[#e4e4e7] shadow-xs min-h-[460px] max-h-[560px] overflow-y-auto p-4 space-y-4 flex-1">
+                  <div
+                    ref={messagesContainerRefB}
+                    className="bg-white border border-[#e4e4e7] shadow-xs min-h-[460px] max-h-[560px] overflow-y-auto p-4 space-y-4 flex-1"
+                  >
                     {messagesB.map((msg, idx) => {
                       const isUser = msg.role === "user";
                       return (
@@ -756,8 +764,6 @@ export default function PlaygroundPage() {
                         </div>
                       </div>
                     )}
-
-                    <div ref={messagesEndRefB} />
                   </div>
                 </div>
               )}
