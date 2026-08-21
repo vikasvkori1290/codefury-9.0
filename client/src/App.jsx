@@ -3,6 +3,7 @@ import { Toaster } from "react-hot-toast";
 import { AuthProvider } from "./context/AuthContext";
 import Navbar from "./components/Navbar";
 import Home from "./pages/Home";
+import About from "./pages/About";
 import AuthPage from "./pages/AuthPage";
 
 function AppLayout() {
@@ -10,10 +11,11 @@ function AppLayout() {
   const isAuthPage = location.pathname === "/login" || location.pathname === "/register";
 
   return (
-    <div className="min-h-screen bg-dark-900">
+    <div className="min-h-screen bg-white text-zinc-900">
       {!isAuthPage && <Navbar />}
       <Routes>
         <Route path="/" element={<Home />} />
+        <Route path="/about" element={<About />} />
         <Route path="/login" element={<AuthPage />} />
         <Route path="/register" element={<AuthPage />} />
       </Routes>
@@ -30,9 +32,9 @@ function App() {
           position="top-right"
           toastOptions={{
             style: {
-              background: "#25262B",
+              background: "#18181b",
               color: "#fff",
-              border: "1px solid #373A40",
+              border: "1px solid #27272a",
             },
           }}
         />
@@ -42,4 +44,3 @@ function App() {
 }
 
 export default App;
-

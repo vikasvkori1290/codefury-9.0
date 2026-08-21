@@ -1,40 +1,264 @@
+import React from "react";
 import { Link } from "react-router-dom";
-import { useAuth } from "../context/AuthContext";
+import {
+  HiOutlineBolt,
+  HiOutlineCurrencyDollar,
+  HiOutlineCube,
+  HiOutlineCpuChip,
+  HiOutlineSparkles,
+  HiOutlineArrowDown,
+} from "react-icons/hi2";
+import MetricCard from "../components/atoms/MetricCard";
+import ModelBadge from "../components/atoms/ModelBadge";
+import WorkflowContainer from "../components/workflow/WorkflowContainer";
+
+const FEATURED_MODELS = [
+  {
+    id: "deepseek-coder",
+    name: "DeepSeek-Coder-V2-Inst",
+    creator: "@aletheia_labs",
+    type: "creator",
+    domain: "Polyglot Coding",
+    latency: "162ms",
+    cost: "$0.14/1M",
+    mmlu: "90.2%",
+    downloads: "42.8k",
+  },
+  {
+    id: "qwen-reasoner",
+    name: "Qwen2.5-Math-72B-Lora",
+    creator: "@math_nexus",
+    type: "fine-tuned",
+    domain: "Complex Math & Logic",
+    latency: "230ms",
+    cost: "$0.45/1M",
+    mmlu: "94.6%",
+    downloads: "18.1k",
+  },
+  {
+    id: "med-llama",
+    name: "BioMistral-Clinical-7B",
+    creator: "@health_ai",
+    type: "quantized",
+    domain: "Medical Diagnosis",
+    latency: "88ms",
+    cost: "$0.08/1M",
+    mmlu: "88.7%",
+    downloads: "61.3k",
+  },
+  {
+    id: "finance-bert",
+    name: "FinGPT-Sentiment-v4",
+    creator: "@alpha_quant",
+    type: "creator",
+    domain: "SEC & Earnings Parsing",
+    latency: "64ms",
+    cost: "$0.05/1M",
+    mmlu: "92.1%",
+    downloads: "34.0k",
+  },
+];
 
 const Home = () => {
-  const { user } = useAuth();
+  const scrollToAbout = () => {
+    const el = document.getElementById("about");
+    if (el) el.scrollIntoView({ behavior: "smooth" });
+  };
 
   return (
-    <div className="min-h-[calc(100vh-65px)] bg-black text-white flex flex-col items-center justify-center p-6 text-center">
-      <h1 className="text-4xl font-bold mb-4">
-        CodeFury
-      </h1>
-      
-      {user ? (
-        <p className="text-gray-400 text-lg">
-          Welcome back, <span className="text-white font-semibold">{user.name}</span>!
-        </p>
-      ) : (
-        <div>
-          <p className="text-gray-400 text-lg mb-6">
-            Welcome to CodeFury.
+    <div className="min-h-screen bg-white text-zinc-900 font-sans selection:bg-[#ea580c] selection:text-white">
+      {/* ==================== HERO SECTION ==================== */}
+      <section className="min-h-[75vh] flex flex-col justify-center items-center text-center px-4 sm:px-8 max-w-5xl mx-auto py-16 space-y-8">
+        {/* Top Tagline */}
+        <div className="inline-flex items-center gap-2 px-3 py-1 bg-zinc-100 border border-zinc-200 text-xs font-mono text-zinc-700">
+          <HiOutlineSparkles className="text-[#ea580c]" />
+          <span>ModelHub 9.0 • AI Marketplace & Benchmarking Engine</span>
+        </div>
+
+        {/* Hero Title */}
+        <div className="max-w-3xl space-y-4">
+          <h1 className="text-4xl sm:text-6xl font-bold tracking-tight text-zinc-950 font-sans leading-tight">
+            See what <span className="text-[#ea580c]">specialized models</span> can do on your data.
+          </h1>
+          <p className="text-base sm:text-lg text-zinc-600 font-sans leading-relaxed max-w-2xl mx-auto">
+            From latency to task completion, ModelHub powers creator fine-tuned models that{" "}
+            <span className="underline decoration-zinc-400 decoration-1 underline-offset-4">
+              reliably
+            </span>{" "}
+            outperform frontier LLMs.
           </p>
-          <div className="flex gap-4 justify-center">
-            <Link
-              to="/login"
-              className="px-5 py-2 rounded bg-white text-black font-semibold text-sm hover:bg-gray-200 transition-colors"
-            >
-              Sign In
-            </Link>
-            <Link
-              to="/register"
-              className="px-5 py-2 rounded border border-white/20 text-white font-semibold text-sm hover:bg-white/10 transition-colors"
-            >
-              Register
-            </Link>
+        </div>
+
+        {/* CTA Buttons */}
+        <div className="flex flex-col sm:flex-row items-center justify-center gap-3 pt-2">
+          <button
+            onClick={scrollToAbout}
+            className="w-full sm:w-auto bg-[#ea580c] hover:bg-[#c2410c] text-white font-bold text-xs px-6 py-3 rounded-none transition-all flex items-center justify-center gap-2 shadow-xs cursor-pointer active:scale-95"
+          >
+            <span>Explore About & How It Works</span>
+            <HiOutlineArrowDown className="text-sm" />
+          </button>
+
+          <Link
+            to="/register"
+            className="w-full sm:w-auto bg-black hover:bg-zinc-800 text-white font-bold text-xs px-6 py-3 rounded-none transition-all flex items-center justify-center gap-2 shadow-xs cursor-pointer active:scale-95"
+          >
+            <HiOutlineCube className="text-sm text-zinc-400" />
+            <span>Get Started Free</span>
+          </Link>
+        </div>
+      </section>
+
+      {/* ==================== ABOUT SECTION (ALL IN ONE PAGE) ==================== */}
+      <div id="about" className="border-t border-[#e4e4e7] bg-[#fbfbfb]">
+        {/* Mission Statement */}
+        <section className="py-14 px-4 sm:px-8 max-w-6xl mx-auto space-y-6">
+          <div className="max-w-3xl space-y-3">
+            <span className="text-xs font-mono font-bold text-[#ea580c] uppercase tracking-wider">
+              About ModelHub
+            </span>
+            <h2 className="text-3xl sm:text-4xl font-bold tracking-tight text-zinc-950 font-sans">
+              The Marketplace & Benchmarking Engine for <span className="text-[#ea580c]">Specialized AI</span>.
+            </h2>
+            <p className="text-sm sm:text-base text-zinc-600 font-sans leading-relaxed">
+              ModelHub empowers developers to discover, benchmark on their exact proprietary data, and deploy creator-built fine-tuned LLMs that reliably outperform generic frontier APIs.
+            </p>
+          </div>
+
+          {/* Metric Cards Row */}
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-2">
+            <MetricCard
+              label="Avg Speedup"
+              value="3.8x"
+              delta="+280%"
+              deltaType="positive"
+              subtext="vs Frontier APIs"
+              icon={<HiOutlineBolt className="text-[#ea580c]" />}
+            />
+            <MetricCard
+              label="Cost Reduction"
+              value="78%"
+              delta="-78% cost"
+              deltaType="positive"
+              subtext="Per 1M tokens"
+              icon={<HiOutlineCurrencyDollar className="text-emerald-600" />}
+            />
+            <MetricCard
+              label="Creator Models"
+              value="340+"
+              delta="Verified"
+              deltaType="neutral"
+              subtext="Fine-tuned weights"
+              icon={<HiOutlineCube className="text-blue-500" />}
+            />
+            <MetricCard
+              label="Live Evals Run"
+              value="1.2M"
+              delta="Real-time"
+              deltaType="neutral"
+              subtext="P99: 142ms"
+              icon={<HiOutlineCpuChip className="text-purple-500" />}
+            />
+          </div>
+        </section>
+
+        {/* How It Works Workflow Container */}
+        <section className="py-10 px-4 sm:px-8 max-w-6xl mx-auto border-t border-[#e4e4e7] space-y-4">
+          <div>
+            <span className="text-xs font-mono font-bold text-[#ea580c] uppercase tracking-wider">
+              Workflow Overview
+            </span>
+            <h3 className="text-2xl sm:text-3xl font-bold tracking-tight text-zinc-900 mt-0.5">
+              How It Works
+            </h3>
+            <p className="text-sm text-zinc-500 mt-0.5">
+              Benchmark custom creator models against frontier APIs in 3 simple steps.
+            </p>
+          </div>
+
+          <WorkflowContainer />
+        </section>
+
+        {/* High-Performance Creator Models Catalog */}
+        <section className="py-14 px-4 sm:px-8 max-w-6xl mx-auto border-t border-[#e4e4e7] space-y-6">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-[#e4e4e7] pb-4">
+            <div>
+              <span className="text-[11px] font-mono text-[#ea580c] font-bold uppercase tracking-wider">
+                Explore Catalog
+              </span>
+              <h3 className="text-xl sm:text-2xl font-bold text-zinc-900 tracking-tight mt-0.5">
+                High-Performance Creator Models
+              </h3>
+            </div>
+            <span className="text-xs text-zinc-500 font-mono">
+              340+ domain-specific models available on inference endpoints
+            </span>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            {FEATURED_MODELS.map((model) => (
+              <div
+                key={model.id}
+                className="bg-white border border-[#e4e4e7] hover:border-zinc-400 p-5 rounded-none flex flex-col justify-between transition-all group shadow-xs"
+              >
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between">
+                    <ModelBadge type={model.type} size="sm">{model.type}</ModelBadge>
+                    <span className="text-[10px] font-mono text-zinc-500">{model.downloads} runs</span>
+                  </div>
+
+                  <div>
+                    <h4 className="text-sm font-bold text-zinc-900 group-hover:text-[#ea580c] transition-colors truncate">
+                      {model.name}
+                    </h4>
+                    <p className="text-[11px] font-mono text-zinc-500 mt-0.5">{model.creator}</p>
+                  </div>
+
+                  <div className="text-xs text-zinc-600 bg-[#fafafa] p-2.5 rounded-none border border-[#e4e4e7]">
+                    <span className="text-zinc-400 block text-[10px] uppercase font-mono font-medium">Domain</span>
+                    {model.domain}
+                  </div>
+                </div>
+
+                <div className="mt-4 pt-3 border-t border-[#f4f4f5] flex items-center justify-between font-mono text-xs">
+                  <div>
+                    <span className="text-[10px] text-zinc-400 block">LATENCY</span>
+                    <span className="text-emerald-700 font-bold">{model.latency}</span>
+                  </div>
+                  <div>
+                    <span className="text-[10px] text-zinc-400 block">COST/1M</span>
+                    <span className="text-zinc-800 font-medium">{model.cost}</span>
+                  </div>
+                  <div>
+                    <span className="text-[10px] text-zinc-400 block">MMLU</span>
+                    <span className="text-zinc-900 font-bold">{model.mmlu}</span>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </section>
+      </div>
+
+      {/* ==================== CLEAN FOOTER ==================== */}
+      <footer className="border-t border-[#e4e4e7] bg-[#fafafa] py-8 px-4 sm:px-8 text-xs text-zinc-500 font-sans">
+        <div className="max-w-6xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
+          <div className="flex items-center gap-2">
+            <div className="w-5 h-5 rounded-none bg-[#ea580c] text-white flex items-center justify-center font-bold text-[10px] font-mono">
+              M
+            </div>
+            <span className="text-zinc-900 font-bold">ModelHub</span>
+            <span className="text-zinc-400">© 2026</span>
+          </div>
+
+          <div className="flex items-center gap-6 text-zinc-600 font-medium">
+            <button onClick={scrollToAbout} className="hover:text-black transition-colors cursor-pointer">About</button>
+            <a href="https://github.com/vikasvkori1290/codefury-9.0" target="_blank" rel="noreferrer" className="hover:text-black transition-colors">Docs</a>
+            <Link to="/login" className="hover:text-black transition-colors">Log in</Link>
+            <Link to="/register" className="text-[#ea580c] font-semibold hover:underline">Sign up</Link>
           </div>
         </div>
-      )}
+      </footer>
     </div>
   );
 };
