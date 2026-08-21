@@ -6,7 +6,7 @@ import jobStore from "../services/jobStore.js";
 import { runCommand } from "../services/command.service.js";
 
 /**
- * @desc Register a new AI Model (JSON or Modelfile/GGUF upload) and trigger benchmark job
+ * @desc Register a new AI Model (JSON, Modelfile/GGUF upload, or API Key) and trigger benchmark job
  * @route POST /api/models/register
  * @access Public
  */
@@ -20,6 +20,9 @@ export const registerModel = async (req, res, next) => {
       pricing,
       pricingPer1kTokens,
       provider = "ollama_local",
+      apiKey,
+      apiProvider,
+      endpoint,
     } = req.body;
 
     const finalModelName = modelName || name;
@@ -44,6 +47,8 @@ export const registerModel = async (req, res, next) => {
       } catch (ollamaErr) {
         console.warn("Ollama create unavailable or failed:", ollamaErr.message);
       }
+    } else if (apiKey || provider === "custom_api") {
+      finalProvider = "custom_api";
     }
 
     const isMongooseConnected = mongoose.connection.readyState === 1;
@@ -68,7 +73,7 @@ export const registerModel = async (req, res, next) => {
           modelName: modelListing.name,
           status: "queued",
           progress: 0,
-          logs: [`[${new Date().toISOString()}] Benchmark job queued for model '${modelListing.name}'.`],
+          logs: [`[${new Date().toISOString()}] Benchmark job queued for model '${modelListing.name}' via ${finalProvider}.`],
         });
 
         modelListing.latestBenchmark = benchmarkJob._id;
@@ -97,7 +102,7 @@ export const registerModel = async (req, res, next) => {
         modelName: modelListing.name,
         status: "queued",
         progress: 0,
-        logs: [`[${new Date().toISOString()}] Benchmark job queued for model '${modelListing.name}'.`],
+        logs: [`[${new Date().toISOString()}] Benchmark job queued for model '${modelListing.name}' via ${finalProvider}.`],
         createdAt: new Date().toISOString(),
       };
     }

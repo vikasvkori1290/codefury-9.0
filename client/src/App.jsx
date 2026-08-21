@@ -5,7 +5,7 @@ import Navbar from "./components/Navbar";
 import Home from "./pages/Home";
 import About from "./pages/About";
 import TestPage from "./pages/TestPage";
-import CreatorBenchPage from "./pages/CreatorBenchPage";
+import LiveBenchPage from "./pages/LiveBenchPage";
 import LiveJobMonitorPage from "./pages/LiveJobMonitorPage";
 import MarketplacePage from "./pages/MarketplacePage";
 import ModelDetailPage from "./pages/ModelDetailPage";
@@ -16,14 +16,18 @@ function AppLayout() {
   const isAuthPage = location.pathname === "/login" || location.pathname === "/register";
 
   return (
-    <div className="min-h-screen bg-white text-zinc-900">
+    <div className="min-h-screen bg-[#fafafa] text-zinc-900">
       {!isAuthPage && <Navbar />}
       <Routes>
         <Route path="/" element={<Home />} />
+        {/* Test Bench Page (/test) contains the Creator Register & Benchmark Component */}
         <Route path="/test" element={<TestPage />} />
-        <Route path="/live-bench" element={<CreatorBenchPage />} />
-        <Route path="/creator/bench" element={<CreatorBenchPage />} />
+        <Route path="/creator/bench" element={<TestPage />} />
+        {/* Live Bench Page (/live-bench) is a dedicated workspace */}
+        <Route path="/live-bench" element={<LiveBenchPage />} />
+        {/* Benchmark Telemetry Monitor */}
         <Route path="/creator/benchmark/:jobId" element={<LiveJobMonitorPage />} />
+        {/* AI Models / Marketplace Explorer */}
         <Route path="/marketplace" element={<MarketplacePage />} />
         <Route path="/models" element={<MarketplacePage />} />
         <Route path="/models/:id" element={<ModelDetailPage />} />
