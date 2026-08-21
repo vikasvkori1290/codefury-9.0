@@ -2,7 +2,8 @@ import { spawn } from "child_process";
 import mongoose from "mongoose";
 import ModelListing from "../models/ModelListing.model.js";
 import BenchmarkJob from "../models/BenchmarkJob.model.js";
-import { addBenchmarkJob, memoryStore } from "../config/queue.js";
+import { addBenchmarkJob } from "../config/queue.js";
+import jobStore from "../services/jobStore.js";
 
 /**
  * @desc Register a new AI Model (JSON or Modelfile/GGUF upload) and trigger benchmark job
@@ -33,7 +34,6 @@ export const registerModel = async (req, res, next) => {
     let finalProvider = provider;
     let uploadedFilePath = null;
 
-    // Handle file upload and async ollama create trigger
     if (uploadedFile) {
       finalProvider = "modelfile_upload";
       uploadedFilePath = uploadedFile.path;
@@ -89,7 +89,6 @@ export const registerModel = async (req, res, next) => {
     }
 
     if (!modelListing || !benchmarkJob) {
-      // In-Memory Fallback object
       modelListing = {
         _id: fallbackId,
         name: finalModelName.trim(),
@@ -111,15 +110,16 @@ export const registerModel = async (req, res, next) => {
         logs: [`[${new Date().toISOString()}] Benchmark job queued for model '${modelListing.name}'.`],
         createdAt: new Date().toISOString(),
       };
-
-      memoryStore.models.set(fallbackId, modelListing);
-      memoryStore.jobs.set(jobFallbackId, benchmarkJob);
     }
 
     const jobIdStr = (benchmarkJob._id || jobFallbackId).toString();
     const modelIdStr = (modelListing._id || fallbackId).toString();
 
-    // 3. Dispatch to BullMQ Queue / Runner
+    // Persist to jobStore
+    jobStore.setJob(jobIdStr, benchmarkJob);
+    jobStore.setModel(modelIdStr, modelListing);
+
+    // Dispatch to BullMQ Queue / Promptfoo Runner
     await addBenchmarkJob({
       jobId: jobIdStr,
       modelName: modelListing.name,
@@ -148,12 +148,12 @@ export const getBenchmarkStatus = async (req, res, next) => {
     const isMongooseConnected = mongoose.connection.readyState === 1;
 
     let job = null;
-    if (isMongooseConnected) {
+    if (isMongooseConnected && mongoose.Types.ObjectId.isValid(jobId)) {
       job = await BenchmarkJob.findById(jobId).populate("modelListingId").catch(() => null);
     }
 
     if (!job) {
-      job = memoryStore.jobs.get(jobId);
+      job = jobStore.getJob(jobId);
     }
 
     if (!job) {
@@ -198,7 +198,7 @@ export const listModels = async (req, res, next) => {
     }
 
     if (models.length === 0) {
-      models = Array.from(memoryStore.models.values());
+      models = jobStore.getAllModels();
     }
 
     return res.status(200).json({

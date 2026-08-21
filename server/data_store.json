@@ -1,0 +1,226 @@
+{
+  "models": {
+    "mem_1787325043215_gl2g5lmyq": {
+      "_id": "mem_1787325043215_gl2g5lmyq",
+      "name": "qwen2.5:7b-instruct-q4",
+      "creator": "@ModelMaster",
+      "provider": "ollama_local",
+      "category": "Coding",
+      "pricingPer1kTokens": 0.0002,
+      "uploadedFilePath": null,
+      "latestBenchmark": "job_1787325043215_17a2dh3m9",
+      "createdAt": "2026-08-21T15:10:43.215Z"
+    },
+    "mem_1787325065777_d8qwnitum": {
+      "_id": "mem_1787325065777_d8qwnitum",
+      "name": "llama-3.2:3b-instruct",
+      "creator": "@AILabs",
+      "provider": "ollama_local",
+      "category": "General",
+      "pricingPer1kTokens": 0.00015,
+      "uploadedFilePath": null,
+      "latestBenchmark": "job_1787325065777_50xd6ifxv",
+      "createdAt": "2026-08-21T15:11:05.777Z"
+    },
+    "mem_1787325091632_olon65m6q": {
+      "_id": "mem_1787325091632_olon65m6q",
+      "name": "codellama:7b-instruct",
+      "creator": "@CodeFuryDev",
+      "provider": "ollama_local",
+      "category": "Code",
+      "pricingPer1kTokens": 0.00016,
+      "uploadedFilePath": null,
+      "latestBenchmark": "job_1787325091632_zsvqwh3wn",
+      "createdAt": "2026-08-21T15:11:31.632Z"
+    },
+    "mem_1787325120357_fy513h173": {
+      "_id": "mem_1787325120357_fy513h173",
+      "name": "deepseek-coder:6.7b",
+      "creator": "@DeepSeekAI",
+      "provider": "ollama_local",
+      "category": "Coding",
+      "pricingPer1kTokens": 0.00014,
+      "uploadedFilePath": null,
+      "latestBenchmark": "job_1787325120357_724nlehpd",
+      "createdAt": "2026-08-21T15:12:00.357Z"
+    },
+    "mem_1787325150393_2vlmfw5g5": {
+      "_id": "mem_1787325150393_2vlmfw5g5",
+      "name": "starcoder2:3b",
+      "creator": "@BigCode",
+      "provider": "ollama_local",
+      "category": "Coding",
+      "pricingPer1kTokens": 0.00012,
+      "uploadedFilePath": null,
+      "latestBenchmark": "job_1787325150393_4n23dszwl",
+      "createdAt": "2026-08-21T15:12:30.393Z"
+    },
+    "mem_1787325172567_8gvsdj1pt": {
+      "_id": "mem_1787325172567_8gvsdj1pt",
+      "name": "phi-3.5:mini-instruct",
+      "creator": "@MicrosoftAI",
+      "provider": "ollama_local",
+      "category": "Reasoning",
+      "pricingPer1kTokens": 0.0001,
+      "uploadedFilePath": null,
+      "latestBenchmark": "job_1787325172567_zjl7zvk08",
+      "createdAt": "2026-08-21T15:12:52.567Z"
+    },
+    "mem_1787325208149_phqqo84eg": {
+      "_id": "mem_1787325208149_phqqo84eg",
+      "name": "llama-3.1:8b-instruct",
+      "creator": "@MetaCreator",
+      "provider": "ollama_local",
+      "category": "Reasoning",
+      "pricingPer1kTokens": 0.00015,
+      "uploadedFilePath": null,
+      "latestBenchmark": "job_1787325208149_kcu5wuo8f",
+      "createdAt": "2026-08-21T15:13:28.149Z"
+    },
+    "mem_1787325230083_oe3080d5l": {
+      "_id": "mem_1787325230083_oe3080d5l",
+      "name": "gemma-2:9b-it",
+      "creator": "@GoogleOSS",
+      "provider": "ollama_local",
+      "category": "General",
+      "pricingPer1kTokens": 0.00015,
+      "uploadedFilePath": null,
+      "latestBenchmark": "job_1787325230083_20kyr0img",
+      "createdAt": "2026-08-21T15:13:50.083Z"
+    },
+    "mem_1787325268777_krug3dw42": {
+      "_id": "mem_1787325268777_krug3dw42",
+      "name": "llama-3.1:8b-instruct",
+      "creator": "@MetaCreator",
+      "provider": "ollama_local",
+      "category": "Reasoning",
+      "pricingPer1kTokens": 0.00015,
+      "uploadedFilePath": null,
+      "latestBenchmark": "job_1787325268777_usi7rsioi",
+      "createdAt": "2026-08-21T15:14:28.777Z"
+    }
+  },
+  "jobs": {
+    "job_1787325043215_17a2dh3m9": {
+      "_id": "job_1787325043215_17a2dh3m9",
+      "modelListingId": "mem_1787325043215_gl2g5lmyq",
+      "modelName": "qwen2.5:7b-instruct-q4",
+      "status": "running",
+      "progress": 45,
+      "logs": [
+        "[2026-08-21T15:10:43.215Z] Benchmark job queued for model 'qwen2.5:7b-instruct-q4'.",
+        "[2026-08-21T15:10:43.224Z] Initializing Promptfoo evaluation worker for 'qwen2.5:7b-instruct-q4'...",
+        "[2026-08-21T15:10:43.225Z] Generating 35 test cases (Reasoning, Knowledge, Coding, Instruction, Safety)...",
+        "[2026-08-21T15:10:43.231Z] Spawning 'npx promptfoo eval' against ollama:chat:qwen2.5:7b-instruct-q4..."
+      ],
+      "createdAt": "2026-08-21T15:10:43.215Z"
+    },
+    "job_1787325065777_50xd6ifxv": {
+      "_id": "job_1787325065777_50xd6ifxv",
+      "modelListingId": "mem_1787325065777_d8qwnitum",
+      "modelName": "llama-3.2:3b-instruct",
+      "status": "running",
+      "progress": 60,
+      "logs": [
+        "[2026-08-21T15:11:05.778Z] Benchmark job queued for model 'llama-3.2:3b-instruct'.",
+        "[2026-08-21T15:11:05.788Z] Initializing Promptfoo evaluation worker for 'llama-3.2:3b-instruct'...",
+        "[2026-08-21T15:11:05.789Z] Generating 35 test cases (Reasoning, Knowledge, Coding, Instruction, Safety)...",
+        "[2026-08-21T15:11:05.795Z] Spawning 'npx promptfoo eval' against ollama:chat:llama-3.2:3b-instruct..."
+      ],
+      "createdAt": "2026-08-21T15:11:05.778Z"
+    },
+    "job_1787325091632_zsvqwh3wn": {
+      "_id": "job_1787325091632_zsvqwh3wn",
+      "modelListingId": "mem_1787325091632_olon65m6q",
+      "modelName": "codellama:7b-instruct",
+      "status": "running",
+      "progress": 60,
+      "logs": [
+        "[2026-08-21T15:11:31.633Z] Benchmark job queued for model 'codellama:7b-instruct'.",
+        "[2026-08-21T15:11:31.653Z] Initializing Promptfoo evaluation worker for 'codellama:7b-instruct'...",
+        "[2026-08-21T15:11:31.655Z] Generating 35 test cases (Reasoning, Knowledge, Coding, Instruction, Safety)...",
+        "[2026-08-21T15:11:31.663Z] Spawning 'promptfoo eval' against ollama:chat:codellama:7b-instruct..."
+      ],
+      "createdAt": "2026-08-21T15:11:31.633Z"
+    },
+    "job_1787325120357_724nlehpd": {
+      "_id": "job_1787325120357_724nlehpd",
+      "modelListingId": "mem_1787325120357_fy513h173",
+      "modelName": "deepseek-coder:6.7b",
+      "status": "running",
+      "progress": 60,
+      "logs": [
+        "[2026-08-21T15:12:00.358Z] Benchmark job queued for model 'deepseek-coder:6.7b'.",
+        "[2026-08-21T15:12:00.374Z] Initializing Promptfoo evaluation worker for 'deepseek-coder:6.7b'...",
+        "[2026-08-21T15:12:00.376Z] Generating 35 test cases (Reasoning, Knowledge, Coding, Instruction, Safety)...",
+        "[2026-08-21T15:12:00.383Z] Spawning 'promptfoo eval' against ollama:chat:deepseek-coder:6.7b..."
+      ],
+      "createdAt": "2026-08-21T15:12:00.358Z"
+    },
+    "job_1787325150393_4n23dszwl": {
+      "_id": "job_1787325150393_4n23dszwl",
+      "modelListingId": "mem_1787325150393_2vlmfw5g5",
+      "modelName": "starcoder2:3b",
+      "status": "running",
+      "progress": 65,
+      "logs": [
+        "[2026-08-21T15:12:30.394Z] Benchmark job queued for model 'starcoder2:3b'.",
+        "[2026-08-21T15:12:30.406Z] Initializing Promptfoo evaluation worker for 'starcoder2:3b'...",
+        "[2026-08-21T15:12:30.409Z] Generating 35 test cases (Reasoning, Knowledge, Coding, Instruction, Safety)...",
+        "[2026-08-21T15:12:30.414Z] Spawning 'promptfoo eval' against ollama:chat:starcoder2:3b..."
+      ],
+      "createdAt": "2026-08-21T15:12:30.394Z"
+    },
+    "job_1787325172567_zjl7zvk08": {
+      "_id": "job_1787325172567_zjl7zvk08",
+      "modelListingId": "mem_1787325172567_8gvsdj1pt",
+      "modelName": "phi-3.5:mini-instruct",
+      "status": "running",
+      "progress": 65,
+      "logs": [
+        "[2026-08-21T15:12:52.568Z] Benchmark job queued for model 'phi-3.5:mini-instruct'.",
+        "[2026-08-21T15:12:52.580Z] Initializing Promptfoo evaluation worker for 'phi-3.5:mini-instruct'...",
+        "[2026-08-21T15:12:52.583Z] Generating 35 test cases (Reasoning, Knowledge, Coding, Instruction, Safety)...",
+        "[2026-08-21T15:12:52.587Z] Spawning 'promptfoo eval' against ollama:chat:phi-3.5:mini-instruct..."
+      ],
+      "createdAt": "2026-08-21T15:12:52.568Z"
+    },
+    "job_1787325208149_kcu5wuo8f": {
+      "_id": "job_1787325208149_kcu5wuo8f",
+      "modelListingId": "mem_1787325208149_phqqo84eg",
+      "modelName": "llama-3.1:8b-instruct",
+      "status": "running",
+      "progress": 15,
+      "logs": [
+        "[2026-08-21T15:13:28.151Z] Benchmark job queued for model 'llama-3.1:8b-instruct'.",
+        "[2026-08-21T15:13:28.179Z] Initializing Promptfoo evaluation worker for 'llama-3.1:8b-instruct'..."
+      ],
+      "createdAt": "2026-08-21T15:13:28.151Z"
+    },
+    "job_1787325230083_20kyr0img": {
+      "_id": "job_1787325230083_20kyr0img",
+      "modelListingId": "mem_1787325230083_oe3080d5l",
+      "modelName": "gemma-2:9b-it",
+      "status": "running",
+      "progress": 15,
+      "logs": [
+        "[2026-08-21T15:13:50.084Z] Benchmark job queued for model 'gemma-2:9b-it'.",
+        "[2026-08-21T15:13:50.142Z] Initializing Promptfoo evaluation worker for 'gemma-2:9b-it'..."
+      ],
+      "createdAt": "2026-08-21T15:13:50.084Z"
+    },
+    "job_1787325268777_usi7rsioi": {
+      "_id": "job_1787325268777_usi7rsioi",
+      "modelListingId": "mem_1787325268777_krug3dw42",
+      "modelName": "llama-3.1:8b-instruct",
+      "status": "running",
+      "progress": 35,
+      "logs": [
+        "[2026-08-21T15:14:28.778Z] Benchmark job queued for model 'llama-3.1:8b-instruct'.",
+        "[2026-08-21T15:14:28.837Z] Initializing Promptfoo evaluation worker for 'llama-3.1:8b-instruct'...",
+        "[2026-08-21T15:14:29.148Z] Generating 35 test cases (Reasoning, Knowledge, Coding, Instruction, Safety)..."
+      ],
+      "createdAt": "2026-08-21T15:14:28.778Z"
+    }
+  }
+}

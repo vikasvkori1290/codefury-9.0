@@ -5,8 +5,10 @@ import Navbar from "./components/Navbar";
 import Home from "./pages/Home";
 import About from "./pages/About";
 import TestPage from "./pages/TestPage";
-import LiveBenchPage from "./pages/LiveBenchPage";
-import ModelsPage from "./pages/ModelsPage";
+import CreatorBenchPage from "./pages/CreatorBenchPage";
+import LiveJobMonitorPage from "./pages/LiveJobMonitorPage";
+import MarketplacePage from "./pages/MarketplacePage";
+import ModelDetailPage from "./pages/ModelDetailPage";
 import AuthPage from "./pages/AuthPage";
 
 function AppLayout() {
@@ -19,8 +21,12 @@ function AppLayout() {
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/test" element={<TestPage />} />
-        <Route path="/live-bench" element={<LiveBenchPage />} />
-        <Route path="/models" element={<ModelsPage />} />
+        <Route path="/live-bench" element={<CreatorBenchPage />} />
+        <Route path="/creator/bench" element={<CreatorBenchPage />} />
+        <Route path="/creator/benchmark/:jobId" element={<LiveJobMonitorPage />} />
+        <Route path="/marketplace" element={<MarketplacePage />} />
+        <Route path="/models" element={<MarketplacePage />} />
+        <Route path="/models/:id" element={<ModelDetailPage />} />
         <Route path="/about" element={<About />} />
         <Route path="/login" element={<AuthPage />} />
         <Route path="/register" element={<AuthPage />} />

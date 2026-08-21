@@ -1,5 +1,9 @@
 import mongoose from "mongoose";
 
+// Disable indefinite command buffering so queries fail fast when Atlas is disconnected
+mongoose.set("bufferCommands", false);
+mongoose.set("bufferTimeoutMS", 2000);
+
 let isDbConnected = false;
 
 const connectDB = async () => {
@@ -9,13 +13,13 @@ const connectDB = async () => {
       return;
     }
     const conn = await mongoose.connect(process.env.MONGO_URI, {
-      serverSelectionTimeoutMS: 4000,
+      serverSelectionTimeoutMS: 3000,
     });
     isDbConnected = true;
     console.log(`✅ MongoDB Connected: ${conn.connection.host}`);
   } catch (error) {
     isDbConnected = false;
-    console.warn(`⚠️ MongoDB Atlas Notice: ${error.message}. Running with in-memory persistence fallback.`);
+    console.warn(`⚠️ MongoDB Atlas Notice: Running with file-backed persistence fallback.`);
   }
 };
 
