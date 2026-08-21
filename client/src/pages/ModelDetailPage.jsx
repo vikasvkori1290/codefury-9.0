@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useParams, Link } from "react-router-dom";
 import {
   HiOutlineArrowLeft,
@@ -25,17 +25,26 @@ import {
   Tooltip,
   Cell,
 } from "recharts";
-import { MARKETPLACE_MODELS, normalizeModel } from "./MarketplacePage";
+import { normalizeModel } from "./MarketplacePage";
 import DeployModal from "../components/modals/DeployModal";
+import API from "../api/axios";
 
 export const ModelDetailPage = () => {
   const { id } = useParams();
+  const [rawModel, setRawModel] = useState(null);
+  const [isLoading, setIsLoading] = useState(true);
   const [activeChartTab, setActiveChartTab] = useState("radar"); // 'radar' | 'bar'
   const [isDeployModalOpen, setIsDeployModalOpen] = useState(false);
 
-  const rawModel =
-    MARKETPLACE_MODELS.find((m) => m.id === id || m.name === id) ||
-    MARKETPLACE_MODELS[0];
+  useEffect(() => {
+    API.get("/models")
+      .then(({ data }) => setRawModel((data.models || []).find((item) => String(item._id || item.id || item.name) === id || item.name === id) || null))
+      .catch(() => setRawModel(null))
+      .finally(() => setIsLoading(false));
+  }, [id]);
+
+  if (isLoading) return <div className="min-h-screen bg-[#fafafa] p-12 text-center font-mono text-xs text-zinc-500">Loading model data from MongoDB...</div>;
+  if (!rawModel) return <div className="min-h-screen bg-[#fafafa] p-12 text-center font-mono text-xs text-zinc-500">Model not found in MongoDB. <Link to="/models" className="text-[#ea580c] underline">Return to marketplace</Link>.</div>;
 
   const model = normalizeModel(rawModel);
 

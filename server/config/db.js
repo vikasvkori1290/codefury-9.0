@@ -20,7 +20,7 @@ const connectDB = async () => {
     console.log(`✅ MongoDB Connected: ${conn.connection.host}`);
   } catch (error) {
     isDbConnected = false;
-    console.warn(`⚠️ MongoDB Atlas Notice: Running with file-backed persistence fallback.`);
+    console.error(`❌ MongoDB connection failed: ${error.message}`);
   }
 };
 

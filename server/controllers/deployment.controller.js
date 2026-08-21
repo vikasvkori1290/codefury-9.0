@@ -2,22 +2,19 @@ import crypto from "crypto";
 import mongoose from "mongoose";
 import ModelListing from "../models/ModelListing.model.js";
 import Deployment from "../models/Deployment.model.js";
-import jobStore from "../services/jobStore.js";
 import { runModelInference } from "../services/modelProviders.service.js";
 
 const hashKey = (key) => crypto.createHash("sha256").update(key).digest("hex");
 const modelId = (model) => model?._id?.toString() || model?.id?.toString();
 
 const getModel = async (id) => {
-  if (mongoose.connection.readyState === 1 && mongoose.Types.ObjectId.isValid(id)) {
-    const model = await ModelListing.findById(id).catch(() => null);
-    if (model) return model;
-  }
-  return jobStore.getModel(id);
+  if (mongoose.connection.readyState !== 1 || !mongoose.Types.ObjectId.isValid(id)) return null;
+  return ModelListing.findById(id).catch(() => null);
 };
 
 export const deployModel = async (req, res, next) => {
   try {
+    if (mongoose.connection.readyState !== 1) return res.status(503).json({ success: false, message: "MongoDB is unavailable." });
     const requestedModelId = req.body.modelId || req.body.modelListingId;
     if (!requestedModelId) return res.status(400).json({ success: false, message: "modelId is required" });
     const model = await getModel(requestedModelId);
@@ -30,22 +27,15 @@ export const deployModel = async (req, res, next) => {
       active: true,
       createdAt: new Date().toISOString(),
     };
-    if (mongoose.connection.readyState === 1 && mongoose.Types.ObjectId.isValid(modelId(model))) {
-      await Deployment.create(deployment).catch(() => jobStore.setDeployment(deployment.keyPrefix, deployment));
-    } else {
-      jobStore.setDeployment(deployment.keyPrefix, deployment);
-    }
+    await Deployment.create(deployment);
     return res.status(201).json({ success: true, modelId: modelId(model), apiKey: key, keyPrefix: deployment.keyPrefix, message: "Deployment created. Store this API key securely; it will not be shown again." });
   } catch (error) { next(error); }
 };
 
 const findDeployment = async (key) => {
   const keyHash = hashKey(key);
-  if (mongoose.connection.readyState === 1) {
-    const deployment = await Deployment.findOne({ keyHash, active: true }).catch(() => null);
-    if (deployment) return deployment;
-  }
-  return jobStore.getDeployments().find((deployment) => deployment.active && deployment.keyHash === keyHash) || null;
+  if (mongoose.connection.readyState !== 1) return null;
+  return Deployment.findOne({ keyHash, active: true }).catch(() => null);
 };
 
 export const proxyPredict = async (req, res, next) => {

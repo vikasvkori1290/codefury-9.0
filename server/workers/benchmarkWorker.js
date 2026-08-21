@@ -7,7 +7,6 @@ import BenchmarkJob from "../models/BenchmarkJob.model.js";
 import ModelListing from "../models/ModelListing.model.js";
 import { generatePromptfooConfig, getBenchmarkTestCases } from "../services/promptfooConfig.js";
 import { runCommand } from "../services/command.service.js";
-import jobStore from "../services/jobStore.js";
 import { runRegisteredModel } from "../services/registeredModel.service.js";
 import { redactSecret } from "../services/credential.service.js";
 
@@ -58,7 +57,7 @@ const findJob = async (jobId) => {
   if (mongoose.connection.readyState === 1 && mongoose.Types.ObjectId.isValid(jobId)) {
     try { return await BenchmarkJob.findById(jobId); } catch (_) {}
   }
-  return jobStore.getJob(jobId);
+  return null;
 };
 
 export const runPromptfooBenchmarkWorker = async (jobId, modelName) => {
@@ -66,7 +65,7 @@ export const runPromptfooBenchmarkWorker = async (jobId, modelName) => {
   if (!job) return console.warn(`[BenchmarkWorker] Job ${jobId} not found.`);
   const isMongooseConnected = mongoose.connection.readyState === 1;
   const configPath = path.join(tempDir, `promptfoo-${jobId}.json`);
-  let registeredModel = jobStore.getModel(job.modelListingId?.toString());
+  let registeredModel = null;
   if (isMongooseConnected && job.modelListingId && mongoose.Types.ObjectId.isValid(job.modelListingId)) {
     registeredModel = await ModelListing.findById(job.modelListingId).select("+apiKeyEncrypted").catch(() => registeredModel);
   }
@@ -75,7 +74,6 @@ export const runPromptfooBenchmarkWorker = async (jobId, modelName) => {
     job.progress = progress;
     job.logs = job.logs || [];
     if (message) job.logs.push(`[${new Date().toISOString()}] ${message}`);
-    jobStore.setJob(jobId, job);
     if (isMongooseConnected && typeof job.save === "function") job.save().catch(() => {});
   };
 
@@ -172,9 +170,6 @@ export const runPromptfooBenchmarkWorker = async (jobId, modelName) => {
       evaluator: isRemoteModel ? `live-${registeredModel.apiProvider || "openai"}` : (ollamaAvailable ? "ollama" : "deterministic-simulation"),
     };
     job.logs.push(`[${new Date().toISOString()}] Evaluation complete: ${passed}/${testCases.length} passed | ${job.metrics.overallPassRate}% | ${avgLatencyMs}ms avg | ${tokensPerSecond} TPS.`);
-    jobStore.setJob(jobId, job);
-    const model = jobStore.getModel(job.modelListingId?.toString());
-    if (model) { model.latestBenchmark = job; jobStore.setModel(job.modelListingId.toString(), model); }
     if (isMongooseConnected && typeof job.save === "function") {
       await job.save().catch(() => {});
       await ModelListing.findByIdAndUpdate(job.modelListingId, {
@@ -187,7 +182,6 @@ export const runPromptfooBenchmarkWorker = async (jobId, modelName) => {
     job.error = redactSecret(error.message);
     job.logs = job.logs || [];
     job.logs.push(`[${new Date().toISOString()}] Benchmark failed: ${job.error}`);
-    jobStore.setJob(jobId, job);
     if (isMongooseConnected && typeof job.save === "function") await job.save().catch(() => {});
   }
 };

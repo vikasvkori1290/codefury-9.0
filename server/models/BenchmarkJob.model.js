@@ -2,6 +2,7 @@ import mongoose from "mongoose";
 
 const benchmarkJobSchema = new mongoose.Schema(
   {
+    legacyId: { type: String, default: null, unique: true, sparse: true, index: true },
     modelListingId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "ModelListing",

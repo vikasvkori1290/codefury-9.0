@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import {
   HiOutlineBolt,
@@ -11,6 +11,7 @@ import {
 } from "react-icons/hi2";
 import MetricCard from "../components/atoms/MetricCard";
 import ModelBadge from "../components/atoms/ModelBadge";
+import API from "../api/axios";
 
 const FEATURED_MODELS = [
   {
@@ -60,6 +61,30 @@ const FEATURED_MODELS = [
 ];
 
 const Home = () => {
+  const [featuredModels, setFeaturedModels] = useState([]);
+
+  useEffect(() => {
+    API.get("/models")
+      .then(({ data }) => {
+        const models = (data.models || []).map((model) => {
+          const metrics = model.latestBenchmark?.metrics || {};
+          return {
+            id: String(model._id || model.name),
+            name: model.name,
+            creator: model.creator || "@anonymous_creator",
+            type: "creator",
+            domain: model.category || "General",
+            latency: metrics.avgLatencyMs ? `${metrics.avgLatencyMs}ms` : "Pending",
+            cost: `$${Number(model.pricingPer1kTokens || 0).toFixed(5)}/1k`,
+            mmlu: metrics.overallPassRate ? `${metrics.overallPassRate}%` : "Pending",
+            downloads: metrics.totalCases ? `${metrics.totalCases} cases` : "No runs",
+          };
+        });
+        setFeaturedModels(models.slice(0, 4));
+      })
+      .catch(() => setFeaturedModels([]));
+  }, []);
+
   const scrollToAbout = () => {
     const el = document.getElementById("about");
     if (el) el.scrollIntoView({ behavior: "smooth" });
@@ -180,7 +205,7 @@ const Home = () => {
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            {FEATURED_MODELS.map((model) => (
+            {featuredModels.map((model) => (
               <div
                 key={model.id}
                 className="bg-white border border-[#e4e4e7] hover:border-zinc-400 p-5 rounded-none flex flex-col justify-between transition-all group shadow-xs"
@@ -221,6 +246,7 @@ const Home = () => {
               </div>
             ))}
           </div>
+          {!featuredModels.length && <p className="border border-dashed border-zinc-200 p-6 text-center font-mono text-xs text-zinc-500">No models are currently registered in MongoDB.</p>}
         </section>
       </div>
 

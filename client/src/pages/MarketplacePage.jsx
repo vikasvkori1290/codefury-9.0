@@ -185,18 +185,17 @@ export const normalizeModel = (model) => {
   const rawLatency = Number(model.latencyMs || metrics.avgLatencyMs || 0);
   const rawTps = Number(model.tokensPerSecond || metrics.tokensPerSecond || 0);
 
-  // Use realistic benchmark fallbacks if model is awaiting first promptfoo run
-  const passRate = rawPassRate > 0 ? rawPassRate : +(93.5 + (Math.abs(model.name?.length || 5) % 5)).toFixed(1);
-  const latencyMs = rawLatency > 0 ? rawLatency : Math.floor(88 + (Math.abs(model.name?.length || 5) * 6) % 50);
-  const tokensPerSecond = rawTps > 0 ? rawTps : +(86 + (Math.abs(model.name?.length || 5) * 4) % 30).toFixed(1);
+  const passRate = rawPassRate;
+  const latencyMs = rawLatency;
+  const tokensPerSecond = rawTps;
 
   const rawScores = metrics.categoryScores || model.scores || {};
   const scores = {
-    reasoning: rawScores.reasoning || 94.2,
-    knowledge: rawScores.knowledge || 93.8,
-    coding: rawScores.coding || 96.5,
-    instruction: rawScores.instruction || 95.0,
-    safety: rawScores.safety || 97.8,
+    reasoning: rawScores.reasoning || 0,
+    knowledge: rawScores.knowledge || 0,
+    coding: rawScores.coding || 0,
+    instruction: rawScores.instruction || 0,
+    safety: rawScores.safety || 0,
   };
 
   return {
@@ -227,25 +226,15 @@ export const MarketplacePage = () => {
   const [selectedCategory, setSelectedCategory] = useState("All");
   const [sortBy, setSortBy] = useState("score"); // 'score' | 'latency' | 'cheapest'
   const [deployModel, setDeployModel] = useState(null);
-  const [marketplaceModels, setMarketplaceModels] = useState(MARKETPLACE_MODELS);
+  const [marketplaceModels, setMarketplaceModels] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     API.get("/models")
       .then(({ data }) => {
-        if (Array.isArray(data.models) && data.models.length) {
-          // Merge API models with seed models so everything is visible
-          const apiNormalized = data.models.map(normalizeModel);
-          const combined = [...apiNormalized];
-          MARKETPLACE_MODELS.forEach((seed) => {
-            if (!combined.some((m) => m.name === seed.name || m.id === seed.id)) {
-              combined.push(seed);
-            }
-          });
-          setMarketplaceModels(combined);
-        }
+        setMarketplaceModels(Array.isArray(data.models) ? data.models.map(normalizeModel) : []);
       })
-      .catch(() => {})
+      .catch(() => setMarketplaceModels([]))
       .finally(() => setIsLoading(false));
   }, []);
 

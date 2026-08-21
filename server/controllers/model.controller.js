@@ -2,7 +2,6 @@ import mongoose from "mongoose";
 import ModelListing from "../models/ModelListing.model.js";
 import BenchmarkJob from "../models/BenchmarkJob.model.js";
 import { addBenchmarkJob } from "../config/queue.js";
-import jobStore from "../services/jobStore.js";
 import { runCommand } from "../services/command.service.js";
 import { encryptCredential, redactSecret } from "../services/credential.service.js";
 
@@ -65,6 +64,12 @@ export const registerModel = async (req, res, next) => {
     }
 
     const isMongooseConnected = mongoose.connection.readyState === 1;
+    if (!isMongooseConnected) {
+      return res.status(503).json({
+        success: false,
+        message: "MongoDB is unavailable. The benchmark was not stored locally or queued.",
+      });
+    }
     let modelListing = null;
     let benchmarkJob = null;
     const fallbackId = `mem_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
@@ -133,10 +138,6 @@ export const registerModel = async (req, res, next) => {
     const jobIdStr = (benchmarkJob._id || jobFallbackId).toString();
     const modelIdStr = (modelListing._id || fallbackId).toString();
 
-    // Persist to jobStore
-    jobStore.setJob(jobIdStr, benchmarkJob);
-    jobStore.setModel(modelIdStr, modelListing);
-
     // Dispatch to BullMQ Queue / Promptfoo Runner
     await addBenchmarkJob({
       jobId: jobIdStr,
@@ -167,14 +168,13 @@ export const getBenchmarkStatus = async (req, res, next) => {
   try {
     const { jobId } = req.params;
     const isMongooseConnected = mongoose.connection.readyState === 1;
+    if (!isMongooseConnected) {
+      return res.status(503).json({ success: false, message: "MongoDB is unavailable." });
+    }
 
     let job = null;
     if (isMongooseConnected && mongoose.Types.ObjectId.isValid(jobId)) {
       job = await BenchmarkJob.findById(jobId).populate("modelListingId").catch(() => null);
-    }
-
-    if (!job) {
-      job = jobStore.getJob(jobId);
     }
 
     if (!job) {
@@ -209,18 +209,14 @@ export const getBenchmarkStatus = async (req, res, next) => {
 export const listModels = async (req, res, next) => {
   try {
     const isMongooseConnected = mongoose.connection.readyState === 1;
+    if (!isMongooseConnected) {
+      return res.status(503).json({ success: false, message: "MongoDB is unavailable." });
+    }
     let models = [];
 
-    if (isMongooseConnected) {
-      models = await ModelListing.find().select("-apiKeyEncrypted")
-        .populate("latestBenchmark")
-        .sort({ createdAt: -1 })
-        .catch(() => []);
-    }
-
-    if (models.length === 0) {
-      models = jobStore.getAllModels();
-    }
+    models = await ModelListing.find().select("-apiKeyEncrypted")
+      .populate("latestBenchmark")
+      .sort({ createdAt: -1 });
 
     return res.status(200).json({
       success: true,
