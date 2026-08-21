@@ -4,18 +4,13 @@ import {
   HiOutlineMagnifyingGlass,
   HiOutlineCpuChip,
   HiOutlineBolt,
-  HiOutlineCurrencyDollar,
   HiOutlineShieldCheck,
   HiOutlineSparkles,
-  HiOutlineRocketLaunch,
   HiOutlineArrowRight,
   HiOutlinePlay,
-  HiOutlineTrophy,
   HiOutlineScale,
-  HiOutlinePlus,
-  HiOutlineMinus,
-  HiOutlineCheckBadge,
-  HiOutlineAdjustmentsHorizontal,
+  HiOutlineWrenchScrewdriver,
+  HiOutlineChartBar,
 } from "react-icons/hi2";
 import DeployModal from "../components/modals/DeployModal";
 import API from "../api/axios";
@@ -28,15 +23,6 @@ const getDominantCategory = (scores = {}) => {
   if (coding > 80 && coding >= reasoning) return "Coding";
   if (reasoning > 85) return "Reasoning";
   return "General";
-};
-
-// Generate 2-letter avatar initials
-const getInitials = (name = "") => {
-  const parts = name.replace(/[^a-zA-Z0-9 ]/g, " ").trim().split(/\s+/);
-  if (parts.length >= 2) {
-    return (parts[0][0] + parts[1][0]).toUpperCase();
-  }
-  return name.slice(0, 2).toUpperCase() || "AI";
 };
 
 // Convert all 44 LiveBench models to marketplace catalog format
@@ -71,6 +57,8 @@ export const GLOBAL_LIVEBENCH_CATALOG = PRELOADED_FRONTIER_MODELS.map((m) => {
       language: catScores.language ?? 85,
       instruction: catScores.instruction ?? 70,
     },
+    capabilities: ["Reasoning", "Code Synthesis", "Mathematics", "Agentic Tool Use"],
+    tools: ["Promptfoo Suite", "LiveBench v2", "Contamination Check"],
     sampleQueries: [
       { prompt: "Complex multi-step reasoning task", pass: true, latency: Math.floor(latency * 0.9) },
       { prompt: "Algorithm implementation with edge case verification", pass: true, latency: latency },
@@ -114,6 +102,7 @@ export const normalizeModel = (model) => {
     provider: model.provider || "ModelHub Test-Bench",
     category: model.category || "General",
     isTested,
+    isOpen: model.isOpen !== undefined ? model.isOpen : (model.provider === "ollama_local" || model.provider === "modelfile_upload"),
     pricingPer1k: Number(model.pricingPer1k || model.pricingPer1kTokens || model.pricing || 0.00015),
     pricingFormatted: model.pricingFormatted || `$${Number(model.pricingPer1k || model.pricingPer1kTokens || model.pricing || 0.00015).toFixed(5)} / 1k`,
     passRate,
@@ -121,6 +110,8 @@ export const normalizeModel = (model) => {
     tokensPerSecond,
     description: model.description || "Creator model registered on ModelHub with verified 35-case benchmark assertions.",
     scores,
+    capabilities: model.capabilities || ["Code Synthesis", "Reasoning & Logic", "Mathematics", "Agentic Tool Use"],
+    tools: model.tools || ["Ollama", "Promptfoo Suite", "Live Bench Suite"],
     sampleQueries: model.sampleQueries || [
       { prompt: "Extract JSON structured fields", pass: true, latency: latencyMs },
       { prompt: "GSM8K Math logic test", pass: true, latency: latencyMs },
@@ -128,27 +119,79 @@ export const normalizeModel = (model) => {
   };
 };
 
+const MODEL_FILTER_GROUPS = [
+  {
+    key: "capability",
+    label: "Capability",
+    options: [
+      "Coding & Development",
+      "Research & Web",
+      "Writing & Content",
+      "Data & Analytics",
+      "Automation",
+      "Customer Support",
+      "Marketing & Sales",
+      "Productivity",
+      "Design & Creative",
+      "Security",
+      "Finance",
+      "Education",
+    ],
+  },
+  {
+    key: "worksOn",
+    label: "Works on",
+    options: [
+      "Ollama",
+      "Promptfoo Suite",
+      "API Endpoint",
+      "Docker",
+      "Terminal",
+      "Python SDK",
+    ],
+  },
+  {
+    key: "source",
+    label: "Source / Type",
+    options: [
+      "Tested by Us",
+      "LiveBench Frontier",
+      "Open Weights [open]",
+      "Proprietary API",
+    ],
+  },
+  {
+    key: "pricing",
+    label: "Pricing",
+    options: [
+      "Free / Open Weights",
+      "< $0.0002 / 1k",
+      "< $0.001 / 1k",
+      "Pay per Use",
+    ],
+  },
+  {
+    key: "rating",
+    label: "Rating",
+    options: ["90%+ Top Tier", "80%+ High Accuracy", "70%+ Solid Performance"],
+  },
+  {
+    key: "latency",
+    label: "Latency",
+    options: ["< 100ms Ultra-Fast", "< 200ms Fast", "< 500ms Standard"],
+  },
+  {
+    key: "cost",
+    label: "Cost / task",
+    options: ["Free", "< $0.01 / task", "< $0.05 / task", "< $0.10 / task"],
+  },
+];
+
 export const MarketplacePage = () => {
-  const [searchQuery, setSearchQuery] = useState("");
-  const [selectedCapability, setSelectedCapability] = useState("all");
-  const [selectedSource, setSelectedSource] = useState("all"); // 'all' | 'tested' | 'frontier' | 'open'
-  const [selectedPricing, setSelectedPricing] = useState("all");
-  const [selectedRating, setSelectedRating] = useState("all");
-  const [selectedLatency, setSelectedLatency] = useState("all");
-  const [sortBy, setSortBy] = useState("score"); // 'score' | 'latency' | 'cheapest' | 'tps'
-
-  // Sidebar accordions state
-  const [openSections, setOpenSections] = useState({
-    capability: true,
-    source: true,
-    pricing: true,
-    rating: true,
-    latency: true,
-  });
-
-  const toggleSection = (key) => {
-    setOpenSections((prev) => ({ ...prev, [key]: !prev[key] }));
-  };
+  const [search, setSearch] = useState("");
+  const [sortBy, setSortBy] = useState("relevant");
+  const [selectedFilters, setSelectedFilters] = useState({});
+  const [expandedGroups, setExpandedGroups] = useState({ capability: true });
 
   const [deployModel, setDeployModel] = useState(null);
   const [testedModels, setTestedModels] = useState([]);
@@ -178,109 +221,116 @@ export const MarketplacePage = () => {
     return [...testedModels, ...globalList];
   }, [testedModels]);
 
-  const filteredModels = useMemo(() => {
-    return allMarketplaceModels
-      .filter((m) => {
-        // Search query
-        if (searchQuery.trim()) {
-          const q = searchQuery.toLowerCase();
-          const match =
-            m.name.toLowerCase().includes(q) ||
-            m.displayName.toLowerCase().includes(q) ||
-            m.creator.toLowerCase().includes(q) ||
-            m.description.toLowerCase().includes(q);
-          if (!match) return false;
-        }
-
-        // Capability filter
-        if (selectedCapability !== "all") {
-          if (selectedCapability === "coding") {
-            if ((m.scores.coding || 0) < 78 && (m.scores.agentic_coding || 0) < 60) return false;
-          } else if (selectedCapability === "reasoning") {
-            if ((m.scores.reasoning || 0) < 80 && (m.scores.mathematics || 0) < 80) return false;
-          } else if (selectedCapability === "math") {
-            if ((m.scores.mathematics || 0) < 85) return false;
-          } else if (selectedCapability === "agentic") {
-            if ((m.scores.agentic_coding || 0) < 55) return false;
-          } else if (selectedCapability === "data_analysis") {
-            if ((m.scores.data_analysis || 0) < 70) return false;
-          } else if (selectedCapability === "instruction") {
-            if ((m.scores.instruction || 0) < 70) return false;
-          }
-        }
-
-        // Source / Type filter
-        if (selectedSource === "tested" && !m.isTested) return false;
-        if (selectedSource === "frontier" && m.isTested) return false;
-        if (selectedSource === "open" && !m.isOpen) return false;
-        if (selectedSource === "proprietary" && m.isOpen) return false;
-
-        // Pricing filter
-        if (selectedPricing === "open_free" && !m.isOpen) return false;
-        if (selectedPricing === "under_0002" && m.pricingPer1k > 0.0002) return false;
-        if (selectedPricing === "under_001" && m.pricingPer1k > 0.001) return false;
-
-        // Rating / Score filter
-        if (selectedRating === "90_plus" && m.passRate < 90) return false;
-        if (selectedRating === "80_plus" && m.passRate < 80) return false;
-        if (selectedRating === "70_plus" && m.passRate < 70) return false;
-
-        // Latency filter
-        if (selectedLatency === "sub_100" && m.latencyMs >= 100) return false;
-        if (selectedLatency === "sub_200" && m.latencyMs >= 200) return false;
-        if (selectedLatency === "sub_500" && m.latencyMs >= 500) return false;
-
-        return true;
-      })
-      .sort((a, b) => {
-        if (sortBy === "latency") return a.latencyMs - b.latencyMs;
-        if (sortBy === "cheapest") return a.pricingPer1k - b.pricingPer1k;
-        if (sortBy === "tps") return b.tokensPerSecond - a.tokensPerSecond;
-        return b.passRate - a.passRate; // default score
-      });
-  }, [
-    allMarketplaceModels,
-    searchQuery,
-    selectedCapability,
-    selectedSource,
-    selectedPricing,
-    selectedRating,
-    selectedLatency,
-    sortBy,
-  ]);
-
-  const resetAllFilters = () => {
-    setSearchQuery("");
-    setSelectedCapability("all");
-    setSelectedSource("all");
-    setSelectedPricing("all");
-    setSelectedRating("all");
-    setSelectedLatency("all");
-    setSortBy("score");
+  const toggleFilter = (key, value) => {
+    setSelectedFilters((current) => {
+      const values = current[key] || [];
+      const nextValues = values.includes(value)
+        ? values.filter((item) => item !== value)
+        : [...values, value];
+      return { ...current, [key]: nextValues };
+    });
   };
+
+  const clearFilters = () => {
+    setSearch("");
+    setSelectedFilters({});
+  };
+
+  const activeFilters = Object.entries(selectedFilters).flatMap(([key, values]) =>
+    values.map((value) => ({ key, value }))
+  );
+
+  const getModelFilterMeta = (m) => {
+    const caps = [];
+    if (m.scores.coding >= 78 || m.scores.agentic_coding >= 55) caps.push("Coding & Development");
+    if (m.scores.reasoning >= 80) caps.push("Reasoning & Logic");
+    if (m.scores.mathematics >= 85) caps.push("Mathematics (90%+)");
+    if (m.scores.agentic_coding >= 50) caps.push("Agentic Tool Use");
+    if (m.scores.data_analysis >= 70) caps.push("Data & Analytics");
+    if (m.scores.language >= 80) caps.push("Language (MMLU)");
+    if (m.scores.instruction >= 70) caps.push("Instruction Following");
+
+    const sources = [];
+    if (m.isTested) sources.push("Tested by Us");
+    else sources.push("LiveBench Frontier");
+    if (m.isOpen) sources.push("Open Weights [open]");
+    else sources.push("Proprietary API");
+
+    const pricings = ["Pay per Use"];
+    if (m.isOpen) pricings.push("Free / Open Weights");
+    if (m.pricingPer1k <= 0.0002) pricings.push("< $0.0002 / 1k");
+    if (m.pricingPer1k <= 0.001) pricings.push("< $0.001 / 1k");
+
+    const ratings = [];
+    if (m.passRate >= 90) ratings.push("90%+ Top Tier");
+    if (m.passRate >= 80) ratings.push("80%+ High Accuracy");
+    if (m.passRate >= 70) ratings.push("70%+ Solid Performance");
+
+    const latencies = [];
+    if (m.latencyMs < 100) latencies.push("< 100ms Ultra-Fast");
+    if (m.latencyMs < 200) latencies.push("< 200ms Fast");
+    if (m.latencyMs < 500) latencies.push("< 500ms Standard");
+
+    return {
+      capability: caps,
+      source: sources,
+      pricing: pricings,
+      rating: ratings,
+      latency: latencies,
+    };
+  };
+
+  const filtered = useMemo(() => {
+    let list = allMarketplaceModels.filter((m) => {
+      const q = search.toLowerCase().trim();
+      const meta = getModelFilterMeta(m);
+
+      const matchesSearch =
+        !q ||
+        m.name.toLowerCase().includes(q) ||
+        m.displayName.toLowerCase().includes(q) ||
+        m.creator.toLowerCase().includes(q) ||
+        m.description.toLowerCase().includes(q);
+
+      const matchesFilters = Object.entries(selectedFilters).every(
+        ([key, values]) =>
+          values.length === 0 || values.some((value) => (meta[key] || []).includes(value))
+      );
+
+      return matchesSearch && matchesFilters;
+    });
+
+    if (sortBy === "rating" || sortBy === "score") list = [...list].sort((a, b) => b.passRate - a.passRate);
+    else if (sortBy === "benchmark") list = [...list].sort((a, b) => b.passRate - a.passRate);
+    else if (sortBy === "price") list = [...list].sort((a, b) => a.pricingPer1k - b.pricingPer1k);
+    else if (sortBy === "latency") list = [...list].sort((a, b) => a.latencyMs - b.latencyMs);
+    else if (sortBy === "tps") list = [...list].sort((a, b) => b.tokensPerSecond - a.tokensPerSecond);
+    else list = [...list].sort((a, b) => b.passRate - a.passRate);
+
+    return list;
+  }, [allMarketplaceModels, search, sortBy, selectedFilters]);
 
   return (
     <div className="min-h-screen bg-[#fafafa] text-zinc-900 font-sans selection:bg-[#ea580c] selection:text-white py-8 px-4 sm:px-8">
-      <div className="max-w-7xl mx-auto space-y-6">
-        {/* ==================== HERO HEADER BANNER ==================== */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-          <div className="space-y-1">
-            <div className="text-[11px] font-mono font-bold uppercase tracking-wider text-[#ea580c] flex items-center gap-1.5">
-              <HiOutlineSparkles />
-              <span>AI Models Catalog</span>
+      <div className="max-w-6xl mx-auto space-y-6">
+        {/* ==================== HEADER BANNER (MATCHES AGENT MARKETPLACE) ==================== */}
+        <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 border-b border-[#e4e4e7] pb-5">
+          <div className="space-y-2">
+            <div className="inline-flex items-center gap-2 text-xs font-mono text-[#ea580c] font-bold uppercase tracking-wide">
+              <HiOutlineSparkles /> AI Models Catalog
             </div>
-            <h1 className="text-3xl sm:text-4xl font-bold tracking-tight text-zinc-950 font-sans">
+            <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-zinc-950 font-sans">
               Find the right model for the job.
             </h1>
-            <p className="text-xs sm:text-sm text-zinc-500 font-sans max-w-2xl">
-              Production-ready AI models with verified 35-case LiveBench capabilities, sub-100ms latencies, and transparent run history.
+            <p className="text-xs sm:text-sm text-zinc-500 max-w-2xl font-sans">
+              Production-ready AI models with verified capabilities, connected tools, and transparent run history.
             </p>
           </div>
 
-          <div className="flex items-center gap-2.5 flex-wrap">
+          <div className="flex items-center gap-2.5 flex-wrap shrink-0">
             <Link
               to="/compare"
-              className="px-4 py-2.5 bg-zinc-900 hover:bg-black text-white text-xs font-mono font-bold flex items-center gap-1.5 transition-all shadow-xs"
+              className="px-4 py-2 bg-zinc-900 hover:bg-black text-white font-bold text-xs font-mono text-center shadow-xs shrink-0 flex items-center gap-1.5"
             >
               <HiOutlineScale className="text-sm text-[#ea580c]" />
               <span>Compare Models</span>
@@ -288,7 +338,7 @@ export const MarketplacePage = () => {
 
             <Link
               to="/test"
-              className="px-4 py-2.5 bg-[#ea580c] hover:bg-[#c2410c] text-white text-xs font-mono font-bold flex items-center gap-1.5 transition-all shadow-xs"
+              className="px-4 py-2 bg-[#ea580c] hover:bg-[#c2410c] text-white font-bold text-xs font-mono text-center shadow-xs shrink-0 flex items-center gap-1"
             >
               <HiOutlineBolt />
               <span>+ Benchmark Your Model</span>
@@ -296,385 +346,269 @@ export const MarketplacePage = () => {
           </div>
         </div>
 
-        {/* ==================== TWO-COLUMN LAYOUT (SIDEBAR + MODELS) ==================== */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
-          {/* ==================== LEFT FILTER SIDEBAR ==================== */}
-          <div className="lg:col-span-3 bg-white border border-[#e4e4e7] p-5 shadow-xs space-y-5 font-mono text-xs">
-            <div className="flex items-center justify-between border-b border-[#f4f4f5] pb-3">
-              <span className="font-bold uppercase tracking-wider text-zinc-950 text-[11px]">
-                FILTER MODELS
-              </span>
-              <button
-                onClick={resetAllFilters}
-                className="text-[10px] text-[#ea580c] hover:underline cursor-pointer"
-              >
-                Reset
-              </button>
-            </div>
-
-            {/* 1. CAPABILITY ACCORDION */}
-            <div className="space-y-2 border-b border-[#f4f4f5] pb-3">
-              <div
-                onClick={() => toggleSection("capability")}
-                className="flex items-center justify-between cursor-pointer text-zinc-700 hover:text-black font-bold uppercase text-[10px]"
-              >
-                <span>CAPABILITY</span>
-                <span>{openSections.capability ? <HiOutlineMinus /> : <HiOutlinePlus />}</span>
-              </div>
-              {openSections.capability && (
-                <div className="space-y-1 pt-1 text-[11px]">
-                  {[
-                    { id: "all", label: "All Capabilities" },
-                    { id: "coding", label: "Code Synthesis" },
-                    { id: "agentic", label: "Agentic Tool Use" },
-                    { id: "reasoning", label: "Reasoning & Logic" },
-                    { id: "math", label: "Mathematics (90%+)" },
-                    { id: "data_analysis", label: "Data Analysis" },
-                    { id: "instruction", label: "Instruction Following" },
-                  ].map((cap) => (
-                    <label
-                      key={cap.id}
-                      className="flex items-center gap-2 cursor-pointer py-0.5 text-zinc-600 hover:text-black"
-                    >
-                      <input
-                        type="radio"
-                        name="capability"
-                        checked={selectedCapability === cap.id}
-                        onChange={() => setSelectedCapability(cap.id)}
-                        className="accent-[#ea580c]"
-                      />
-                      <span>{cap.label}</span>
-                    </label>
-                  ))}
-                </div>
+        {/* ==================== TWO-COLUMN LAYOUT (IDENTICAL TO AGENTS) ==================== */}
+        <div className="grid grid-cols-1 lg:grid-cols-[220px_minmax(0,1fr)] gap-6 items-start">
+          {/* ==================== LEFT FILTER RAIL ==================== */}
+          <aside className="bg-white border border-[#e4e4e7] p-4 shadow-xs space-y-5 font-mono text-xs lg:sticky lg:top-20">
+            <div className="flex items-center justify-between border-b border-[#e4e4e7] pb-3">
+              <h2 className="font-bold uppercase tracking-wide text-zinc-900">Filter models</h2>
+              {(search || activeFilters.length > 0) && (
+                <button
+                  onClick={clearFilters}
+                  className="text-[#ea580c] font-bold hover:underline cursor-pointer"
+                >
+                  Clear all
+                </button>
               )}
             </div>
 
-            {/* 2. SOURCE / TYPE ACCORDION */}
-            <div className="space-y-2 border-b border-[#f4f4f5] pb-3">
-              <div
-                onClick={() => toggleSection("source")}
-                className="flex items-center justify-between cursor-pointer text-zinc-700 hover:text-black font-bold uppercase text-[10px]"
-              >
-                <span>SOURCE / TYPE</span>
-                <span>{openSections.source ? <HiOutlineMinus /> : <HiOutlinePlus />}</span>
-              </div>
-              {openSections.source && (
-                <div className="space-y-1 pt-1 text-[11px]">
-                  {[
-                    { id: "all", label: `All Models (${allMarketplaceModels.length})` },
-                    { id: "tested", label: `🧪 Tested by Us (${testedModels.length})` },
-                    { id: "frontier", label: `🌐 LiveBench Frontier (44)` },
-                    { id: "open", label: "Open Weights [open]" },
-                    { id: "proprietary", label: "Proprietary API" },
-                  ].map((src) => (
-                    <label
-                      key={src.id}
-                      className="flex items-center gap-2 cursor-pointer py-0.5 text-zinc-600 hover:text-black"
-                    >
-                      <input
-                        type="radio"
-                        name="source"
-                        checked={selectedSource === src.id}
-                        onChange={() => setSelectedSource(src.id)}
-                        className="accent-[#ea580c]"
-                      />
-                      <span>{src.label}</span>
-                    </label>
-                  ))}
-                </div>
-              )}
-            </div>
-
-            {/* 3. PRICING ACCORDION */}
-            <div className="space-y-2 border-b border-[#f4f4f5] pb-3">
-              <div
-                onClick={() => toggleSection("pricing")}
-                className="flex items-center justify-between cursor-pointer text-zinc-700 hover:text-black font-bold uppercase text-[10px]"
-              >
-                <span>PRICING / TIER</span>
-                <span>{openSections.pricing ? <HiOutlineMinus /> : <HiOutlinePlus />}</span>
-              </div>
-              {openSections.pricing && (
-                <div className="space-y-1 pt-1 text-[11px]">
-                  {[
-                    { id: "all", label: "All Price Tiers" },
-                    { id: "open_free", label: "Free / Open Weights" },
-                    { id: "under_0002", label: "< $0.0002 / 1k (Budget)" },
-                    { id: "under_001", label: "< $0.001 / 1k" },
-                  ].map((pr) => (
-                    <label
-                      key={pr.id}
-                      className="flex items-center gap-2 cursor-pointer py-0.5 text-zinc-600 hover:text-black"
-                    >
-                      <input
-                        type="radio"
-                        name="pricing"
-                        checked={selectedPricing === pr.id}
-                        onChange={() => setSelectedPricing(pr.id)}
-                        className="accent-[#ea580c]"
-                      />
-                      <span>{pr.label}</span>
-                    </label>
-                  ))}
-                </div>
-              )}
-            </div>
-
-            {/* 4. RATING / BENCHMARK SCORE ACCORDION */}
-            <div className="space-y-2 border-b border-[#f4f4f5] pb-3">
-              <div
-                onClick={() => toggleSection("rating")}
-                className="flex items-center justify-between cursor-pointer text-zinc-700 hover:text-black font-bold uppercase text-[10px]"
-              >
-                <span>BENCHMARK SCORE</span>
-                <span>{openSections.rating ? <HiOutlineMinus /> : <HiOutlinePlus />}</span>
-              </div>
-              {openSections.rating && (
-                <div className="space-y-1 pt-1 text-[11px]">
-                  {[
-                    { id: "all", label: "All Benchmark Scores" },
-                    { id: "90_plus", label: "90%+ Top Frontier Tier" },
-                    { id: "80_plus", label: "80%+ High Accuracy" },
-                    { id: "70_plus", label: "70%+ Solid Performance" },
-                  ].map((rt) => (
-                    <label
-                      key={rt.id}
-                      className="flex items-center gap-2 cursor-pointer py-0.5 text-zinc-600 hover:text-black"
-                    >
-                      <input
-                        type="radio"
-                        name="rating"
-                        checked={selectedRating === rt.id}
-                        onChange={() => setSelectedRating(rt.id)}
-                        className="accent-[#ea580c]"
-                      />
-                      <span>{rt.label}</span>
-                    </label>
-                  ))}
-                </div>
-              )}
-            </div>
-
-            {/* 5. LATENCY ACCORDION */}
-            <div className="space-y-2 border-b border-[#f4f4f5] pb-3">
-              <div
-                onClick={() => toggleSection("latency")}
-                className="flex items-center justify-between cursor-pointer text-zinc-700 hover:text-black font-bold uppercase text-[10px]"
-              >
-                <span>LATENCY</span>
-                <span>{openSections.latency ? <HiOutlineMinus /> : <HiOutlinePlus />}</span>
-              </div>
-              {openSections.latency && (
-                <div className="space-y-1 pt-1 text-[11px]">
-                  {[
-                    { id: "all", label: "Any Latency" },
-                    { id: "sub_100", label: "< 100ms Ultra-Fast" },
-                    { id: "sub_200", label: "< 200ms Fast" },
-                    { id: "sub_500", label: "< 500ms Standard" },
-                  ].map((lat) => (
-                    <label
-                      key={lat.id}
-                      className="flex items-center gap-2 cursor-pointer py-0.5 text-zinc-600 hover:text-black"
-                    >
-                      <input
-                        type="radio"
-                        name="latency"
-                        checked={selectedLatency === lat.id}
-                        onChange={() => setSelectedLatency(lat.id)}
-                        className="accent-[#ea580c]"
-                      />
-                      <span>{lat.label}</span>
-                    </label>
-                  ))}
-                </div>
-              )}
-            </div>
-
-            {/* Reset / Toggle button */}
-            <button
-              onClick={resetAllFilters}
-              className="w-full py-2 bg-[#fafafa] hover:bg-zinc-100 border border-[#e4e4e7] text-zinc-700 text-[11px] font-bold text-center transition-colors cursor-pointer"
-            >
-              Reset all filters
-            </button>
-
-            {/* SORT BY DROPDOWN */}
-            <div className="space-y-1.5 pt-1">
-              <span className="text-[10px] uppercase font-bold text-zinc-400 block">
-                SORT BY
-              </span>
-              <select
-                value={sortBy}
-                onChange={(e) => setSortBy(e.target.value)}
-                className="w-full bg-[#fafafa] border border-[#e4e4e7] p-2 text-xs text-zinc-900 outline-none cursor-pointer"
-              >
-                <option value="score">Highest Benchmark Score</option>
-                <option value="latency">Lowest Latency</option>
-                <option value="cheapest">Lowest Cost</option>
-                <option value="tps">Highest Speed (TPS)</option>
-              </select>
-            </div>
-          </div>
-
-          {/* ==================== RIGHT MAIN MODELS CONTENT ==================== */}
-          <div className="lg:col-span-9 space-y-4">
-            {/* Search Box matching the screenshot */}
-            <div className="relative bg-white border border-[#e4e4e7] p-1.5 shadow-xs">
-              <HiOutlineMagnifyingGlass className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-400 text-sm" />
-              <input
-                type="text"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Describe the model or capability and we will search it for you..."
-                className="w-full pl-9 pr-4 py-2 text-xs text-zinc-900 outline-none bg-transparent font-sans"
-              />
-            </div>
-
-            {/* Results Header Status */}
-            <div className="flex items-center justify-between font-mono text-xs text-zinc-500 px-1">
-              <span className="font-bold text-zinc-900">
-                {filteredModels.length} models found
-              </span>
-              <span>
-                {allMarketplaceModels.length} verified benchmark publishers
-              </span>
-            </div>
-
-            {/* Model Cards Grid (2-Columns matching screenshot) */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {filteredModels.map((model) => {
-                const initials = getInitials(model.displayName);
+            <div className="space-y-2 max-h-[calc(100vh-235px)] overflow-y-auto pr-1">
+              {MODEL_FILTER_GROUPS.map((group) => {
+                const selectedCount = (selectedFilters[group.key] || []).length;
+                const isExpanded = expandedGroups[group.key];
+                const visibleOptions = isExpanded ? group.options : [];
 
                 return (
-                  <div
-                    key={model.id}
-                    className="bg-white border border-[#e4e4e7] p-5 shadow-xs hover:border-[#ea580c]/50 transition-all flex flex-col justify-between space-y-4"
-                  >
-                    <div className="space-y-3">
-                      {/* Top Header with Avatar & Verified Badge */}
-                      <div className="flex items-start justify-between gap-3">
-                        <div className="flex items-center gap-3">
-                          {/* 2-Letter Dark Box Avatar */}
-                          <div className="w-10 h-10 bg-zinc-950 text-white font-mono font-bold text-xs flex items-center justify-center shrink-0">
-                            {initials}
-                          </div>
-
-                          <div>
-                            <h3 className="font-bold text-zinc-950 text-sm font-sans hover:text-[#ea580c] transition-colors line-clamp-1">
-                              {model.displayName}
-                            </h3>
-                            <span className="text-[11px] text-zinc-500 font-mono block">
-                              {model.creator}
-                            </span>
-                          </div>
-                        </div>
-
-                        {/* Verified Shield Badge */}
-                        <div className="text-emerald-600 text-lg" title="LiveBench Verified">
-                          <HiOutlineShieldCheck />
-                        </div>
-                      </div>
-
-                      {/* Description */}
-                      <p className="text-xs text-zinc-600 font-sans line-clamp-2 leading-relaxed">
-                        {model.description}
-                      </p>
-
-                      {/* Tag Pills */}
-                      <div className="flex items-center gap-1.5 flex-wrap font-mono text-[10px]">
-                        <span className="px-2 py-0.5 bg-[#fafafa] border border-zinc-200 text-zinc-700">
-                          {model.category}
-                        </span>
-                        {model.isTested ? (
-                          <span className="px-2 py-0.5 bg-orange-50 text-[#ea580c] border border-orange-200 font-bold">
-                            LIVE TESTED
-                          </span>
-                        ) : (
-                          <span className="px-2 py-0.5 bg-zinc-100 text-zinc-800 border border-zinc-200 font-bold">
-                            LIVEBENCH
-                          </span>
+                  <div key={group.key} className="border-b border-[#f0f0f1] pb-2">
+                    <button
+                      type="button"
+                      onClick={() =>
+                        setExpandedGroups((current) => ({
+                          ...current,
+                          [group.key]: !current[group.key],
+                        }))
+                      }
+                      className="w-full flex items-center justify-between py-1.5 text-left cursor-pointer"
+                    >
+                      <span className="text-[10px] text-zinc-500 uppercase font-bold">
+                        {group.label}
+                        {selectedCount > 0 && (
+                          <span className="ml-1.5 text-[#ea580c]">({selectedCount})</span>
                         )}
-                        {model.isOpen && (
-                          <span className="px-2 py-0.5 bg-emerald-50 text-emerald-700 border border-emerald-200">
-                            open weights
-                          </span>
-                        )}
+                      </span>
+                      <span className="text-zinc-400 text-sm">{isExpanded ? "−" : "+"}</span>
+                    </button>
+
+                    {isExpanded && (
+                      <div className="grid grid-cols-1 gap-1 pb-1">
+                        {visibleOptions.map((option) => {
+                          const checked = (selectedFilters[group.key] || []).includes(option);
+                          return (
+                            <label
+                              key={option}
+                              className="flex items-center gap-2 text-[11px] text-zinc-600 hover:text-zinc-950 cursor-pointer py-0.5"
+                            >
+                              <input
+                                type="checkbox"
+                                checked={checked}
+                                onChange={() => toggleFilter(group.key, option)}
+                                className="accent-[#ea580c]"
+                              />
+                              <span className="truncate">{option}</span>
+                            </label>
+                          );
+                        })}
                       </div>
-                    </div>
-
-                    {/* Stats & Actions Footer */}
-                    <div className="space-y-3 pt-3 border-t border-[#f4f4f5] font-mono">
-                      {/* Metric 3-Column Numbers */}
-                      <div className="grid grid-cols-3 gap-2 text-xs">
-                        <div>
-                          <span className="text-[9px] text-zinc-400 block uppercase">BENCHMARK</span>
-                          <span className="font-bold text-emerald-700 text-sm">
-                            {model.passRate?.toFixed(1)}%
-                          </span>
-                        </div>
-                        <div>
-                          <span className="text-[9px] text-zinc-400 block uppercase">SUCCESS</span>
-                          <span className="font-bold text-zinc-900 text-sm">
-                            {model.passRate?.toFixed(1)}%
-                          </span>
-                        </div>
-                        <div>
-                          <span className="text-[9px] text-zinc-400 block uppercase">LATENCY</span>
-                          <span className="font-bold text-zinc-900 text-sm">
-                            {(model.latencyMs / 1000).toFixed(2)}s
-                          </span>
-                        </div>
-                      </div>
-
-                      {/* Secondary Row with Price & View Action */}
-                      <div className="flex items-center justify-between gap-2 pt-1">
-                        <div className="text-[11px] space-y-0.5">
-                          <div className="text-zinc-500">
-                            RATING <b className="text-zinc-900">4.9 ★</b> • <b className="text-zinc-900">{model.tokensPerSecond} TPS</b>
-                          </div>
-                          <div className="font-bold text-[#ea580c] text-xs">
-                            {model.pricingFormatted}
-                          </div>
-                        </div>
-
-                        <div className="flex items-center gap-1.5 shrink-0">
-                          <Link
-                            to={`/models/${model.id}`}
-                            className="px-3.5 py-1.5 bg-zinc-950 hover:bg-black text-white text-xs font-mono font-bold flex items-center gap-1 transition-all shadow-xs"
-                          >
-                            <span>View Model</span>
-                            <HiOutlineArrowRight className="text-xs" />
-                          </Link>
-
-                          <button
-                            onClick={() => setDeployModel(model)}
-                            className="p-1.5 bg-orange-50 hover:bg-orange-100 text-[#ea580c] border border-orange-200 text-xs transition-colors"
-                            title="Deploy / Run API"
-                          >
-                            <HiOutlinePlay />
-                          </button>
-                        </div>
-                      </div>
-                    </div>
+                    )}
                   </div>
                 );
               })}
             </div>
+          </aside>
 
-            {/* Empty State */}
-            {filteredModels.length === 0 && !isLoading && (
-              <div className="p-12 bg-white border border-[#e4e4e7] text-center font-mono text-xs text-zinc-500 space-y-2">
-                <div>No AI models match your current sidebar filters or search query.</div>
+          {/* ==================== RIGHT MAIN MODELS CONTENT ==================== */}
+          <main className="space-y-4">
+            {/* Search Box matching Agent Marketplace */}
+            <div className="relative bg-white border border-[#e4e4e7] shadow-xs">
+              <HiOutlineMagnifyingGlass className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-400 text-lg" />
+              <input
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                placeholder="Describe the model and we will search it for you"
+                className="w-full bg-white focus:border-[#ea580c] pl-11 pr-4 py-4 outline-none text-sm text-zinc-900 placeholder:text-zinc-400"
+              />
+            </div>
+
+            {/* Results Header Status */}
+            <div className="flex items-center justify-between font-mono text-xs">
+              <span className="text-zinc-500">
+                <strong className="text-zinc-900">{filtered.length}</strong> models found
+              </span>
+              <select
+                value={sortBy}
+                onChange={(e) => setSortBy(e.target.value)}
+                className="bg-white border border-[#e4e4e7] text-zinc-700 px-2.5 py-1.5 outline-none cursor-pointer focus:border-[#ea580c]"
+              >
+                <option value="relevant">Most Relevant</option>
+                <option value="score">Highest Benchmark</option>
+                <option value="rating">Highest Rated</option>
+                <option value="latency">Lowest Latency</option>
+                <option value="price">Lowest Price</option>
+                <option value="tps">Highest TPS Speed</option>
+              </select>
+            </div>
+
+            {/* Active Filters Bar */}
+            {(search || activeFilters.length > 0) && (
+              <div className="flex flex-wrap items-center gap-2 bg-white border border-[#e4e4e7] p-3 font-mono text-[11px]">
+                <span className="text-zinc-500 uppercase font-bold">Active filters:</span>
+                {search && (
+                  <button
+                    onClick={() => setSearch("")}
+                    className="px-2 py-1 bg-zinc-900 text-white cursor-pointer"
+                  >
+                    “{search}” ×
+                  </button>
+                )}
+                {activeFilters.map(({ key, value }) => (
+                  <button
+                    key={`${key}-${value}`}
+                    onClick={() => toggleFilter(key, value)}
+                    className="px-2 py-1 bg-[#fff7ed] border border-orange-200 text-[#ea580c] cursor-pointer"
+                  >
+                    {value} ×
+                  </button>
+                ))}
                 <button
-                  onClick={resetAllFilters}
-                  className="text-[#ea580c] underline hover:text-[#c2410c] cursor-pointer"
+                  onClick={clearFilters}
+                  className="text-zinc-500 hover:text-[#ea580c] font-bold cursor-pointer"
                 >
-                  Reset all filters
+                  Clear all
                 </button>
               </div>
             )}
-          </div>
+
+            {/* Model Cards Grid (2 Columns matching Agent Marketplace) */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {filtered.map((model) => {
+                const primaryTag = model.category === "Coding"
+                  ? "Coding Model"
+                  : model.category === "Reasoning"
+                  ? "Reasoning Engine"
+                  : model.category;
+
+                return (
+                  <article
+                    key={model.id}
+                    className="bg-white border border-[#e4e4e7] hover:border-zinc-400 p-5 transition-all group shadow-xs flex flex-col justify-between"
+                  >
+                    <div>
+                      {/* Top Header with Avatar & Verified Shield */}
+                      <div className="flex items-start gap-3">
+                        <div className="w-11 h-11 bg-white border border-[#e4e4e7] flex items-center justify-center shrink-0 overflow-hidden">
+                          <img
+                            src={`https://api.dicebear.com/9.x/initials/svg?seed=${encodeURIComponent(
+                              model.creator || model.displayName
+                            )}&backgroundColor=f4f4f5&fontFamily=monospace&fontWeight=700`}
+                            alt={`${model.creator} logo`}
+                            className="w-full h-full object-contain p-1.5"
+                            loading="lazy"
+                          />
+                        </div>
+
+                        <div className="min-w-0 flex-1">
+                          <div className="flex items-start justify-between gap-2">
+                            <div className="min-w-0">
+                              <h3 className="text-base font-bold text-zinc-950 group-hover:text-[#ea580c] transition-colors truncate">
+                                {model.displayName}
+                              </h3>
+                              <p className="text-xs text-zinc-500 font-mono flex items-center gap-1 mt-0.5">
+                                <HiOutlineCpuChip className="text-zinc-400" /> Built by {model.creator}
+                              </p>
+                            </div>
+                            <HiOutlineShieldCheck
+                              className="text-emerald-600 text-lg shrink-0"
+                              title="Verified Benchmark"
+                            />
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Description */}
+                      <p className="text-xs text-zinc-600 leading-relaxed mt-4 line-clamp-2">
+                        {model.description}
+                      </p>
+
+                      {/* Capabilities & Tools Rows (Identical to Agent Marketplace) */}
+                      <div className="mt-4 pt-3 border-t border-[#e4e4e7] space-y-3">
+                        <div>
+                          <span className="text-[10px] font-mono text-zinc-400 uppercase font-bold">
+                            What it does
+                          </span>
+                          <div className="flex flex-wrap gap-1.5 mt-1.5">
+                            {model.capabilities.slice(0, 3).map((capability) => (
+                              <span
+                                key={capability}
+                                className="px-2 py-1 bg-zinc-100 border border-[#e4e4e7] text-[10px] font-mono text-zinc-700"
+                              >
+                                {capability}
+                              </span>
+                            ))}
+                          </div>
+                        </div>
+
+                        <div>
+                          <span className="text-[10px] font-mono text-zinc-400 uppercase font-bold flex items-center gap-1">
+                            <HiOutlineWrenchScrewdriver /> Works with
+                          </span>
+                          <div className="flex flex-wrap gap-1.5 mt-1.5">
+                            {model.tools.slice(0, 4).map((tool) => (
+                              <span
+                                key={tool}
+                                className="px-2 py-1 bg-white border border-[#e4e4e7] text-[10px] font-mono text-zinc-700"
+                              >
+                                {tool}
+                              </span>
+                            ))}
+                            {model.isOpen && (
+                              <span className="px-2 py-1 bg-emerald-50 border border-emerald-200 text-[10px] font-mono text-emerald-700 font-bold">
+                                Open Weights
+                              </span>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Card Footer Actions (Identical to Agent Marketplace) */}
+                    <div className="flex items-center justify-between gap-3 mt-4 pt-3 border-t border-[#e4e4e7] font-mono">
+                      <div className="flex items-center gap-2 text-[11px] text-zinc-500">
+                        <span className="px-1.5 py-1 bg-[#fff7ed] border border-orange-200 text-[10px] text-[#ea580c] font-bold">
+                          {primaryTag}
+                        </span>
+                        <span className="text-[10px] text-emerald-700 font-bold">
+                          {model.passRate?.toFixed(1)}% score
+                        </span>
+                      </div>
+
+                      <div className="flex items-center gap-1.5 shrink-0">
+                        <button
+                          onClick={() => setDeployModel(model)}
+                          className="px-2.5 py-2 bg-orange-50 hover:bg-orange-100 text-[#ea580c] border border-orange-200 text-xs font-bold transition-colors cursor-pointer"
+                          title="1-Click API Run"
+                        >
+                          <HiOutlinePlay />
+                        </button>
+
+                        <Link
+                          to={`/models/${model.id}`}
+                          className="px-4 py-2 bg-zinc-900 hover:bg-[#ea580c] text-white text-xs font-bold transition-colors shrink-0"
+                        >
+                          View Model →
+                        </Link>
+                      </div>
+                    </div>
+                  </article>
+                );
+              })}
+            </div>
+
+            {filtered.length === 0 && !isLoading && (
+              <div className="bg-white border border-dashed border-[#e4e4e7] p-10 text-center font-mono text-xs text-zinc-500">
+                No models match your filters. Try resetting the sidebar.
+              </div>
+            )}
+          </main>
         </div>
       </div>
 
