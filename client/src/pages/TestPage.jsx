@@ -14,7 +14,7 @@ const TestPage = () => {
               <span>Interactive Benchmarking Engine</span>
             </div>
             <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-zinc-950 font-sans">
-              Model Evaluation & Benchmarking Sandbox
+              Test Bench • Evaluation Sandbox
             </h1>
             <p className="text-xs sm:text-sm text-zinc-500 font-sans">
               Test creator specialized models against OpenAI, Google, and Anthropic frontier APIs with your exact prompt data.

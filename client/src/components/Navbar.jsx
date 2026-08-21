@@ -17,7 +17,7 @@ const Navbar = () => {
   return (
     <header className="w-full bg-white border-b border-[#e4e4e7] sticky top-0 z-50 font-sans text-sm">
       <div className="max-w-6xl mx-auto px-4 sm:px-8 h-14 flex items-center justify-between">
-        {/* Left: Brand Logo & Navigation */}
+        {/* Left: Brand Logo & Navigation Links */}
         <div className="flex items-center gap-6">
           <Link to="/" className="flex items-center gap-2 group">
             <div className="w-6 h-6 rounded-none bg-[#ea580c] text-white flex items-center justify-center font-bold text-xs font-mono shadow-xs">
@@ -28,7 +28,8 @@ const Navbar = () => {
             </span>
           </Link>
 
-          <nav className="flex items-center gap-2 text-xs font-mono">
+          <nav className="flex items-center gap-1 sm:gap-2 text-xs font-mono">
+            {/* Test Bench Link */}
             <Link
               to="/test"
               className={`px-3 py-1.5 rounded-none transition-all flex items-center gap-1.5 ${
@@ -38,13 +39,42 @@ const Navbar = () => {
               }`}
             >
               <span className="w-1.5 h-1.5 bg-[#ea580c] rounded-none" />
-              <span>Test Benchmark</span>
+              <span>Test Bench</span>
             </Link>
 
+            {/* Live Bench Link */}
+            <Link
+              to="/live-bench"
+              className={`px-3 py-1.5 rounded-none transition-all ${
+                location.pathname === "/live-bench"
+                  ? "bg-black text-white font-bold"
+                  : "text-zinc-700 hover:text-black hover:bg-zinc-100 font-medium"
+              }`}
+            >
+              Live Bench
+            </Link>
+
+            {/* AI Models Link */}
+            <Link
+              to="/models"
+              className={`px-3 py-1.5 rounded-none transition-all ${
+                location.pathname === "/models"
+                  ? "bg-black text-white font-bold"
+                  : "text-zinc-700 hover:text-black hover:bg-zinc-100 font-medium"
+              }`}
+            >
+              AI Models
+            </Link>
+
+            {/* About Link */}
             <Link
               to="/#about"
               onClick={handleAboutClick}
-              className="text-zinc-600 hover:text-black px-3 py-1.5 rounded-none transition-colors"
+              className={`px-3 py-1.5 rounded-none transition-colors hidden sm:inline ${
+                location.pathname === "/about"
+                  ? "text-[#ea580c] font-bold"
+                  : "text-zinc-600 hover:text-black"
+              }`}
             >
               About
             </Link>
@@ -60,7 +90,7 @@ const Navbar = () => {
               </span>
               <button
                 onClick={logout}
-                className="px-3 py-1.5 rounded-none border border-zinc-300 text-zinc-700 hover:text-black hover:bg-zinc-50 font-medium transition-all cursor-pointer"
+                className="px-3 py-1.5 rounded-none border border-zinc-300 text-zinc-700 hover:text-black hover:bg-zinc-50 font-medium transition-all cursor-pointer font-mono"
               >
                 Log out
               </button>

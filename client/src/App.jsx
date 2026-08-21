@@ -5,6 +5,8 @@ import Navbar from "./components/Navbar";
 import Home from "./pages/Home";
 import About from "./pages/About";
 import TestPage from "./pages/TestPage";
+import LiveBenchPage from "./pages/LiveBenchPage";
+import ModelsPage from "./pages/ModelsPage";
 import AuthPage from "./pages/AuthPage";
 
 function AppLayout() {
@@ -17,6 +19,8 @@ function AppLayout() {
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/test" element={<TestPage />} />
+        <Route path="/live-bench" element={<LiveBenchPage />} />
+        <Route path="/models" element={<ModelsPage />} />
         <Route path="/about" element={<About />} />
         <Route path="/login" element={<AuthPage />} />
         <Route path="/register" element={<AuthPage />} />
