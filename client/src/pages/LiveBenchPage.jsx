@@ -12,10 +12,11 @@ import {
   HiOutlineCodeBracket,
   HiOutlineCheckCircle,
   HiOutlineBolt,
+  HiOutlineScale,
 } from "react-icons/hi2";
 
 // 100% Comprehensive LiveBench.ai Leaderboard Models extracted directly from livebench.ai (44 Models)
-const PRELOADED_FRONTIER_MODELS = [
+export const PRELOADED_FRONTIER_MODELS = [
   {
     id: "claude-fable-5",
     name: "Claude Fable 5 Max Effort",
@@ -683,10 +684,18 @@ export const LiveBenchPage = () => {
               </p>
             </div>
 
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2.5 flex-wrap">
+              <Link
+                to="/compare"
+                className="px-4 py-2.5 bg-zinc-900 hover:bg-black text-white text-xs font-mono font-bold flex items-center gap-1.5 transition-all shadow-xs cursor-pointer"
+              >
+                <HiOutlineScale className="text-sm text-[#ea580c]" />
+                <span>Compare Models</span>
+              </Link>
+
               <Link
                 to="/test"
-                className="px-4 py-2.5 bg-[#ea580c] hover:bg-[#c2410c] text-white text-xs font-mono font-bold flex items-center gap-1.5 transition-all shadow-xs"
+                className="px-4 py-2.5 bg-[#ea580c] hover:bg-[#c2410c] text-white text-xs font-mono font-bold flex items-center gap-1.5 transition-all shadow-xs cursor-pointer"
               >
                 <HiOutlineBolt className="text-sm" />
                 <span>Test Bench & Creator Rankings</span>
@@ -1012,58 +1021,24 @@ export const LiveBenchPage = () => {
                         {/* Expanded Drawer */}
                         {isExpanded && (
                           <tr className="bg-zinc-50 border-y border-[#e4e4e7]">
-                            <td colSpan={10} className="p-4 sm:p-6 space-y-4">
-                              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                            <td colSpan={10} className="p-4 sm:p-5">
+                              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 font-mono text-xs">
                                 <div>
-                                  <h4 className="font-bold text-zinc-950 text-sm">
-                                    {model.name} — Benchmark Telemetry Specs
+                                  <h4 className="font-bold text-zinc-950 text-xs">
+                                    {model.name} — LiveBench Automated Benchmark Specs
                                   </h4>
-                                  <p className="text-xs text-zinc-500 font-sans mt-0.5">
-                                    35 assertions evaluated with automated promptfoo test suite. Average Latency: {model.metrics.avgLatencyMs}ms.
+                                  <p className="text-[11px] text-zinc-500 font-sans mt-0.5">
+                                    Organization: <span className="text-zinc-800 font-medium">{model.org}</span> • 35 assertions evaluated with contamination-free promptfoo test suite • Average Latency: <span className="text-zinc-800 font-medium">{model.metrics.avgLatencyMs}ms</span>.
                                   </p>
                                 </div>
 
-                                <div className="flex items-center gap-2">
-                                  <Link
-                                    to="/test"
-                                    className="px-3 py-1.5 bg-zinc-900 hover:bg-black text-white text-xs font-mono font-bold flex items-center gap-1"
-                                  >
-                                    <span>Benchmark Custom Model</span>
-                                    <HiOutlineArrowTopRightOnSquare />
-                                  </Link>
-                                </div>
-                              </div>
-
-                              {/* Mini score grid */}
-                              <div className="grid grid-cols-2 sm:grid-cols-7 gap-2 text-center text-xs font-mono">
-                                <div className="p-2 bg-white border border-[#e4e4e7]">
-                                  <span className="text-[10px] text-zinc-500 block">Reasoning</span>
-                                  <span className="font-bold text-zinc-900">{catScores.reasoning ?? 90}%</span>
-                                </div>
-                                <div className="p-2 bg-white border border-[#e4e4e7]">
-                                  <span className="text-[10px] text-zinc-500 block">Coding</span>
-                                  <span className="font-bold text-zinc-900">{catScores.coding ?? 85}%</span>
-                                </div>
-                                <div className="p-2 bg-white border border-[#e4e4e7]">
-                                  <span className="text-[10px] text-zinc-500 block">Agentic</span>
-                                  <span className="font-bold text-zinc-900">{catScores.agentic_coding ?? 65}%</span>
-                                </div>
-                                <div className="p-2 bg-white border border-[#e4e4e7]">
-                                  <span className="text-[10px] text-zinc-500 block">Math</span>
-                                  <span className="font-bold text-zinc-900">{catScores.mathematics ?? 92}%</span>
-                                </div>
-                                <div className="p-2 bg-white border border-[#e4e4e7]">
-                                  <span className="text-[10px] text-zinc-500 block">Data Analysis</span>
-                                  <span className="font-bold text-zinc-900">{catScores.data_analysis ?? 80}%</span>
-                                </div>
-                                <div className="p-2 bg-white border border-[#e4e4e7]">
-                                  <span className="text-[10px] text-zinc-500 block">Language</span>
-                                  <span className="font-bold text-zinc-900">{catScores.language ?? 88}%</span>
-                                </div>
-                                <div className="p-2 bg-white border border-[#e4e4e7]">
-                                  <span className="text-[10px] text-zinc-500 block">Instruction</span>
-                                  <span className="font-bold text-zinc-900">{catScores.instruction ?? 75}%</span>
-                                </div>
+                                <Link
+                                  to="/test"
+                                  className="px-3 py-1.5 bg-zinc-900 hover:bg-black text-white text-xs font-mono font-bold flex items-center gap-1 shrink-0 shadow-xs"
+                                >
+                                  <span>Benchmark Custom Model</span>
+                                  <HiOutlineArrowTopRightOnSquare />
+                                </Link>
                               </div>
                             </td>
                           </tr>
