@@ -1,4 +1,4 @@
-@import url("https://fonts.googleapis.com/css2?family=Monda:wght@400;700&family=Inter:wght@300;400;500;600;700;800&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Space+Mono:ital,wght@0,400;0,700;1,400&family=Monda:wght@400;700&display=swap");
 
 @tailwind base;
 @tailwind components;
@@ -8,55 +8,149 @@
 @layer base {
   body {
     @apply bg-black text-white antialiased;
-    font-family: "Monda", sans-serif;
+    font-family: "Space Mono", monospace;
   }
 
   * {
     @apply box-border m-0 p-0;
-    font-family: "Monda", sans-serif;
   }
 
-  ::-webkit-scrollbar {
-    @apply w-2;
-  }
-
-  ::-webkit-scrollbar-track {
-    @apply bg-dark-800;
-  }
-
-  ::-webkit-scrollbar-thumb {
-    @apply bg-dark-400 rounded-full;
-  }
+  ::-webkit-scrollbar { @apply w-2; }
+  ::-webkit-scrollbar-track { background: #111; }
+  ::-webkit-scrollbar-thumb { background: #333; border-radius: 0; }
 }
 
-/* ---- Reusable Component Classes ---- */
+/* ---- Components ---- */
 @layer components {
+
   .btn-primary {
-    @apply bg-primary-600 hover:bg-primary-700 text-white font-semibold py-2.5 px-6 rounded-lg transition-all duration-200 ease-in-out active:scale-95;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: #d4500a;
+    color: #f5f0e8;
+    font-family: "Press Start 2P", monospace;
+    font-size: 0.58rem;
+    font-weight: 700;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    padding: 13px 24px;
+    border: 2px solid #1a1a1a;
+    border-radius: 0;
+    box-shadow: 4px 4px 0 #1a1a1a;
+    cursor: pointer;
+    transition: transform 0.1s, box-shadow 0.1s, background 0.15s, color 0.15s;
+  }
+  .btn-primary:hover {
+    background: #1a1a1a;
+    color: #f5f0e8;
+    transform: translate(-2px, -2px);
+    box-shadow: 6px 6px 0 #d4500a;
+  }
+  .btn-primary:active {
+    transform: translate(2px, 2px);
+    box-shadow: 2px 2px 0 #1a1a1a;
   }
 
   .btn-secondary {
-    @apply bg-dark-500 hover:bg-dark-400 text-white font-semibold py-2.5 px-6 rounded-lg transition-all duration-200 ease-in-out border border-dark-300 active:scale-95;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: transparent;
+    color: #1a1a1a;
+    font-family: "Press Start 2P", monospace;
+    font-size: 0.58rem;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    padding: 11px 24px;
+    border: 2px solid #1a1a1a;
+    border-radius: 0;
+    box-shadow: 4px 4px 0 #1a1a1a;
+    cursor: pointer;
+    transition: transform 0.1s, box-shadow 0.1s, background 0.15s, color 0.15s;
+  }
+  .btn-secondary:hover {
+    background: #1a1a1a;
+    color: #f5f0e8;
+    transform: translate(-2px, -2px);
+    box-shadow: 6px 6px 0 #d4500a;
   }
 
   .btn-danger {
-    @apply bg-red-600 hover:bg-red-700 text-white font-semibold py-2.5 px-6 rounded-lg transition-all duration-200 ease-in-out active:scale-95;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: #c0392b;
+    color: #f5f0e8;
+    font-family: "Press Start 2P", monospace;
+    font-size: 0.58rem;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    padding: 13px 24px;
+    border: 2px solid #1a1a1a;
+    border-radius: 0;
+    box-shadow: 4px 4px 0 #1a1a1a;
+    cursor: pointer;
+    transition: transform 0.1s, box-shadow 0.1s;
+  }
+  .btn-danger:hover {
+    transform: translate(-2px, -2px);
+    box-shadow: 6px 6px 0 #7b241c;
   }
 
+  /* Underline-only input field */
   .input-field {
-    @apply w-full bg-dark-700 border border-dark-400 text-white rounded-lg px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent placeholder-dark-200 transition-all duration-200;
+    width: 100%;
+    background: transparent;
+    border: none;
+    border-bottom: 2px solid #1a1a1a;
+    border-radius: 0;
+    color: #1a1a1a;
+    font-size: 0.82rem;
+    font-family: "Space Mono", monospace;
+    padding: 8px 0;
+    outline: none;
+    letter-spacing: 0.5px;
+    transition: border-color 0.2s;
+    caret-color: #d4500a;
   }
+  .input-field::placeholder { color: #bbb; }
+  .input-field:focus { border-bottom-color: #d4500a; }
 
+  /* Card */
   .card {
-    @apply bg-dark-700 border border-dark-500 rounded-xl p-6 shadow-lg;
+    background: #fff;
+    border: 2px solid #1a1a1a;
+    border-radius: 0;
+    padding: 1.5rem;
+    box-shadow: 4px 4px 0 #1a1a1a;
   }
 
+  /* Glass card — now just a clean retro card */
   .glass-card {
-    @apply bg-white/5 backdrop-blur-lg border border-white/10 rounded-xl p-6 shadow-lg;
+    background: #fff;
+    border: 2px solid #1a1a1a;
+    border-radius: 0;
+    padding: 2rem 2.5rem 2.5rem;
+    box-shadow: 6px 6px 0 #1a1a1a;
+    position: relative;
+  }
+  .glass-card::before {
+    content: "";
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 4px;
+    background: #d4500a;
   }
 
+  /* Retro heading text */
   .gradient-text {
-    @apply bg-gradient-to-r from-primary-400 to-purple-400 bg-clip-text text-transparent;
+    font-family: "Press Start 2P", monospace;
+    font-size: 0.82rem;
+    color: #1a1a1a;
+    letter-spacing: 1px;
+    line-height: 1.6;
+    display: block;
   }
 
   .page-container {

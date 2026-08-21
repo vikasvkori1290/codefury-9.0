@@ -105,14 +105,16 @@ const AuthPage = () => {
         <div className="auth-form-panel auth-form-panel--login">
           <form onSubmit={handleLogin} className="auth-form">
             <h2 className="auth-form__title">Sign In</h2>
-            <p className="auth-form__subtitle">Access your account</p>
+            <p className="auth-form__subtitle">welcome back</p>
 
             <div className="auth-input-group">
-              <HiOutlineEnvelope className="auth-input-icon" />
+              <label style={{ fontSize: "0.6rem", fontFamily: "'Space Mono', monospace", color: "#888", letterSpacing: "1px", textTransform: "uppercase" }}>
+                Email
+              </label>
               <input
                 type="email"
                 className="auth-input"
-                placeholder="Email"
+                placeholder="you@example.com"
                 value={loginEmail}
                 onChange={(e) => setLoginEmail(e.target.value)}
                 autoComplete="email"
@@ -120,23 +122,27 @@ const AuthPage = () => {
             </div>
 
             <div className="auth-input-group">
-              <HiOutlineLockClosed className="auth-input-icon" />
-              <input
-                type={showLoginPass ? "text" : "password"}
-                className="auth-input"
-                placeholder="Password"
-                value={loginPassword}
-                onChange={(e) => setLoginPassword(e.target.value)}
-                autoComplete="current-password"
-              />
-              <button
-                type="button"
-                className="auth-input-toggle"
-                onClick={() => setShowLoginPass(!showLoginPass)}
-                tabIndex={-1}
-              >
-                {showLoginPass ? <HiOutlineEyeSlash /> : <HiOutlineEye />}
-              </button>
+              <label style={{ fontSize: "0.6rem", fontFamily: "'Space Mono', monospace", color: "#888", letterSpacing: "1px", textTransform: "uppercase" }}>
+                Password
+              </label>
+              <div style={{ position: "relative" }}>
+                <input
+                  type={showLoginPass ? "text" : "password"}
+                  className="auth-input"
+                  placeholder="••••••••"
+                  value={loginPassword}
+                  onChange={(e) => setLoginPassword(e.target.value)}
+                  autoComplete="current-password"
+                />
+                <button
+                  type="button"
+                  className="auth-input-toggle"
+                  onClick={() => setShowLoginPass(!showLoginPass)}
+                  tabIndex={-1}
+                >
+                  {showLoginPass ? <HiOutlineEyeSlash /> : <HiOutlineEye />}
+                </button>
+              </div>
             </div>
 
             <button type="submit" className="auth-btn" disabled={loading}>
@@ -148,7 +154,7 @@ const AuthPage = () => {
             </button>
 
             <p className="auth-toggle-text auth-toggle-text--mobile">
-              Don't have an account?{" "}
+              No account?{" "}
               <button type="button" onClick={toggleMode} className="auth-toggle-link">
                 Sign Up
               </button>
@@ -156,14 +162,17 @@ const AuthPage = () => {
           </form>
         </div>
 
+
         {/* ==================== REGISTER FORM PANEL ==================== */}
         <div className="auth-form-panel auth-form-panel--register">
           <form onSubmit={handleRegister} className="auth-form">
             <h2 className="auth-form__title">Create Account</h2>
-            <p className="auth-form__subtitle">Join us today</p>
+            <p className="auth-form__subtitle">join us today</p>
 
             <div className="auth-input-group">
-              <HiOutlineUser className="auth-input-icon" />
+              <label style={{ fontSize: "0.6rem", fontFamily: "'Space Mono', monospace", color: "#888", letterSpacing: "1px", textTransform: "uppercase" }}>
+                Name
+              </label>
               <input
                 type="text"
                 className="auth-input"
@@ -175,11 +184,13 @@ const AuthPage = () => {
             </div>
 
             <div className="auth-input-group">
-              <HiOutlineEnvelope className="auth-input-icon" />
+              <label style={{ fontSize: "0.6rem", fontFamily: "'Space Mono', monospace", color: "#888", letterSpacing: "1px", textTransform: "uppercase" }}>
+                Email
+              </label>
               <input
                 type="email"
                 className="auth-input"
-                placeholder="Email"
+                placeholder="you@example.com"
                 value={regEmail}
                 onChange={(e) => setRegEmail(e.target.value)}
                 autoComplete="email"
@@ -187,23 +198,27 @@ const AuthPage = () => {
             </div>
 
             <div className="auth-input-group">
-              <HiOutlineLockClosed className="auth-input-icon" />
-              <input
-                type={showRegPass ? "text" : "password"}
-                className="auth-input"
-                placeholder="Password"
-                value={regPassword}
-                onChange={(e) => setRegPassword(e.target.value)}
-                autoComplete="new-password"
-              />
-              <button
-                type="button"
-                className="auth-input-toggle"
-                onClick={() => setShowRegPass(!showRegPass)}
-                tabIndex={-1}
-              >
-                {showRegPass ? <HiOutlineEyeSlash /> : <HiOutlineEye />}
-              </button>
+              <label style={{ fontSize: "0.6rem", fontFamily: "'Space Mono', monospace", color: "#888", letterSpacing: "1px", textTransform: "uppercase" }}>
+                Password
+              </label>
+              <div style={{ position: "relative" }}>
+                <input
+                  type={showRegPass ? "text" : "password"}
+                  className="auth-input"
+                  placeholder="min 6 characters"
+                  value={regPassword}
+                  onChange={(e) => setRegPassword(e.target.value)}
+                  autoComplete="new-password"
+                />
+                <button
+                  type="button"
+                  className="auth-input-toggle"
+                  onClick={() => setShowRegPass(!showRegPass)}
+                  tabIndex={-1}
+                >
+                  {showRegPass ? <HiOutlineEyeSlash /> : <HiOutlineEye />}
+                </button>
+              </div>
             </div>
 
             <button type="submit" className="auth-btn" disabled={loading}>
@@ -215,7 +230,7 @@ const AuthPage = () => {
             </button>
 
             <p className="auth-toggle-text auth-toggle-text--mobile">
-              Already have an account?{" "}
+              Have an account?{" "}
               <button type="button" onClick={toggleMode} className="auth-toggle-link">
                 Sign In
               </button>
