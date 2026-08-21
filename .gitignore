@@ -20,6 +20,10 @@ build/
 .DS_Store
 Thumbs.db
 
-# Logs
+# Logs & Temp
 *.log
 npm-debug.log*
+server/temp/
+temp/
+server/uploads/
+uploads/

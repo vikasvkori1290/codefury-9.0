@@ -198,9 +198,9 @@ export const getBenchmarkTestCases = () => {
 };
 
 /**
- * Generates dynamic promptfooconfig.json or YAML for a given Ollama model tag
+ * Generates dynamic promptfoo benchmark configuration for a given model
  */
-export const generatePromptfooConfig = async (modelName, configOutputPath) => {
+export const generatePromptfooConfig = async (modelName, configOutputPath = null) => {
   const testCases = getBenchmarkTestCases();
 
   const config = {
@@ -213,12 +213,14 @@ export const generatePromptfooConfig = async (modelName, configOutputPath) => {
     },
   };
 
-  const targetDir = path.dirname(configOutputPath);
-  if (!fs.existsSync(targetDir)) {
-    fs.mkdirSync(targetDir, { recursive: true });
+  if (configOutputPath) {
+    const targetDir = path.dirname(configOutputPath);
+    if (!fs.existsSync(targetDir)) {
+      fs.mkdirSync(targetDir, { recursive: true });
+    }
+    await fs.promises.writeFile(configOutputPath, JSON.stringify(config, null, 2), "utf8");
   }
 
-  await fs.promises.writeFile(configOutputPath, JSON.stringify(config, null, 2), "utf8");
   return config;
 };
 

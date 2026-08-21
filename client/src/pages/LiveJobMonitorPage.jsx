@@ -117,12 +117,12 @@ export const LiveJobMonitorPage = () => {
 
         {/* Progress Bar Container */}
         <div className="p-6 bg-white border border-[#e4e4e7] rounded-none shadow-xs space-y-3 font-mono text-xs">
-          <div className="flex items-center justify-between text-zinc-700">
+           <div className="flex items-center justify-between text-zinc-700">
             <span className="uppercase tracking-wider font-bold flex items-center gap-2">
               <HiOutlineBolt className="text-[#ea580c]" />
               <span>Execution Pipeline Progress</span>
             </span>
-            <span className="font-bold text-[#ea580c]">{progress}%</span>
+             <span className="font-bold text-[#ea580c]">{status === "completed" ? "100% COMPLETE" : `${progress}%`}</span>
           </div>
 
           <div className="w-full h-2.5 bg-zinc-100 border border-[#e4e4e7] rounded-none overflow-hidden">
@@ -132,13 +132,17 @@ export const LiveJobMonitorPage = () => {
             />
           </div>
 
-          <div className="grid grid-cols-5 text-[10px] text-zinc-400 pt-1">
-            <span className={progress >= 25 ? "text-[#ea580c] font-bold" : ""}>1. GSM8K (Reasoning)</span>
-            <span className={progress >= 45 ? "text-[#ea580c] font-bold" : ""}>2. MMLU (Knowledge)</span>
-            <span className={progress >= 65 ? "text-[#ea580c] font-bold" : ""}>3. Coding & JSON</span>
-            <span className={progress >= 85 ? "text-[#ea580c] font-bold" : ""}>4. Safety Refusals</span>
-            <span className={progress >= 100 ? "text-emerald-700 font-bold" : ""}>5. Final Scorecard</span>
-          </div>
+           <div className="grid grid-cols-2 gap-2 pt-1 text-[10px] sm:grid-cols-5">
+             {["GSM8K / Reasoning", "MMLU / Knowledge", "Coding & JSON", "Safety Refusals", "Final Scorecard"].map((stage, index) => {
+               const threshold = index === 4 ? 100 : (index + 1) * 20;
+               const active = progress >= threshold || status === "completed";
+               return <div key={stage} className={`border px-2 py-2 transition-colors ${active ? "border-orange-200 bg-orange-50 text-[#ea580c]" : "border-zinc-200 bg-zinc-50 text-zinc-400"}`}><span className="mr-1 font-bold">0{index + 1}</span>{stage}</div>;
+             })}
+           </div>
+           <div className="flex items-center justify-between border-t border-zinc-100 pt-3 font-mono text-[10px] text-zinc-400">
+             <span>{status === "completed" ? "All test cases evaluated and scorecard persisted." : `Executing one provider request at a time. ${Math.min(35, Math.floor(Math.max(0, progress - 10) / 85 * 35))}/35 cases completed.`}</span>
+             <span className={status === "completed" ? "font-bold text-emerald-700" : "text-[#ea580c]"}>{status === "completed" ? "READY" : "LIVE"}</span>
+           </div>
         </div>
 
         {/* Scorecard Results (Revealed when completed) */}

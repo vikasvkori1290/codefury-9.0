@@ -26,11 +26,36 @@ const POPULAR_OLLAMA_MODELS = [
 ];
 
 const API_PROVIDERS = [
-  { id: "openai", name: "OpenAI (gpt-4o-mini)", defaultModel: "gpt-4o-mini" },
-  { id: "google", name: "Google Gemini (gemini-2.5-flash)", defaultModel: "gemini-2.5-flash" },
-  { id: "anthropic", name: "Anthropic Claude (claude-3-5-haiku)", defaultModel: "claude-3-5-haiku-20241022" },
-  { id: "huggingface", name: "Hugging Face (Mistral-7B)", defaultModel: "mistralai/Mistral-7B-Instruct-v0.3" },
-  { id: "custom", name: "Custom REST / vLLM Endpoint", defaultModel: "custom-model" },
+  {
+    id: "google",
+    name: "Google Gemini",
+    defaultModel: "gemini-2.0-flash",
+    models: ["gemini-2.0-flash", "gemini-1.5-flash", "gemini-2.5-flash", "gemini-1.5-pro", "gemini-3-flash-preview"],
+  },
+  {
+    id: "openai",
+    name: "OpenAI",
+    defaultModel: "gpt-4o-mini",
+    models: ["gpt-4o-mini", "gpt-4o", "o3-mini", "gpt-3.5-turbo"],
+  },
+  {
+    id: "anthropic",
+    name: "Anthropic Claude",
+    defaultModel: "claude-3-5-haiku-20241022",
+    models: ["claude-3-5-haiku-20241022", "claude-3-5-sonnet-20241022", "claude-3-haiku-20240307"],
+  },
+  {
+    id: "huggingface",
+    name: "Hugging Face Serverless",
+    defaultModel: "mistralai/Mistral-7B-Instruct-v0.3",
+    models: ["mistralai/Mistral-7B-Instruct-v0.3", "meta-llama/Llama-3.1-8B-Instruct"],
+  },
+  {
+    id: "custom",
+    name: "Custom REST / vLLM Endpoint",
+    defaultModel: "custom-model",
+    models: ["custom-model"],
+  },
 ];
 
 const CATEGORIES = [
@@ -52,7 +77,7 @@ export const CreatorModelSubmitForm = () => {
   const [uploadedFile, setUploadedFile] = useState(null);
 
   // API Key fields
-  const [apiProvider, setApiProvider] = useState("openai");
+  const [apiProvider, setApiProvider] = useState("google");
   const [apiKey, setApiKey] = useState("");
   const [customEndpoint, setCustomEndpoint] = useState("");
   const [showApiKey, setShowApiKey] = useState(false);
@@ -163,6 +188,8 @@ export const CreatorModelSubmitForm = () => {
     }
   };
 
+  const selectedProviderObj = API_PROVIDERS.find((p) => p.id === apiProvider) || API_PROVIDERS[0];
+
   return (
     <div className="bg-white border border-[#e4e4e7] rounded-none shadow-xs font-sans">
       <form onSubmit={handleSubmit} className="p-6 sm:p-8 space-y-6">
@@ -217,7 +244,7 @@ export const CreatorModelSubmitForm = () => {
               onClick={() => {
                 setSubmissionMode("api_key");
                 if (!modelName || modelName.includes(":")) {
-                  setModelName("gpt-4o-mini");
+                  setModelName("gemini-2.0-flash");
                 }
               }}
               className={`py-3 px-3 rounded-none transition-all flex items-center justify-center gap-2 cursor-pointer border ${
@@ -347,7 +374,7 @@ export const CreatorModelSubmitForm = () => {
                   type="text"
                   value={modelName}
                   onChange={(e) => setModelName(e.target.value)}
-                  placeholder="e.g. gpt-4o-mini, gemini-1.5-flash"
+                  placeholder="e.g. gemini-2.0-flash, gemini-1.5-flash, gpt-4o-mini"
                   className="w-full bg-[#fafafa] border border-[#e4e4e7] focus:border-[#ea580c] text-zinc-900 text-xs font-mono rounded-none px-3 py-2 outline-none"
                   required
                 />
@@ -376,6 +403,31 @@ export const CreatorModelSubmitForm = () => {
                 />
               </div>
             </div>
+
+            {/* Quick model pills for selected provider */}
+            {selectedProviderObj.models?.length > 0 && (
+              <div className="space-y-1.5">
+                <span className="text-[11px] font-mono text-zinc-500 block">
+                  Quick Select {selectedProviderObj.name} Models:
+                </span>
+                <div className="flex flex-wrap gap-2">
+                  {selectedProviderObj.models.map((tag) => (
+                    <button
+                      key={tag}
+                      type="button"
+                      onClick={() => setModelName(tag)}
+                      className={`px-3 py-1 text-[11px] font-mono rounded-none transition-all cursor-pointer border ${
+                        modelName === tag
+                          ? "bg-orange-50 text-[#ea580c] border-[#ea580c] font-bold"
+                          : "bg-[#fafafa] text-zinc-600 border-[#e4e4e7] hover:border-zinc-400 hover:text-black"
+                      }`}
+                    >
+                      {tag}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
 
             {/* Custom Endpoint URL (optional) */}
             {apiProvider === "custom" && (
