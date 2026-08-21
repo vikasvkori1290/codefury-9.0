@@ -365,25 +365,61 @@ export const CreatorModelSubmitForm = () => {
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              {/* Model Tag/Name */}
+              {/* AI Model Name / Selection */}
               <div className="space-y-1.5">
                 <label className="text-xs font-mono font-semibold text-zinc-800">
-                  Model Endpoint Identifier:
+                  AI Model:
                 </label>
-                <input
-                  type="text"
-                  value={modelName}
-                  onChange={(e) => setModelName(e.target.value)}
-                  placeholder="e.g. gemini-2.0-flash, gemini-1.5-flash, gpt-4o-mini"
-                  className="w-full bg-[#fafafa] border border-[#e4e4e7] focus:border-[#ea580c] text-zinc-900 text-xs font-mono rounded-none px-3 py-2 outline-none"
-                  required
-                />
+                <div className="space-y-2">
+                  <select
+                    value={selectedProviderObj.models.includes(modelName) ? modelName : "custom"}
+                    onChange={(e) => {
+                      if (e.target.value !== "custom") {
+                        setModelName(e.target.value);
+                      }
+                    }}
+                    className="w-full bg-[#fafafa] border border-[#e4e4e7] focus:border-[#ea580c] text-zinc-900 text-xs font-mono rounded-none px-3 py-2 outline-none cursor-pointer"
+                  >
+                    {selectedProviderObj.models.map((m) => (
+                      <option key={m} value={m}>
+                        {m}
+                      </option>
+                    ))}
+                    <option value="custom">Custom Model Name...</option>
+                  </select>
+
+                  <input
+                    type="text"
+                    value={modelName}
+                    onChange={(e) => {
+                      const val = e.target.value;
+                      // Guard: If user accidentally pastes an API key into Model Name, auto-shift it to apiKey!
+                      if (
+                        val.startsWith("AIza") ||
+                        val.startsWith("AQ.") ||
+                        val.startsWith("gsk_") ||
+                        val.startsWith("sk-") ||
+                        val.startsWith("xai-") ||
+                        val.length > 30
+                      ) {
+                        setApiKey(val);
+                        setModelName(selectedProviderObj.defaultModel || "gemini-1.5-flash");
+                        toast.success("Detected API Key! Moved to Secret Key field.");
+                      } else {
+                        setModelName(val);
+                      }
+                    }}
+                    placeholder="e.g. gemini-1.5-flash, gpt-4o-mini"
+                    className="w-full bg-[#fafafa] border border-[#e4e4e7] focus:border-[#ea580c] text-zinc-900 text-xs font-mono rounded-none px-3 py-2 outline-none"
+                    required
+                  />
+                </div>
               </div>
 
-              {/* API Key Input */}
+              {/* API Key Input (Encrypted / Masked) */}
               <div className="space-y-1.5">
                 <label className="text-xs font-mono font-semibold text-zinc-800 flex items-center justify-between">
-                  <span>API Secret Key:</span>
+                  <span>API Secret Key (Never displayed publicly):</span>
                   <button
                     type="button"
                     onClick={() => setShowApiKey(!showApiKey)}
@@ -397,44 +433,22 @@ export const CreatorModelSubmitForm = () => {
                   type={showApiKey ? "text" : "password"}
                   value={apiKey}
                   onChange={(e) => setApiKey(e.target.value)}
-                  placeholder="sk-... or AIzaSy..."
+                  placeholder="Paste API key here (AIzaSy..., gsk_..., sk-...)"
                   className="w-full bg-[#fafafa] border border-[#e4e4e7] focus:border-[#ea580c] text-zinc-900 text-xs font-mono rounded-none px-3 py-2 outline-none"
                   required
                 />
+                <span className="text-[10px] text-zinc-500 font-mono block">
+                  Encrypted securely and never exposed in telemetry or logs.
+                </span>
               </div>
             </div>
-
-            {/* Quick model pills for selected provider */}
-            {selectedProviderObj.models?.length > 0 && (
-              <div className="space-y-1.5">
-                <span className="text-[11px] font-mono text-zinc-500 block">
-                  Quick Select {selectedProviderObj.name} Models:
-                </span>
-                <div className="flex flex-wrap gap-2">
-                  {selectedProviderObj.models.map((tag) => (
-                    <button
-                      key={tag}
-                      type="button"
-                      onClick={() => setModelName(tag)}
-                      className={`px-3 py-1 text-[11px] font-mono rounded-none transition-all cursor-pointer border ${
-                        modelName === tag
-                          ? "bg-orange-50 text-[#ea580c] border-[#ea580c] font-bold"
-                          : "bg-[#fafafa] text-zinc-600 border-[#e4e4e7] hover:border-zinc-400 hover:text-black"
-                      }`}
-                    >
-                      {tag}
-                    </button>
-                  ))}
-                </div>
-              </div>
-            )}
 
             {/* Custom Endpoint URL (optional) */}
             {apiProvider === "custom" && (
               <div className="space-y-1.5">
                 <label className="text-xs font-mono font-semibold text-zinc-800 flex items-center gap-1">
                   <HiOutlineGlobeAlt className="text-zinc-500" />
-                  <span>Custom Base URL (Optional):</span>
+                  <span>Custom Base URL / Endpoint:</span>
                 </label>
                 <input
                   type="text"

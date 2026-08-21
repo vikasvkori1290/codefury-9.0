@@ -27,3 +27,4 @@ server/temp/
 temp/
 server/uploads/
 uploads/
+server/data_store.json
