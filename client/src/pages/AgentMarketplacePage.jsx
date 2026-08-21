@@ -224,6 +224,7 @@ export const AGENTS = [
     company: "Anthropic",
     creator: "Anthropic",
     avatar: "CC",
+    icon: "https://cdn.simpleicons.org/anthropic/191919",
     category: "Coding",
     type: "coding agent",
     rating: 4.9,
@@ -250,6 +251,7 @@ export const AGENTS = [
     company: "OpenAI",
     creator: "OpenAI",
     avatar: "CX",
+    icon: "https://cdn.simpleicons.org/openai/191919",
     category: "Coding",
     type: "coding agent",
     rating: 4.8,
@@ -276,6 +278,7 @@ export const AGENTS = [
     company: "Cognition",
     creator: "Cognition",
     avatar: "DV",
+    icon: "https://api.dicebear.com/9.x/initials/svg?seed=Cognition&backgroundColor=18181b&fontFamily=monospace&fontWeight=700&fontSize=34",
     category: "Coding",
     type: "autonomous agent",
     rating: 4.7,
@@ -302,6 +305,7 @@ export const AGENTS = [
     company: "Cursor",
     creator: "Cursor",
     avatar: "CU",
+    icon: "https://cdn.simpleicons.org/cursor/191919",
     category: "Coding",
     type: "copilot",
     rating: 4.8,
@@ -328,6 +332,7 @@ export const AGENTS = [
     company: "Google",
     creator: "Google",
     avatar: "GC",
+    icon: "https://cdn.simpleicons.org/google/191919",
     category: "Coding",
     type: "copilot",
     rating: 4.6,
@@ -351,6 +356,7 @@ export const AGENTS = [
 
 const FILTER_GROUPS = [
   { key: "capability", label: "Capability", options: ["Coding & Development", "Research & Web", "Writing & Content", "Data & Analytics", "Automation", "Customer Support", "Marketing & Sales", "Productivity", "Design & Creative", "Security", "Finance", "Education"] },
+  { key: "worksOn", label: "Works on", options: ["GitHub", "VS Code", "Terminal", "Browser", "GUI", "TUI / CLI", "Workflow UI", "Chat UI", "Docker"] },
   { key: "useCase", label: "Use case", options: ["Code Generation", "Code Review", "Debugging", "Testing", "Web Research", "Competitor Research", "Document Analysis", "PDF Analysis", "Data Extraction", "Report Generation", "Email Management", "Lead Generation", "Customer Support", "Browser Automation", "DevOps", "Content Creation", "Data Analysis"] },
   { key: "type", label: "Agent type", options: ["Autonomous Agent", "Copilot", "Workflow Agent", "Chat Agent", "Browser Agent", "Coding Agent", "Multi-Agent", "API Agent"] },
   { key: "integration", label: "Integrations", options: ["GitHub", "GitLab", "VS Code", "Docker", "Terminal", "Notion", "Slack", "Gmail", "Google Drive", "Google Calendar", "PostgreSQL", "MongoDB", "Google Sheets", "Snowflake", "Browser", "Tavily", "Search", "PDF Parser", "OCR"] },
@@ -380,10 +386,21 @@ const getAgentFilterValues = (agent) => {
   const meta = AGENT_FILTER_META[agent.id] || {};
   const capabilityFallback = agent.category === "Coding" ? ["Coding & Development"] : [agent.category];
   const typeFallback = agent.type === "autonomous" ? ["Autonomous Agent"] : agent.type === "assistant" ? ["Copilot"] : ["Workflow Agent"];
+  const worksOnFallback = [
+    agent.tools.includes("GitHub") && "GitHub",
+    agent.tools.includes("VS Code") && "VS Code",
+    agent.tools.includes("Terminal") && "Terminal",
+    agent.tools.includes("Browser") && "Browser",
+    agent.tools.includes("Docker") && "Docker",
+    agent.type.includes("autonomous") && "TUI / CLI",
+    (agent.type.includes("assistant") || agent.type.includes("copilot")) && "Chat UI",
+    agent.type.includes("workflow") && "Workflow UI",
+  ].filter(Boolean);
   return {
     ...meta,
     capability: meta.capability || capabilityFallback,
     type: meta.type || typeFallback,
+    worksOn: meta.worksOn || worksOnFallback,
     integration: meta.integration || agent.tools,
     pricing: meta.pricing || [agent.priceTier === "Free" ? "Free" : "Pay per Use"],
     tags: agent.tags,
@@ -400,7 +417,6 @@ export const AgentMarketplacePage = () => {
   const [search, setSearch] = useState("");
   const [sortBy, setSortBy] = useState("relevant");
   const [selectedFilters, setSelectedFilters] = useState({});
-  const [showMoreFilters, setShowMoreFilters] = useState(false);
   const [expandedGroups, setExpandedGroups] = useState({ capability: true, useCase: true });
 
   const toggleFilter = (key, value) => setSelectedFilters((current) => {
@@ -412,7 +428,7 @@ export const AgentMarketplacePage = () => {
   const clearFilters = () => { setSearch(""); setSelectedFilters({}); };
 
   const activeFilters = Object.entries(selectedFilters).flatMap(([key, values]) => values.map((value) => ({ key, value })));
-  const primaryGroups = FILTER_GROUPS.filter((group) => group.key === "capability");
+  const primaryGroups = FILTER_GROUPS.filter((group) => ["capability", "worksOn"].includes(group.key));
   const advancedGroups = FILTER_GROUPS.filter((group) => ["pricing", "rating", "latency", "cost"].includes(group.key));
 
   const filtered = useMemo(() => {
@@ -460,10 +476,10 @@ export const AgentMarketplacePage = () => {
             </div>
 
             <div className="space-y-2 max-h-[calc(100vh-235px)] overflow-y-auto pr-1">
-              {[...primaryGroups, ...(showMoreFilters ? advancedGroups : [])].map((group) => {
+              {[...primaryGroups, ...advancedGroups].map((group) => {
                 const selectedCount = (selectedFilters[group.key] || []).length;
                 const isExpanded = expandedGroups[group.key];
-                const visibleOptions = isExpanded ? group.options.slice(0, showMoreFilters ? group.options.length : 6) : [];
+                const visibleOptions = isExpanded ? group.options : [];
                 return (
                   <div key={group.key} className="border-b border-[#f0f0f1] pb-2">
                     <button
@@ -485,7 +501,6 @@ export const AgentMarketplacePage = () => {
                             </label>
                           );
                         })}
-                        {!showMoreFilters && group.options.length > 6 && <span className="text-[10px] text-zinc-400 pt-1">+ {group.options.length - 6} more options</span>}
                       </div>
                     )}
                   </div>
@@ -493,25 +508,6 @@ export const AgentMarketplacePage = () => {
               })}
             </div>
 
-            <button
-              type="button"
-              onClick={() => setShowMoreFilters((current) => !current)}
-              className="w-full px-3 py-2 border border-[#e4e4e7] bg-[#fafafa] hover:bg-white text-zinc-700 font-bold text-[11px] cursor-pointer transition-colors"
-            >
-              {showMoreFilters ? "Hide advanced filters" : `More filters (${advancedGroups.length})`}
-            </button>
-
-            <label className="block space-y-1.5 border-t border-[#e4e4e7] pt-4">
-              <span className="text-[10px] text-zinc-500 uppercase font-bold">Sort by</span>
-              <select value={sortBy} onChange={(e) => setSortBy(e.target.value)} className="w-full bg-[#fafafa] border border-[#e4e4e7] text-zinc-800 px-2 py-2 outline-none cursor-pointer focus:border-[#ea580c]">
-                <option value="relevant">Most Relevant</option>
-                <option value="popular">Most Popular</option>
-                <option value="rating">Highest Rated</option>
-                <option value="benchmark">Highest Benchmark</option>
-                <option value="price">Lowest Price</option>
-                <option value="latency">Lowest Latency</option>
-              </select>
-            </label>
           </aside>
 
           <main className="space-y-4">
@@ -527,7 +523,14 @@ export const AgentMarketplacePage = () => {
 
             <div className="flex items-center justify-between font-mono text-xs">
               <span className="text-zinc-500"><strong className="text-zinc-900">{filtered.length}</strong> agents found</span>
-              <span className="text-zinc-400">{AGENTS.filter((agent) => agent.verified).length} verified publishers</span>
+              <select value={sortBy} onChange={(e) => setSortBy(e.target.value)} className="bg-white border border-[#e4e4e7] text-zinc-700 px-2.5 py-1.5 outline-none cursor-pointer focus:border-[#ea580c]">
+                <option value="relevant">Most Relevant</option>
+                <option value="popular">Most Popular</option>
+                <option value="rating">Highest Rated</option>
+                <option value="benchmark">Highest Benchmark</option>
+                <option value="price">Lowest Price</option>
+                <option value="latency">Lowest Latency</option>
+              </select>
             </div>
 
             {(search || activeFilters.length > 0) && (
@@ -540,10 +543,25 @@ export const AgentMarketplacePage = () => {
             )}
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {filtered.map((agent) => (
+              {filtered.map((agent) => {
+                const primaryTag = agent.category === "Data & Analytics"
+                  ? "Data Analysis"
+                  : agent.type.includes("copilot")
+                    ? "Coding Copilot"
+                    : agent.type.includes("coding")
+                      ? "Coding Agent"
+                      : agent.category;
+                return (
                 <article key={agent.id} className="bg-white border border-[#e4e4e7] hover:border-zinc-400 p-5 transition-all group shadow-xs">
                   <div className="flex items-start gap-3">
-                    <div className="w-11 h-11 bg-zinc-900 text-white flex items-center justify-center font-mono font-bold shrink-0">{agent.avatar}</div>
+                    <div className="w-11 h-11 bg-white border border-[#e4e4e7] flex items-center justify-center shrink-0 overflow-hidden">
+                      <img
+                        src={agent.icon || `https://api.dicebear.com/9.x/initials/svg?seed=${encodeURIComponent(agent.company || agent.creator)}&backgroundColor=f4f4f5&fontFamily=monospace&fontWeight=700`}
+                        alt={`${agent.company || agent.creator} logo`}
+                        className="w-full h-full object-contain p-1.5"
+                        loading="lazy"
+                      />
+                    </div>
                     <div className="min-w-0 flex-1">
                       <div className="flex items-start justify-between gap-2">
                         <div className="min-w-0">
@@ -575,13 +593,13 @@ export const AgentMarketplacePage = () => {
 
                   <div className="flex items-center justify-between gap-3 mt-4 pt-3 border-t border-[#e4e4e7] font-mono">
                     <div className="flex items-center gap-2 text-[11px] text-zinc-500">
-                      <span className="px-2 py-1 bg-[#fff7ed] border border-orange-200 text-[#ea580c] font-bold uppercase">{agent.category}</span>
-                      <span>{agent.type}</span>
+                      <span className="px-1.5 py-1 bg-[#fff7ed] border border-orange-200 text-[10px] text-[#ea580c] font-bold">{primaryTag}</span>
                     </div>
                     <Link to={`/agents/${agent.id}`} className="px-4 py-2 bg-zinc-900 hover:bg-[#ea580c] text-white text-xs font-bold transition-colors shrink-0">View Agent →</Link>
                   </div>
                 </article>
-              ))}
+                );
+              })}
             </div>
 
             {filtered.length === 0 && <div className="bg-white border border-dashed border-[#e4e4e7] p-10 text-center font-mono text-xs text-zinc-500">No agents match your filters. Try resetting the sidebar.</div>}
