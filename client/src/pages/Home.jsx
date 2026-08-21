@@ -11,8 +11,11 @@ const Home = () => {
           <span className="inline-flex items-center gap-2 bg-white/70 border border-[#cbd5e1] px-3 py-1.5 text-[11px] font-mono uppercase tracking-wider text-zinc-700">
             <HiOutlineSparkles className="text-[#ea580c]" /> ModelHub 9.0 / AI evaluation infrastructure
           </span>
-          <h1 className="text-5xl sm:text-7xl lg:text-8xl font-bold tracking-[-0.07em] leading-[0.95]">
-            Find the model that <span className="bg-[#f4511e] text-white px-2">wins on your data.</span>
+          <h1 className="text-4xl sm:text-6xl lg:text-7xl font-extrabold tracking-[-0.03em] leading-[1.25] sm:leading-[1.2] flex flex-col items-center gap-3">
+            <span>Find the model that</span>
+            <span className="inline-block bg-[#ea580c] text-white px-3 py-1 shadow-xs">
+              wins on your data.
+            </span>
           </h1>
           <p className="max-w-2xl mx-auto text-base sm:text-xl font-medium leading-relaxed text-zinc-700">
             Discover specialized AI, benchmark it against real workloads, and deploy the winner with confidence.
