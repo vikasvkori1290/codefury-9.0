@@ -1009,36 +1009,6 @@ export const LiveBenchPage = () => {
         {viewMode === "graph" ? (
           /* ==================== 1. GRAPH VIEW (MATCHING LIVEBENCH BAR CHART) ==================== */
           <div className="bg-white border border-[#e4e4e7] shadow-xs overflow-hidden font-mono">
-            {/* Top Sub-controls matching LiveBench Graph */}
-            <div className="p-3.5 bg-[#fafafa] border-b border-[#e4e4e7] flex flex-col sm:flex-row items-center justify-between gap-3 text-xs">
-              <div className="flex items-center gap-2 flex-wrap">
-                {/* Version pills */}
-                <div className="inline-flex items-center bg-zinc-200/80 p-0.5 border border-zinc-300">
-                  <span className="px-2.5 py-0.5 bg-black text-white font-bold text-[11px]">
-                    v1.1
-                  </span>
-                  <span className="px-2.5 py-0.5 text-zinc-600 font-medium text-[11px]">
-                    v1
-                  </span>
-                </div>
-
-                {/* Effort pills */}
-                <div className="inline-flex items-center bg-zinc-200/80 p-0.5 border border-zinc-300">
-                  <span className="px-2.5 py-0.5 bg-black text-white font-bold text-[11px]">
-                    Best
-                  </span>
-                  <span className="px-2.5 py-0.5 text-zinc-600 font-medium text-[11px]">
-                    All effort levels
-                  </span>
-                </div>
-              </div>
-
-              <div className="flex items-center gap-2 text-zinc-600 text-xs">
-                <span className="font-bold text-zinc-900">Models ({combinedList.length}/44)</span>
-                <span className="text-[10px] text-zinc-400">▾</span>
-              </div>
-            </div>
-
             {/* Table / Graph Layout (Robust Non-Wrapping Columns) */}
             <div className="overflow-x-auto">
               <table className="w-full text-left border-collapse text-xs font-mono min-w-[760px]">
