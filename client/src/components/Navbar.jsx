@@ -6,14 +6,6 @@ const Navbar = () => {
   const { user, logout } = useAuth();
   const location = useLocation();
 
-  const handleAboutClick = (e) => {
-    if (location.pathname === "/") {
-      e.preventDefault();
-      const el = document.getElementById("about");
-      if (el) el.scrollIntoView({ behavior: "smooth" });
-    }
-  };
-
   return (
     <header className="w-full bg-white border-b border-[#e4e4e7] sticky top-0 z-50 font-sans text-sm">
       <div className="max-w-6xl mx-auto px-4 sm:px-8 h-14 flex items-center justify-between">
@@ -28,8 +20,7 @@ const Navbar = () => {
             </span>
           </Link>
 
-          <nav className="flex items-center gap-1 sm:gap-2 text-xs font-mono">
-            {/* Test Bench Link */}
+          <nav className="flex items-center gap-1 font-mono text-xs">
             <Link
               to="/test"
               className={`px-3 py-1.5 rounded-none transition-all flex items-center gap-1.5 ${
@@ -38,35 +29,32 @@ const Navbar = () => {
                   : "text-zinc-700 hover:text-black hover:bg-zinc-100 font-medium"
               }`}
             >
-              <span className="w-1.5 h-1.5 bg-[#ea580c] rounded-none" />
+              <span className="w-1.5 h-1.5 bg-[#ea580c] rounded-none hidden sm:inline" />
               <span>Test Bench</span>
             </Link>
 
-            {/* Live Bench Link */}
             <Link
               to="/live-bench"
-              className={`px-3 py-1.5 rounded-none transition-all ${
+              className={`px-3 py-1.5 rounded-none transition-all flex items-center gap-1.5 ${
                 location.pathname === "/live-bench"
                   ? "bg-black text-white font-bold"
                   : "text-zinc-700 hover:text-black hover:bg-zinc-100 font-medium"
               }`}
             >
-              Live Bench
+              <span>Live Bench</span>
             </Link>
 
-            {/* AI Models Link */}
             <Link
               to="/models"
-              className={`px-3 py-1.5 rounded-none transition-all ${
+              className={`px-3 py-1.5 rounded-none transition-all flex items-center gap-1.5 ${
                 location.pathname === "/models" || location.pathname.startsWith("/models/")
                   ? "bg-black text-white font-bold"
                   : "text-zinc-700 hover:text-black hover:bg-zinc-100 font-medium"
               }`}
             >
-              AI Models
+              <span>AI Models</span>
             </Link>
 
-            {/* Agent Marketplace Link */}
             <Link
               to="/agents"
               className={`px-3 py-1.5 rounded-none transition-all flex items-center gap-1.5 ${
@@ -77,19 +65,6 @@ const Navbar = () => {
             >
               <span className="w-1.5 h-1.5 bg-emerald-500 rounded-none hidden sm:inline" />
               <span>Agent Marketplace</span>
-            </Link>
-
-            {/* About Link */}
-            <Link
-              to="/#about"
-              onClick={handleAboutClick}
-              className={`px-3 py-1.5 rounded-none transition-colors hidden sm:inline ${
-                location.pathname === "/about"
-                  ? "text-[#ea580c] font-bold"
-                  : "text-zinc-600 hover:text-black"
-              }`}
-            >
-              About
             </Link>
           </nav>
         </div>
