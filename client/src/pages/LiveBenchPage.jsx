@@ -2,6 +2,7 @@ import React, { useEffect, useMemo, useState } from "react";
 import {
   HiOutlineArrowTopRightOnSquare,
   HiOutlineCpuChip,
+  HiOutlineCheckCircle,
   HiOutlineExclamationTriangle,
   HiOutlineMagnifyingGlass,
   HiOutlineSparkles,
@@ -50,6 +51,7 @@ const scoreLabel = (score) =>
 
 const LiveBenchPage = () => {
   const [boards, setBoards] = useState([]);
+  const [creatorModels, setCreatorModels] = useState([]);
   const [activeBoard, setActiveBoard] = useState("Verified");
   const [searchQuery, setSearchQuery] = useState("");
   const [agentFilter, setAgentFilter] = useState("all");
@@ -73,6 +75,26 @@ const LiveBenchPage = () => {
 
     return () => controller.abort();
   }, []);
+
+  useEffect(() => {
+    const loadCreatorModels = () => fetch("http://localhost:5000/api/models")
+      .then((response) => (response.ok ? response.json() : null))
+      .then((payload) => setCreatorModels(payload?.models || []))
+      .catch(() => setCreatorModels([]));
+    loadCreatorModels();
+    const interval = setInterval(loadCreatorModels, 5000);
+    return () => clearInterval(interval);
+  }, []);
+
+  const rankedCreatorModels = useMemo(
+    () => creatorModels
+      .filter((model) => model.latestBenchmark?.status === "completed" && model.latestBenchmark?.metrics)
+      .sort((a, b) => {
+        const scoreDifference = (b.latestBenchmark.metrics.overallPassRate || 0) - (a.latestBenchmark.metrics.overallPassRate || 0);
+        return scoreDifference || (a.latestBenchmark.metrics.avgLatencyMs || Infinity) - (b.latestBenchmark.metrics.avgLatencyMs || Infinity);
+      }),
+    [creatorModels],
+  );
 
   const currentBoard = useMemo(
     () => boards.find((board) => board.name.toLowerCase() === activeBoard.toLowerCase()),
@@ -123,6 +145,30 @@ const LiveBenchPage = () => {
             </a>
           </div>
         </header>
+
+        <section className="space-y-4 border border-[#e4e4e7] bg-white p-5 shadow-xs">
+          <div className="flex flex-col justify-between gap-2 sm:flex-row sm:items-end">
+            <div>
+              <div className="font-mono text-[10px] font-bold uppercase tracking-wider text-[#ea580c]">CodeFury Creator Rankings</div>
+              <h2 className="mt-1 text-lg font-bold text-zinc-900">Completed creator benchmarks</h2>
+              <p className="mt-1 text-xs text-zinc-500">Live results ranked by the application benchmark pass rate.</p>
+            </div>
+            <span className="font-mono text-[11px] text-zinc-500">{rankedCreatorModels.length} completed models</span>
+          </div>
+          {rankedCreatorModels.length ? (
+            <div className="overflow-x-auto">
+              <table className="w-full min-w-[620px] text-left">
+                <thead className="border-y border-zinc-200 font-mono text-[10px] uppercase text-zinc-500"><tr><th className="px-3 py-2">Rank</th><th className="px-3 py-2">Model</th><th className="px-3 py-2">Creator</th><th className="px-3 py-2">Pass rate</th><th className="px-3 py-2">Latency</th><th className="px-3 py-2">Evaluator</th></tr></thead>
+                <tbody className="divide-y divide-zinc-100">
+                  {rankedCreatorModels.map((model, index) => {
+                    const metrics = model.latestBenchmark.metrics;
+                    return <tr key={model._id || model.id} className="hover:bg-orange-50/40"><td className="px-3 py-3 font-mono text-xs font-bold text-zinc-500">#{index + 1}</td><td className="px-3 py-3"><div className="flex items-center gap-2 text-xs font-bold text-zinc-900"><HiOutlineCheckCircle className="text-emerald-600" />{model.name}</div><div className="mt-1 font-mono text-[10px] text-zinc-400">{model.provider} / {model.category}</div></td><td className="px-3 py-3 font-mono text-xs text-zinc-600">{model.creator}</td><td className="px-3 py-3 font-mono text-sm font-bold text-emerald-700">{metrics.overallPassRate}%</td><td className="px-3 py-3 font-mono text-xs text-zinc-600">{metrics.avgLatencyMs} ms</td><td className="px-3 py-3 font-mono text-[10px] text-zinc-500">{metrics.evaluator || "-"}</td></tr>;
+                  })}
+                </tbody>
+              </table>
+            </div>
+          ) : <div className="border border-dashed border-zinc-200 p-6 text-center font-mono text-xs text-zinc-500">Completed creator benchmark results will appear here automatically.</div>}
+        </section>
 
         <nav className="flex gap-1 overflow-x-auto border border-[#e4e4e7] bg-white p-2 shadow-xs" aria-label="SWE-bench benchmark tabs">
           {BOARDS.map((board) => (

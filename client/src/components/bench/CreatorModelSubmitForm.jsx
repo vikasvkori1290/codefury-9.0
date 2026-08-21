@@ -27,7 +27,7 @@ const POPULAR_OLLAMA_MODELS = [
 
 const API_PROVIDERS = [
   { id: "openai", name: "OpenAI (gpt-4o-mini)", defaultModel: "gpt-4o-mini" },
-  { id: "google", name: "Google Gemini (gemini-1.5-flash)", defaultModel: "gemini-1.5-flash" },
+  { id: "google", name: "Google Gemini (gemini-2.5-flash)", defaultModel: "gemini-2.5-flash" },
   { id: "anthropic", name: "Anthropic Claude (claude-3-5-haiku)", defaultModel: "claude-3-5-haiku-20241022" },
   { id: "huggingface", name: "Hugging Face (Mistral-7B)", defaultModel: "mistralai/Mistral-7B-Instruct-v0.3" },
   { id: "custom", name: "Custom REST / vLLM Endpoint", defaultModel: "custom-model" },

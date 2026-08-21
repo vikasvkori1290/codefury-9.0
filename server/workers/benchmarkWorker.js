@@ -8,6 +8,8 @@ import ModelListing from "../models/ModelListing.model.js";
 import { generatePromptfooConfig, getBenchmarkTestCases } from "../services/promptfooConfig.js";
 import { runCommand } from "../services/command.service.js";
 import jobStore from "../services/jobStore.js";
+import { runRegisteredModel } from "../services/registeredModel.service.js";
+import { redactSecret } from "../services/credential.service.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -64,6 +66,10 @@ export const runPromptfooBenchmarkWorker = async (jobId, modelName) => {
   if (!job) return console.warn(`[BenchmarkWorker] Job ${jobId} not found.`);
   const isMongooseConnected = mongoose.connection.readyState === 1;
   const configPath = path.join(tempDir, `promptfoo-${jobId}.json`);
+  let registeredModel = jobStore.getModel(job.modelListingId?.toString());
+  if (isMongooseConnected && job.modelListingId && mongoose.Types.ObjectId.isValid(job.modelListingId)) {
+    registeredModel = await ModelListing.findById(job.modelListingId).select("+apiKeyEncrypted").catch(() => registeredModel);
+  }
 
   const update = (progress, message) => {
     job.progress = progress;
@@ -79,44 +85,66 @@ export const runPromptfooBenchmarkWorker = async (jobId, modelName) => {
     const testCases = getBenchmarkTestCases();
     await generatePromptfooConfig(modelName, configPath);
 
+    const isRemoteModel = registeredModel?.provider === "custom_api";
     let ollamaAvailable = false;
-    try {
-      await runCommand("ollama", ["--version"], { timeoutMs: 3000, maxOutputBytes: 4096 });
-      const models = await runCommand("ollama", ["list"], { timeoutMs: 5000, maxOutputBytes: 64 * 1024 });
-      ollamaAvailable = models.stdout.split("\n").some((line) => line.trim().startsWith(modelName));
-      update(10, ollamaAvailable
-        ? "Ollama model detected; executing the generated suite against the model."
-        : "Ollama model is not installed; using deterministic simulated evaluation against all 35 cases.");
-    } catch (_) {
-      update(10, "Ollama CLI unavailable; using deterministic simulated evaluation against all 35 cases.");
+    if (isRemoteModel) {
+      update(10, `Remote provider '${registeredModel.apiProvider || "openai"}' selected; executing live requests.`);
+    } else {
+      try {
+        await runCommand("ollama", ["--version"], { timeoutMs: 3000, maxOutputBytes: 4096 });
+        const models = await runCommand("ollama", ["list"], { timeoutMs: 5000, maxOutputBytes: 64 * 1024 });
+        ollamaAvailable = models.stdout.split("\n").some((line) => line.trim().startsWith(modelName));
+        update(10, ollamaAvailable
+          ? "Ollama model detected; executing the generated suite against the model."
+          : "Ollama model not detected; executing deterministic simulated benchmark.");
+      } catch (_) {
+        update(10, "Ollama CLI unavailable; executing deterministic simulated benchmark.");
+      }
     }
 
     const results = [];
-    for (let index = 0; index < testCases.length; index += 1) {
+    let completedCases = 0;
+    const runCase = async (index) => {
       const testCase = testCases[index];
       const started = performance.now();
       let output;
-      let source = "simulated";
+      let source = isRemoteModel ? `live:${registeredModel.apiProvider || "openai"}` : (ollamaAvailable ? "ollama" : "simulated");
+      let usage = null;
       try {
-        if (ollamaAvailable) {
+        if (isRemoteModel) {
+          const remoteResult = await runRegisteredModel({ model: registeredModel, prompt: testCase.vars.prompt });
+          output = remoteResult.output;
+          usage = remoteResult.tokens;
+        } else if (ollamaAvailable) {
           const result = await runCommand("ollama", ["run", modelName, testCase.vars.prompt], { timeoutMs: 60000, maxOutputBytes: 256 * 1024 });
           output = result.stdout.trim();
-          source = "ollama";
         } else {
           output = simulatedResponse(testCase);
-          await sleep(1);
+          await sleep(15);
         }
         if (!output) throw new Error("Model returned an empty response");
       } catch (error) {
-        results.push({ ...evaluateCase(testCase, "", Math.round(performance.now() - started), source), error: error.message });
-        job.logs.push(`[${new Date().toISOString()}] Case ${index + 1}/35 failed: ${error.message}`);
-        update(Math.min(95, 10 + Math.round(((index + 1) / testCases.length) * 85)), null);
-        continue;
+        const safeError = redactSecret(error.message);
+        results[index] = { ...evaluateCase(testCase, "", Math.round(performance.now() - started), source), error: safeError };
+        job.logs.push(`[${new Date().toISOString()}] Case ${index + 1}/35 failed: ${safeError}`);
       }
-      results.push(evaluateCase(testCase, output, Math.round(performance.now() - started), source));
-      if ((index + 1) % 5 === 0 || index === testCases.length - 1) {
-        update(Math.min(95, 10 + Math.round(((index + 1) / testCases.length) * 85)), `Executed ${index + 1}/${testCases.length} benchmark cases.`);
+      if (!results[index]?.error) {
+        const evaluated = evaluateCase(testCase, output, Math.round(performance.now() - started), source);
+        results[index] = {
+          ...evaluated,
+          tokens: usage,
+          estimatedCost: usage && registeredModel?.pricingPer1kTokens
+            ? +(usage.total_tokens / 1000 * Number(registeredModel.pricingPer1kTokens)).toFixed(6)
+            : null,
+        };
       }
+      completedCases += 1;
+      update(Math.min(95, 10 + Math.round((completedCases / testCases.length) * 85)), `Executed ${completedCases}/${testCases.length} benchmark cases.`);
+    };
+
+    // Four concurrent requests keep the benchmark responsive without overwhelming a provider.
+    for (let start = 0; start < testCases.length; start += 4) {
+      await Promise.all(testCases.slice(start, start + 4).map((_, offset) => runCase(start + offset)));
     }
 
     const categories = ["reasoning", "knowledge", "coding", "instruction", "safety"];
@@ -141,7 +169,7 @@ export const runPromptfooBenchmarkWorker = async (jobId, modelName) => {
       tokensPerSecond,
       categoryScores,
       testResults: results,
-      evaluator: ollamaAvailable ? "ollama" : "deterministic-simulation",
+      evaluator: isRemoteModel ? `live-${registeredModel.apiProvider || "openai"}` : (ollamaAvailable ? "ollama" : "deterministic-simulation"),
     };
     job.logs.push(`[${new Date().toISOString()}] Evaluation complete: ${passed}/${testCases.length} passed | ${job.metrics.overallPassRate}% | ${avgLatencyMs}ms avg | ${tokensPerSecond} TPS.`);
     jobStore.setJob(jobId, job);
@@ -149,13 +177,16 @@ export const runPromptfooBenchmarkWorker = async (jobId, modelName) => {
     if (model) { model.latestBenchmark = job; jobStore.setModel(job.modelListingId.toString(), model); }
     if (isMongooseConnected && typeof job.save === "function") {
       await job.save().catch(() => {});
-      await ModelListing.findByIdAndUpdate(job.modelListingId, { latestBenchmark: job._id }).catch(() => {});
+      await ModelListing.findByIdAndUpdate(job.modelListingId, {
+        latestBenchmark: job._id,
+        ...(isRemoteModel ? { credentialStatus: "valid" } : {}),
+      }).catch(() => {});
     }
   } catch (error) {
     job.status = "failed";
-    job.error = error.message;
+    job.error = redactSecret(error.message);
     job.logs = job.logs || [];
-    job.logs.push(`[${new Date().toISOString()}] Benchmark failed: ${error.message}`);
+    job.logs.push(`[${new Date().toISOString()}] Benchmark failed: ${job.error}`);
     jobStore.setJob(jobId, job);
     if (isMongooseConnected && typeof job.save === "function") await job.save().catch(() => {});
   }

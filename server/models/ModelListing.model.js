@@ -17,6 +17,15 @@ const modelListingSchema = new mongoose.Schema(
       enum: ["ollama_local", "modelfile_upload", "custom_api"],
       default: "ollama_local",
     },
+    apiProvider: { type: String, default: null },
+    modelIdentifier: { type: String, default: null },
+    endpoint: { type: String, default: null },
+    apiKeyEncrypted: { type: String, default: null, select: false },
+    credentialStatus: {
+      type: String,
+      enum: ["not_required", "pending", "valid", "invalid"],
+      default: "not_required",
+    },
     category: {
       type: String,
       default: "General",

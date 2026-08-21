@@ -18,6 +18,7 @@ export const LiveJobMonitorPage = () => {
   const [jobData, setJobData] = useState(null);
   const [error, setError] = useState(null);
   const [isPolling, setIsPolling] = useState(true);
+  const [showCompletionReport, setShowCompletionReport] = useState(false);
   const terminalEndRef = useRef(null);
 
   const fetchStatus = async () => {
@@ -29,6 +30,7 @@ export const LiveJobMonitorPage = () => {
       const data = await res.json();
       if (data.success) {
         setJobData(data);
+        if (data.status === "completed") setShowCompletionReport(true);
         if (data.status === "completed" || data.status === "failed") {
           setIsPolling(false);
         }
@@ -261,6 +263,23 @@ export const LiveJobMonitorPage = () => {
           </div>
         </div>
       </div>
+      {showCompletionReport && status === "completed" && metrics && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-zinc-950/60 p-4" role="dialog" aria-modal="true" aria-labelledby="benchmark-report-title">
+          <div className="w-full max-w-lg space-y-5 border border-zinc-200 bg-white p-6 shadow-2xl">
+            <div className="flex items-start justify-between gap-4">
+              <div><div className="font-mono text-[10px] font-bold uppercase tracking-wider text-[#ea580c]">Benchmark complete</div><h2 id="benchmark-report-title" className="mt-1 text-xl font-bold text-zinc-950">{jobData.modelName} scorecard</h2></div>
+              <button type="button" onClick={() => setShowCompletionReport(false)} className="font-mono text-xs text-zinc-500 hover:text-zinc-950">Close</button>
+            </div>
+            <div className="grid grid-cols-3 gap-2 font-mono text-center">
+              <div className="border border-emerald-200 bg-emerald-50 p-3"><div className="text-[10px] text-zinc-500">PASS RATE</div><div className="mt-1 text-xl font-bold text-emerald-700">{metrics.overallPassRate}%</div></div>
+              <div className="border border-zinc-200 bg-zinc-50 p-3"><div className="text-[10px] text-zinc-500">AVG LATENCY</div><div className="mt-1 text-xl font-bold text-zinc-900">{metrics.avgLatencyMs}ms</div></div>
+              <div className="border border-zinc-200 bg-zinc-50 p-3"><div className="text-[10px] text-zinc-500">CASES</div><div className="mt-1 text-xl font-bold text-zinc-900">{metrics.passedCases}/{metrics.totalCases}</div></div>
+            </div>
+            <p className="font-mono text-xs text-zinc-600">This result is now included in CodeFury Creator Rankings and will be ranked against other completed creator models by pass rate.</p>
+            <div className="flex justify-end gap-2"><button type="button" onClick={() => setShowCompletionReport(false)} className="border border-zinc-300 px-4 py-2 font-mono text-xs text-zinc-700">Review details</button><Link to="/live-bench" onClick={() => setShowCompletionReport(false)} className="bg-[#ea580c] px-4 py-2 font-mono text-xs font-bold text-white hover:bg-[#c2410c]">Open Live Bench</Link></div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

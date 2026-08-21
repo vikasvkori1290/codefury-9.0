@@ -4,6 +4,14 @@ import BenchmarkJob from "../models/BenchmarkJob.model.js";
 import { addBenchmarkJob } from "../config/queue.js";
 import jobStore from "../services/jobStore.js";
 import { runCommand } from "../services/command.service.js";
+import { encryptCredential, redactSecret } from "../services/credential.service.js";
+
+const withoutCredential = (model) => {
+  if (!model) return null;
+  const safe = typeof model.toObject === "function" ? model.toObject() : { ...model };
+  delete safe.apiKeyEncrypted;
+  return safe;
+};
 
 /**
  * @desc Register a new AI Model (JSON, Modelfile/GGUF upload, or API Key) and trigger benchmark job
@@ -36,6 +44,11 @@ export const registerModel = async (req, res, next) => {
     const uploadedFile = req.file;
     let finalProvider = provider;
     let uploadedFilePath = null;
+    const isApiModel = Boolean(apiKey) || provider === "custom_api";
+    if (isApiModel && !apiKey?.trim()) {
+      return res.status(400).json({ success: false, message: "An API key is required for remote model benchmarking." });
+    }
+    const encryptedApiKey = apiKey ? encryptCredential(apiKey.trim()) : null;
 
     if (uploadedFile) {
       finalProvider = "modelfile_upload";
@@ -47,7 +60,7 @@ export const registerModel = async (req, res, next) => {
       } catch (ollamaErr) {
         console.warn("Ollama create unavailable or failed:", ollamaErr.message);
       }
-    } else if (apiKey || provider === "custom_api") {
+    } else if (isApiModel) {
       finalProvider = "custom_api";
     }
 
@@ -66,6 +79,11 @@ export const registerModel = async (req, res, next) => {
           category: category.trim(),
           pricingPer1kTokens: Number(pricing || pricingPer1kTokens) || 0.00015,
           uploadedFilePath,
+          apiProvider: apiProvider || "openai",
+          modelIdentifier: finalModelName.trim(),
+          endpoint: endpoint || null,
+          apiKeyEncrypted: encryptedApiKey,
+          credentialStatus: isApiModel ? "pending" : "not_required",
         });
 
         benchmarkJob = await BenchmarkJob.create({
@@ -92,6 +110,11 @@ export const registerModel = async (req, res, next) => {
         category: category.trim(),
         pricingPer1kTokens: Number(pricing || pricingPer1kTokens) || 0.00015,
         uploadedFilePath,
+        apiProvider: apiProvider || "openai",
+        modelIdentifier: finalModelName.trim(),
+        endpoint: endpoint || null,
+        apiKeyEncrypted: encryptedApiKey,
+        credentialStatus: isApiModel ? "pending" : "not_required",
         latestBenchmark: jobFallbackId,
         createdAt: new Date().toISOString(),
       };
@@ -120,15 +143,18 @@ export const registerModel = async (req, res, next) => {
       modelName: modelListing.name,
     });
 
+    const safeModel = { ...modelListing };
+    delete safeModel.apiKeyEncrypted;
+
     return res.status(201).json({
       success: true,
       message: "Model registered and benchmark queued successfully.",
       jobId: jobIdStr,
       modelId: modelIdStr,
-      model: modelListing,
+      model: safeModel,
     });
   } catch (error) {
-    next(error);
+    next(new Error(redactSecret(error.message)));
   }
 };
 
@@ -167,7 +193,7 @@ export const getBenchmarkStatus = async (req, res, next) => {
       metrics: job.metrics || null,
       logs: job.logs || [],
       error: job.error || null,
-      model: job.modelListingId,
+      model: withoutCredential(job.modelListingId),
       updatedAt: job.updatedAt || new Date().toISOString(),
     });
   } catch (error) {
@@ -186,7 +212,7 @@ export const listModels = async (req, res, next) => {
     let models = [];
 
     if (isMongooseConnected) {
-      models = await ModelListing.find()
+      models = await ModelListing.find().select("-apiKeyEncrypted")
         .populate("latestBenchmark")
         .sort({ createdAt: -1 })
         .catch(() => []);
@@ -199,7 +225,7 @@ export const listModels = async (req, res, next) => {
     return res.status(200).json({
       success: true,
       count: models.length,
-      models,
+      models: models.map(withoutCredential),
     });
   } catch (error) {
     next(error);
