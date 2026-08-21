@@ -206,20 +206,6 @@ console.log(await response.json());`,
           </div>
          </div>
 
-         {/* API access and pricing belong to individual models, not agents. */}
-         <div className="bg-white border border-[#e4e4e7] p-6 sm:p-8 rounded-none shadow-xs space-y-6">
-           <div className="flex items-center justify-between border-b border-[#e4e4e7] pb-4">
-             <div><h2 className="text-base font-bold">API Access & Pricing</h2><p className="text-xs text-zinc-500 mt-1">Choose a usage tier, then copy the integration for this model.</p></div>
-             <button onClick={() => setIsDeployModalOpen(true)} className="bg-[#ea580c] text-white px-4 py-2 text-xs font-bold">Open API setup</button>
-           </div>
-           <div className="grid md:grid-cols-3 gap-4">
-             <div className="border-2 border-zinc-900 p-5 space-y-3"><span className="text-[10px] uppercase font-bold text-zinc-500">Starter</span><div className="text-2xl font-bold">Pay as you go</div><p className="text-xs text-zinc-500">{model.pricingFormatted} · standard access</p><button onClick={() => setIsDeployModalOpen(true)} className="w-full border border-zinc-300 py-2 text-xs font-bold">Use model</button></div>
-             <div className="border-2 border-[#ea580c] bg-[#fff7ed] p-5 space-y-3 relative"><span className="absolute -top-2 left-4 bg-[#ea580c] text-white px-2 py-0.5 text-[10px] font-bold">RECOMMENDED</span><span className="text-[10px] uppercase font-bold text-[#ea580c]">Production</span><div className="text-2xl font-bold">Hosted API</div><p className="text-xs text-zinc-500">Priority routing · usage metering</p><button onClick={() => setIsDeployModalOpen(true)} className="w-full bg-[#ea580c] text-white py-2 text-xs font-bold">Deploy API</button></div>
-             <div className="border border-zinc-200 p-5 space-y-3"><span className="text-[10px] uppercase font-bold text-zinc-500">Enterprise</span><div className="text-2xl font-bold">Private hosting</div><p className="text-xs text-zinc-500">VPC, audit logs and dedicated capacity</p><button onClick={() => setIsDeployModalOpen(true)} className="w-full bg-zinc-900 text-white py-2 text-xs font-bold">Configure API</button></div>
-           </div>
-           <div className="space-y-3"><div className="flex flex-wrap items-center justify-between gap-3"><h3 className="text-xs font-bold uppercase font-mono">Install via API / SDK</h3><div className="inline-flex border border-zinc-200 p-0.5 text-xs font-mono">{["curl", "python", "node"].map((mode) => <button key={mode} onClick={() => setInstallMode(mode)} className={`px-3 py-1 ${installMode === mode ? "bg-white border border-zinc-200 font-bold" : "text-zinc-500"}`}>{mode === "node" ? "Node" : mode}</button>)}</div></div><div className="bg-[#0c0c0e] border border-zinc-800"><div className="flex items-center justify-between px-3 py-2 text-[10px] text-zinc-400 border-b border-zinc-700"><span>{installMode.toUpperCase()}</span><button onClick={copyInstallSnippet} className="flex items-center gap-1 bg-zinc-800 text-white px-2 py-1">{isSnippetCopied ? <HiOutlineCheck /> : <HiOutlineClipboard />} {isSnippetCopied ? "Copied" : "Copy snippet"}</button></div><pre className="p-4 text-xs text-zinc-200 overflow-x-auto leading-5"><code>{installSnippets[installMode]}</code></pre></div></div>
-         </div>
-
          {/* 2. SPEED & THROUGHPUT STATS BAR */}
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 font-mono">
           <div className="p-4 bg-white border border-[#e4e4e7] rounded-none shadow-xs space-y-1">
@@ -366,6 +352,102 @@ console.log(await response.json());`,
                 ))}
               </tbody>
             </table>
+          </div>
+        </div>
+
+        {/* 5. API ACCESS & PRICING (EXTREME END OF PAGE) */}
+        <div className="bg-white border border-[#e4e4e7] p-6 sm:p-8 rounded-none shadow-xs space-y-6">
+          <div className="flex items-center justify-between border-b border-[#e4e4e7] pb-4">
+            <div>
+              <h2 className="text-base font-bold">API Access & Pricing</h2>
+              <p className="text-xs text-zinc-500 mt-1">
+                Choose a usage tier, then copy the integration for this model.
+              </p>
+            </div>
+            <button
+              onClick={() => setIsDeployModalOpen(true)}
+              className="bg-[#ea580c] text-white px-4 py-2 text-xs font-bold hover:bg-[#c2410c] transition-colors cursor-pointer"
+            >
+              Open API setup
+            </button>
+          </div>
+
+          <div className="grid md:grid-cols-3 gap-4">
+            <div className="border-2 border-zinc-900 p-5 space-y-3">
+              <span className="text-[10px] uppercase font-bold text-zinc-500">Starter</span>
+              <div className="text-2xl font-bold">Pay as you go</div>
+              <p className="text-xs text-zinc-500">{model.pricingFormatted} · standard access</p>
+              <button
+                onClick={() => setIsDeployModalOpen(true)}
+                className="w-full border border-zinc-300 py-2 text-xs font-bold hover:bg-zinc-50 transition-colors cursor-pointer"
+              >
+                Use model
+              </button>
+            </div>
+
+            <div className="border-2 border-[#ea580c] bg-[#fff7ed] p-5 space-y-3 relative">
+              <span className="absolute -top-2 left-4 bg-[#ea580c] text-white px-2 py-0.5 text-[10px] font-bold">
+                RECOMMENDED
+              </span>
+              <span className="text-[10px] uppercase font-bold text-[#ea580c]">Production</span>
+              <div className="text-2xl font-bold">Hosted API</div>
+              <p className="text-xs text-zinc-500">Priority routing · usage metering</p>
+              <button
+                onClick={() => setIsDeployModalOpen(true)}
+                className="w-full bg-[#ea580c] hover:bg-[#c2410c] text-white py-2 text-xs font-bold transition-colors cursor-pointer"
+              >
+                Deploy API
+              </button>
+            </div>
+
+            <div className="border border-zinc-200 p-5 space-y-3">
+              <span className="text-[10px] uppercase font-bold text-zinc-500">Enterprise</span>
+              <div className="text-2xl font-bold">Private hosting</div>
+              <p className="text-xs text-zinc-500">VPC, audit logs and dedicated capacity</p>
+              <button
+                onClick={() => setIsDeployModalOpen(true)}
+                className="w-full bg-zinc-900 hover:bg-black text-white py-2 text-xs font-bold transition-colors cursor-pointer"
+              >
+                Configure API
+              </button>
+            </div>
+          </div>
+
+          <div className="space-y-3">
+            <div className="flex flex-wrap items-center justify-between gap-3">
+              <h3 className="text-xs font-bold uppercase font-mono">Install via API / SDK</h3>
+              <div className="inline-flex border border-zinc-200 p-0.5 text-xs font-mono">
+                {["curl", "python", "node"].map((mode) => (
+                  <button
+                    key={mode}
+                    onClick={() => setInstallMode(mode)}
+                    className={`px-3 py-1 cursor-pointer transition-colors ${
+                      installMode === mode
+                        ? "bg-white border border-zinc-200 font-bold text-zinc-950"
+                        : "text-zinc-500 hover:text-black"
+                    }`}
+                  >
+                    {mode === "node" ? "Node" : mode}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div className="bg-[#0c0c0e] border border-zinc-800">
+              <div className="flex items-center justify-between px-3 py-2 text-[10px] text-zinc-400 border-b border-zinc-700">
+                <span>{installMode.toUpperCase()}</span>
+                <button
+                  onClick={copyInstallSnippet}
+                  className="flex items-center gap-1 bg-zinc-800 hover:bg-zinc-700 text-white px-2 py-1 cursor-pointer transition-colors"
+                >
+                  {isSnippetCopied ? <HiOutlineCheck /> : <HiOutlineClipboard />}
+                  <span>{isSnippetCopied ? "Copied" : "Copy snippet"}</span>
+                </button>
+              </div>
+              <pre className="p-4 text-xs text-zinc-200 overflow-x-auto leading-5 font-mono">
+                <code>{installSnippets[installMode]}</code>
+              </pre>
+            </div>
           </div>
         </div>
       </div>

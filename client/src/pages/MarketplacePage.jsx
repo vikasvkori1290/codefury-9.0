@@ -187,6 +187,21 @@ const MODEL_FILTER_GROUPS = [
   },
 ];
 
+// Fast, 0-latency local avatar component
+const ModelAvatar = ({ creator, displayName }) => {
+  const label = (creator || displayName || "AI").replace(/[@_.-]/g, " ").trim();
+  const parts = label.split(/\s+/).filter(Boolean);
+  const initials = parts.length >= 2
+    ? (parts[0][0] + parts[1][0]).toUpperCase()
+    : label.slice(0, 2).toUpperCase() || "AI";
+
+  return (
+    <div className="w-11 h-11 bg-zinc-950 text-white flex items-center justify-center shrink-0 font-mono font-bold text-xs tracking-wider select-none">
+      {initials}
+    </div>
+  );
+};
+
 export const MarketplacePage = () => {
   const [search, setSearch] = useState("");
   const [sortBy, setSortBy] = useState("relevant");
@@ -479,50 +494,67 @@ export const MarketplacePage = () => {
             )}
 
             {/* Model Cards Grid (2 Columns matching Agent Marketplace) */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {filtered.map((model) => {
-                const primaryTag = model.category === "Coding"
-                  ? "Coding Model"
-                  : model.category === "Reasoning"
-                  ? "Reasoning Engine"
-                  : model.category;
-
-                return (
-                  <article
-                    key={model.id}
-                    className="bg-white border border-[#e4e4e7] hover:border-zinc-400 p-5 transition-all group shadow-xs flex flex-col justify-between"
+            {isLoading ? (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {Array.from({ length: 6 }).map((_, i) => (
+                  <div
+                    key={i}
+                    className="bg-white border border-[#e4e4e7] p-5 shadow-xs animate-pulse space-y-4"
                   >
-                    <div>
-                      {/* Top Header with Avatar & Verified Shield */}
-                      <div className="flex items-start gap-3">
-                        <div className="w-11 h-11 bg-white border border-[#e4e4e7] flex items-center justify-center shrink-0 overflow-hidden">
-                          <img
-                            src={`https://api.dicebear.com/9.x/initials/svg?seed=${encodeURIComponent(
-                              model.creator || model.displayName
-                            )}&backgroundColor=f4f4f5&fontFamily=monospace&fontWeight=700`}
-                            alt={`${model.creator} logo`}
-                            className="w-full h-full object-contain p-1.5"
-                            loading="lazy"
-                          />
-                        </div>
+                    <div className="flex items-start gap-3">
+                      <div className="w-11 h-11 bg-zinc-200 shrink-0" />
+                      <div className="flex-1 space-y-2">
+                        <div className="h-4 bg-zinc-200 w-3/4" />
+                        <div className="h-3 bg-zinc-100 w-1/2" />
+                      </div>
+                    </div>
+                    <div className="space-y-1.5 pt-1">
+                      <div className="h-3 bg-zinc-100 w-full" />
+                      <div className="h-3 bg-zinc-100 w-4/5" />
+                    </div>
+                    <div className="pt-3 border-t border-[#f4f4f5] flex items-center justify-between">
+                      <div className="h-4 bg-zinc-200 w-24" />
+                      <div className="h-8 bg-zinc-200 w-28" />
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {filtered.map((model) => {
+                  const primaryTag = model.category === "Coding"
+                    ? "Coding Model"
+                    : model.category === "Reasoning"
+                    ? "Reasoning Engine"
+                    : model.category;
 
-                        <div className="min-w-0 flex-1">
-                          <div className="flex items-start justify-between gap-2">
-                            <div className="min-w-0">
-                              <h3 className="text-base font-bold text-zinc-950 group-hover:text-[#ea580c] transition-colors truncate">
-                                {model.displayName}
-                              </h3>
-                              <p className="text-xs text-zinc-500 font-mono flex items-center gap-1 mt-0.5">
-                                <HiOutlineCpuChip className="text-zinc-400" /> Built by {model.creator}
-                              </p>
+                  return (
+                    <article
+                      key={model.id}
+                      className="bg-white border border-[#e4e4e7] hover:border-zinc-400 p-5 transition-all group shadow-xs flex flex-col justify-between"
+                    >
+                      <div>
+                        {/* Top Header with Avatar & Verified Shield */}
+                        <div className="flex items-start gap-3">
+                          <ModelAvatar creator={model.creator} displayName={model.displayName} />
+
+                          <div className="min-w-0 flex-1">
+                            <div className="flex items-start justify-between gap-2">
+                              <div className="min-w-0">
+                                <h3 className="text-base font-bold text-zinc-950 group-hover:text-[#ea580c] transition-colors truncate">
+                                  {model.displayName}
+                                </h3>
+                                <p className="text-xs text-zinc-500 font-mono flex items-center gap-1 mt-0.5">
+                                  <HiOutlineCpuChip className="text-zinc-400" /> Built by {model.creator}
+                                </p>
+                              </div>
+                              <HiOutlineShieldCheck
+                                className="text-emerald-600 text-lg shrink-0"
+                                title="Verified Benchmark"
+                              />
                             </div>
-                            <HiOutlineShieldCheck
-                              className="text-emerald-600 text-lg shrink-0"
-                              title="Verified Benchmark"
-                            />
                           </div>
                         </div>
-                      </div>
 
                       {/* Description */}
                       <p className="text-xs text-zinc-600 leading-relaxed mt-4 line-clamp-2">
@@ -602,6 +634,7 @@ export const MarketplacePage = () => {
                 );
               })}
             </div>
+            )}
 
             {filtered.length === 0 && !isLoading && (
               <div className="bg-white border border-dashed border-[#e4e4e7] p-10 text-center font-mono text-xs text-zinc-500">
