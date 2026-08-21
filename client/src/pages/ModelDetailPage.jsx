@@ -156,11 +156,12 @@ console.log(await response.json());`,
         {/* 1. HERO HEADER */}
         <div className="p-6 sm:p-8 bg-white border border-[#e4e4e7] rounded-none shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-6">
           <div className="space-y-3">
-            <div className="flex items-center gap-2">
-              <span className="px-2.5 py-0.5 bg-emerald-50 border border-emerald-200 text-emerald-800 font-mono text-xs font-bold rounded-none">
-                Verified Benchmark Scorecard
+            <div className="flex items-center gap-2 flex-wrap">
+              <span className="px-3 py-1 bg-emerald-50 border border-emerald-300 text-emerald-800 font-mono text-xs font-bold rounded-none flex items-center gap-1.5 shadow-xs">
+                <HiOutlineShieldCheck className="text-base text-emerald-600" />
+                <span>Verified by Deterministic Ground-Truth Engine (LiveBench Standard)</span>
               </span>
-              <span className="text-xs font-mono text-zinc-600 bg-zinc-100 px-2.5 py-0.5 rounded-none">
+              <span className="text-xs font-mono text-zinc-600 bg-zinc-100 px-2.5 py-1 rounded-none">
                 {model.category}
               </span>
             </div>
@@ -184,12 +185,12 @@ console.log(await response.json());`,
 
           {/* Giant Score Badge & Deploy CTA */}
           <div className="flex flex-col items-start md:items-end justify-between gap-4 shrink-0">
-            <div className="p-5 bg-white border border-emerald-300 rounded-none text-right font-mono space-y-1 shadow-xs">
-              <span className="text-[10px] text-zinc-500 block uppercase">Composite Benchmark</span>
+            <div className="p-5 bg-white border-2 border-emerald-500 rounded-none text-right font-mono space-y-1 shadow-xs">
+              <span className="text-[10px] text-zinc-500 block uppercase">Composite LiveBench Score</span>
               <div className="text-3xl sm:text-4xl font-bold text-emerald-700">
                 {model.passRate}%
               </div>
-              <span className="text-[10px] text-zinc-400 block">35 Test Assertions Passed</span>
+              <span className="text-[10px] text-zinc-400 block font-sans">20 Deterministic Test Assertions Verified</span>
             </div>
 
              <button

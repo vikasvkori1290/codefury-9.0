@@ -2,233 +2,424 @@ import path from "path";
 import fs from "fs";
 
 /**
- * 35 Multi-Category Benchmark Test Cases across 7 Modern LLM Domains (5 Cases Each):
- * 1. Reasoning (5)
- * 2. Coding (5)
- * 3. Agentic Coding (5)
- * 4. Mathematics (5)
- * 5. Data Analysis (5)
- * 6. Language (5)
- * 7. Instruction Following (5)
+ * 20-Test High-Rigor Objective Ground-Truth Benchmark Suite (LiveBench Standard)
+ * Zero LLM Judge Bias - 100% Programmatically Verified
+ * 
+ * 4 Core Domains (5 Tests Each):
+ * 1. Math & Exact Logic (GSM8K competition logic & exact arithmetic)
+ * 2. Coding & Execution (Unit-tested JS algorithms in sandboxed VM)
+ * 3. JSON Schema & Extraction (Strict schema & structured data verification)
+ * 4. Complex Instruction Following (Multi-constraint, lipogram, and token delimiters)
  */
 export const getBenchmarkTestCases = () => {
   return [
-    // ==================== 1. REASONING (5 Cases) ====================
+    // ==================== 1. MATH & EXACT LOGIC (5 Tests) ====================
     {
-      vars: { prompt: "If all Bloops are Razzies and all Razzies are Lizzies, are all Bloops definitely Lizzies? Answer with only 'Yes' or 'No'." },
-      assert: [{ type: "contains", value: "Yes" }],
-      metadata: { category: "reasoning" },
+      id: "math_1",
+      vars: {
+        prompt: "A store sells notebooks for $4 each and pens for $2 each. Janet buys 5 notebooks and 6 pens. She pays with a $50 bill. How much change does she receive in dollars? Output only the final numeric integer value.",
+      },
+      assert: [{ type: "regex_numeric", expectedNumber: 18, regex: "\\b18(\\b|\\.00)" }],
+      metadata: {
+        category: "math_logic",
+        title: "GSM8K Multi-Step Transaction Arithmetic",
+        expected: "18",
+      },
     },
     {
-      vars: { prompt: "Sally has 3 brothers. Each brother has 2 sisters. How many sisters does Sally have? Answer with only the number." },
-      assert: [{ type: "contains", value: "1" }],
-      metadata: { category: "reasoning" },
+      id: "math_2",
+      vars: {
+        prompt: "A train travels at 60 mph for 2.5 hours and then 80 mph for 1.5 hours. What is the total distance traveled in miles? Output only the numeric value.",
+      },
+      assert: [{ type: "regex_numeric", expectedNumber: 270, regex: "\\b270(\\b|\\.0)" }],
+      metadata: {
+        category: "math_logic",
+        title: "Compound Speed-Time Integration",
+        expected: "270",
+      },
     },
     {
-      vars: { prompt: "A farmer is taking a wolf, a goat, and a cabbage across a river. If left alone, the wolf eats the goat, and the goat eats the cabbage. Which item must the farmer take across first? Answer with only the item name." },
-      assert: [{ type: "contains", value: "goat" }],
-      metadata: { category: "reasoning" },
+      id: "math_3",
+      vars: {
+        prompt: "A bakery made 240 cookies. They sold 3/4 of them in the morning and 1/3 of the remainder in the afternoon. How many cookies are left? Output only the integer number.",
+      },
+      assert: [{ type: "regex_numeric", expectedNumber: 40, regex: "\\b40\\b" }],
+      metadata: {
+        category: "math_logic",
+        title: "Sequential Fractional Depletion Logic",
+        expected: "40",
+      },
     },
     {
-      vars: { prompt: "If today is Tuesday, what day of the week will it be in 100 days? Answer with only the day name." },
-      assert: [{ type: "contains", value: "Thursday" }],
-      metadata: { category: "reasoning" },
+      id: "math_4",
+      vars: {
+        prompt: "In a round-robin tournament of 8 teams, every team plays every other team exactly once. How many total matches are played? Output only the numeric answer.",
+      },
+      assert: [{ type: "regex_numeric", expectedNumber: 28, regex: "\\b28\\b" }],
+      metadata: {
+        category: "math_logic",
+        title: "Combinatorics & Graph Clique Sizing",
+        expected: "28",
+      },
     },
     {
-      vars: { prompt: "A bat and a ball cost $1.10 in total. The bat costs $1.00 more than the ball. How much does the ball cost in cents? Give only the number." },
-      assert: [{ type: "contains", value: "5" }],
-      metadata: { category: "reasoning" },
-    },
-
-    // ==================== 2. CODING (5 Cases) ====================
-    {
-      vars: { prompt: "Write a JavaScript function named `isPalindrome(str)` that returns true if a given string is a palindrome. Output only valid JavaScript code." },
-      assert: [{ type: "contains", value: "function isPalindrome" }],
-      metadata: { category: "coding" },
-    },
-    {
-      vars: { prompt: "Write a Python function `fibonacci(n)` that returns the nth Fibonacci number (0-indexed where fib(0)=0, fib(1)=1). Output only the Python def block." },
-      assert: [{ type: "contains", value: "def fibonacci" }],
-      metadata: { category: "coding" },
-    },
-    {
-      vars: { prompt: "Write a SQL query to find the second highest salary from an Employee table with columns (id, salary). Output only the SQL query." },
-      assert: [{ type: "contains", value: "SELECT" }],
-      metadata: { category: "coding" },
-    },
-    {
-      vars: { prompt: "Write a JavaScript function `flatten(arr)` that flattens a nested array of arbitrary depth. Output only the code." },
-      assert: [{ type: "contains", value: "flatten" }],
-      metadata: { category: "coding" },
-    },
-    {
-      vars: { prompt: "Write a Python function `two_sum(nums, target)` that returns the indices of two numbers that add up to target. Output only code." },
-      assert: [{ type: "contains", value: "def two_sum" }],
-      metadata: { category: "coding" },
-    },
-
-    // ==================== 3. AGENTIC CODING (5 Cases) ====================
-    {
-      vars: { prompt: "Given this buggy code `function add(a,b){ return a - b; }`, generate a JSON patch object with keys `bug`, `fix`, and `patchedCode`." },
-      assert: [{ type: "is-json" }, { type: "contains", value: "patchedCode" }],
-      metadata: { category: "agentic_coding" },
-    },
-    {
-      vars: { prompt: "You are an agent with tools. Output a tool call JSON with `tool`: 'search_file' and `parameters`: { 'query': 'authMiddleware' }." },
-      assert: [{ type: "is-json" }, { type: "contains", value: "search_file" }],
-      metadata: { category: "agentic_coding" },
-    },
-    {
-      vars: { prompt: "Refactor this synchronous code to use async/await: `function fetchUser(id){ return db.find(id); }`. Output valid async function syntax." },
-      assert: [{ type: "contains", value: "async function fetchUser" }],
-      metadata: { category: "agentic_coding" },
-    },
-    {
-      vars: { prompt: "Generate an agent execution plan JSON array of 3 step strings to debug a memory leak in a Node.js server." },
-      assert: [{ type: "is-json" }],
-      metadata: { category: "agentic_coding" },
-    },
-    {
-      vars: { prompt: "Generate a Git diff format patch that changes `const PORT = 3000;` to `const PORT = process.env.PORT || 5000;`." },
-      assert: [{ type: "contains", value: "PORT" }],
-      metadata: { category: "agentic_coding" },
+      id: "math_5",
+      vars: {
+        prompt: "If a 12-hour clock shows exactly 8:00 right now, what hour will it show in exactly 150 hours? Give only the number from 1 to 12.",
+      },
+      assert: [{ type: "regex_numeric", expectedNumber: 2, regex: "\\b2\\b" }],
+      metadata: {
+        category: "math_logic",
+        title: "Modular Arithmetic Cycle Resolution",
+        expected: "2",
+      },
     },
 
-    // ==================== 4. MATHEMATICS (5 Cases) ====================
+    // ==================== 2. CODING & EXECUTION (5 Tests) ====================
     {
-      vars: { prompt: "Solve for x: 3x + 15 = 42. Answer with only the number." },
-      assert: [{ type: "contains", value: "9" }],
-      metadata: { category: "mathematics" },
+      id: "code_1",
+      vars: {
+        prompt: "Write a JavaScript function `isPalindrome(str)` that returns true if `str` (ignoring non-alphanumeric chars and case) is a palindrome, false otherwise. Output ONLY the executable JavaScript function definition without markdown if possible.",
+      },
+      assert: [
+        {
+          type: "code_unit_test",
+          fnName: "isPalindrome",
+          testCases: [
+            { input: ["A man, a plan, a canal: Panama"], expected: true },
+            { input: ["race a car"], expected: false },
+            { input: ["Was it a car or a cat I saw?"], expected: true },
+          ],
+        },
+      ],
+      metadata: {
+        category: "code_execution",
+        title: "Sanitized Palindrome Algorithm (3 Unit Tests)",
+        expected: "Pass 3 hidden assertion vectors",
+      },
     },
     {
-      vars: { prompt: "What is the derivative of f(x) = 5x^3 - 4x^2 + 7x - 2 with respect to x? Output only the algebraic expression." },
-      assert: [{ type: "contains", value: "15x" }],
-      metadata: { category: "mathematics" },
+      id: "code_2",
+      vars: {
+        prompt: "Write a JavaScript function `deepClone(obj)` that returns a deep copy of an object/array without using JSON.parse. Output ONLY the JavaScript function definition.",
+      },
+      assert: [
+        {
+          type: "code_unit_test",
+          fnName: "deepClone",
+          testCases: [
+            {
+              evalStr: "const o = { a: 1, b: { c: 2 } }; const c = deepClone(o); c.b.c = 99; return o.b.c === 2;",
+              expected: true,
+            },
+            {
+              evalStr: "const arr = [1, [2, 3]]; const cloned = deepClone(arr); cloned[1][0] = 77; return arr[1][0] === 2;",
+              expected: true,
+            },
+            {
+              evalStr: "return deepClone({ x: null }).x === null;",
+              expected: true,
+            },
+          ],
+        },
+      ],
+      metadata: {
+        category: "code_execution",
+        title: "Recursive Deep Clone Execution (3 Mutation Tests)",
+        expected: "Pass object & array clone tests",
+      },
     },
     {
-      vars: { prompt: "If 4 workers take 6 hours to complete a job, how many hours will 8 workers take at the same rate? Give only the number." },
-      assert: [{ type: "contains", value: "3" }],
-      metadata: { category: "mathematics" },
+      id: "code_3",
+      vars: {
+        prompt: "Write a JavaScript function `uniqueArray(arr)` that returns an array with duplicate primitive elements removed while strictly preserving original order. Output ONLY the JavaScript function.",
+      },
+      assert: [
+        {
+          type: "code_unit_test",
+          fnName: "uniqueArray",
+          testCases: [
+            { input: [[1, 2, 2, 3, 1, 4]], expected: [1, 2, 3, 4], isJsonEq: true },
+            { input: [["a", "b", "a", "c"]], expected: ["a", "b", "c"], isJsonEq: true },
+            { input: [[]], expected: [], isJsonEq: true },
+          ],
+        },
+      ],
+      metadata: {
+        category: "code_execution",
+        title: "Order-Preserving Deduplication (3 Array Tests)",
+        expected: "Pass order & edge-case unit tests",
+      },
     },
     {
-      vars: { prompt: "What is the probability of rolling a sum of 7 with two fair 6-sided dice? Answer with only a fraction like 1/6 or decimal." },
-      assert: [{ type: "contains-any", value: ["1/6", "0.166", "0.167"] }],
-      metadata: { category: "mathematics" },
+      id: "code_4",
+      vars: {
+        prompt: "Write a JavaScript function `isValidParentheses(s)` that takes a string containing '()[]{}' and returns true if the brackets are closed in the correct order. Output ONLY the JavaScript function.",
+      },
+      assert: [
+        {
+          type: "code_unit_test",
+          fnName: "isValidParentheses",
+          testCases: [
+            { input: ["()[]{}"], expected: true },
+            { input: ["(]"], expected: false },
+            { input: ["([{}])"], expected: true },
+          ],
+        },
+      ],
+      metadata: {
+        category: "code_execution",
+        title: "Stack-Based Bracket Matching (3 Structure Tests)",
+        expected: "Pass nested & unbalanced bracket tests",
+      },
     },
     {
-      vars: { prompt: "Calculate 14 multiplied by 18, then subtract 52. Answer with only the resulting number." },
-      assert: [{ type: "contains", value: "200" }],
-      metadata: { category: "mathematics" },
+      id: "code_5",
+      vars: {
+        prompt: "Write a JavaScript function `flattenArray(arr)` that recursively flattens an array of arbitrarily nested arrays into a single flat array. Output ONLY the JavaScript function.",
+      },
+      assert: [
+        {
+          type: "code_unit_test",
+          fnName: "flattenArray",
+          testCases: [
+            { input: [[1, [2, [3, [4]], 5]]], expected: [1, 2, 3, 4, 5], isJsonEq: true },
+            { input: [[]], expected: [], isJsonEq: true },
+            { input: [[[1], [2], [3]]], expected: [1, 2, 3], isJsonEq: true },
+          ],
+        },
+      ],
+      metadata: {
+        category: "code_execution",
+        title: "Arbitrary-Depth Array Flattening (3 Depth Tests)",
+        expected: "Pass multi-nested array tests",
+      },
     },
 
-    // ==================== 5. DATA ANALYSIS (5 Cases) ====================
+    // ==================== 3. JSON SCHEMA & EXTRACTION (5 Tests) ====================
     {
-      vars: { prompt: "Given this sales data: [{\"q1\": 100}, {\"q2\": 150}, {\"q3\": 200}, {\"q4\": 250}], calculate the total annual sales and average per quarter. Output as JSON with keys `total` and `average`." },
-      assert: [{ type: "is-json" }, { type: "contains", value: "700" }],
-      metadata: { category: "data_analysis" },
+      id: "schema_1",
+      vars: {
+        prompt: "Extract data from: 'Invoice #INV-2026-88 issued on 2026-04-15 to Acme Corp for total amount $1,450.00 with status PAID.' into raw JSON with exact keys: `invoice_id` (string), `date` (string), `recipient` (string), `total` (number), `paid` (boolean). Output ONLY raw JSON.",
+      },
+      assert: [
+        {
+          type: "json_schema_validation",
+          requiredKeys: ["invoice_id", "date", "recipient", "total", "paid"],
+          validateFn: (obj) =>
+            obj.invoice_id === "INV-2026-88" &&
+            obj.total === 1450 &&
+            obj.paid === true &&
+            obj.recipient.toLowerCase().includes("acme"),
+        },
+      ],
+      metadata: {
+        category: "schema_adherence",
+        title: "Unstructured Financial Document Extraction",
+        expected: "Valid JSON with typed fields & exact values",
+      },
     },
     {
-      vars: { prompt: "Parse the following log line and output a JSON object with keys `ip`, `status`, `endpoint`: '192.168.1.1 GET /api/v1/models 200'" },
-      assert: [{ type: "is-json" }, { type: "contains", value: "192.168.1.1" }],
-      metadata: { category: "data_analysis" },
+      id: "schema_2",
+      vars: {
+        prompt: "Extract data from server log: 'ERROR 2026-08-21T14:23:05.120Z [auth-service] User id=usr_9984 login failed from IP 192.168.1.45 (code 401: Invalid Credentials)' into raw JSON with exact keys: `level` (string), `service` (string), `user_id` (string), `ip` (string), `status_code` (number). Output ONLY raw JSON.",
+      },
+      assert: [
+        {
+          type: "json_schema_validation",
+          requiredKeys: ["level", "service", "user_id", "ip", "status_code"],
+          validateFn: (obj) =>
+            obj.status_code === 401 &&
+            obj.service === "auth-service" &&
+            obj.user_id === "usr_9984" &&
+            obj.ip === "192.168.1.45",
+        },
+      ],
+      metadata: {
+        category: "schema_adherence",
+        title: "Server Security Log Telemetry Parsing",
+        expected: "Valid JSON schema with status code 401",
+      },
     },
     {
-      vars: { prompt: "Given values [12, 18, 25, 29, 36], what is the median value? Answer with only the number." },
-      assert: [{ type: "contains", value: "25" }],
-      metadata: { category: "data_analysis" },
+      id: "schema_3",
+      vars: {
+        prompt: "Parse specs: 'Model: Titan RTX Pro. Price: $2499. In Stock: yes. VRAM: 24GB GDDR6X. TDP: 350W.' into raw JSON with exact keys: `model_name` (string), `price_usd` (number), `in_stock` (boolean), `vram_gb` (number), `tdp_watts` (number). Output ONLY raw JSON.",
+      },
+      assert: [
+        {
+          type: "json_schema_validation",
+          requiredKeys: ["model_name", "price_usd", "in_stock", "vram_gb", "tdp_watts"],
+          validateFn: (obj) =>
+            obj.price_usd === 2499 &&
+            obj.in_stock === true &&
+            obj.vram_gb === 24 &&
+            obj.tdp_watts === 350,
+        },
+      ],
+      metadata: {
+        category: "schema_adherence",
+        title: "Hardware Specification Schema Conversion",
+        expected: "Valid JSON with exact typed numeric specs",
+      },
     },
     {
-      vars: { prompt: "Given users with ages [20, 22, 28, 45, 55], calculate the percentage of users who are 30 or older. Answer with only the percentage number." },
-      assert: [{ type: "contains", value: "40" }],
-      metadata: { category: "data_analysis" },
+      id: "schema_4",
+      vars: {
+        prompt: "Extract customer review breakdown: 'I loved the fast battery charging, but the display brightness in sunlight is terrible. Overall rating: 3 stars.' into raw JSON with exact keys: `sentiment` ('positive'|'negative'|'mixed'), `rating` (number 1-5), `pros` (array of strings), `cons` (array of strings). Output ONLY raw JSON.",
+      },
+      assert: [
+        {
+          type: "json_schema_validation",
+          requiredKeys: ["sentiment", "rating", "pros", "cons"],
+          validateFn: (obj) =>
+            typeof obj.rating === "number" &&
+            Array.isArray(obj.pros) &&
+            Array.isArray(obj.cons) &&
+            obj.pros.length >= 1 &&
+            obj.cons.length >= 1,
+        },
+      ],
+      metadata: {
+        category: "schema_adherence",
+        title: "Sentiment & Aspect-Based Opinion Mining",
+        expected: "Valid JSON with typed arrays & rating number",
+      },
     },
     {
-      vars: { prompt: "Extract key metrics from this text: 'Revenue grew by 24% to $1.2M while churn dropped to 2%'. Output a JSON object with keys `revenue_growth`, `revenue_amount`, and `churn_rate`." },
-      assert: [{ type: "is-json" }, { type: "contains", value: "24%" }],
-      metadata: { category: "data_analysis" },
+      id: "schema_5",
+      vars: {
+        prompt: "Extract entities from: 'Dr. Sarah Connor met with Dr. Miles Dyson at Cyberdyne Systems in Sunnyvale, California.' into raw JSON with exact keys: `people` (array of strings) and `locations` (array of strings). Output ONLY raw JSON.",
+      },
+      assert: [
+        {
+          type: "json_schema_validation",
+          requiredKeys: ["people", "locations"],
+          validateFn: (obj) =>
+            Array.isArray(obj.people) &&
+            Array.isArray(obj.locations) &&
+            obj.people.length >= 2 &&
+            obj.locations.length >= 1,
+        },
+      ],
+      metadata: {
+        category: "schema_adherence",
+        title: "Named Entity Structured Relation Extraction",
+        expected: "Valid JSON with people & locations arrays",
+      },
     },
 
-    // ==================== 6. LANGUAGE (5 Cases) ====================
+    // ==================== 4. COMPLEX INSTRUCTION FOLLOWING (5 Tests) ====================
     {
-      vars: { prompt: "What is the powerhouse of the biological cell?\nA) Ribosome\nB) Mitochondria\nC) Nucleus\nD) Endoplasmic Reticulum\nAnswer with only the letter: A, B, C, or D." },
-      assert: [{ type: "contains", value: "B" }],
-      metadata: { category: "language" },
+      id: "rule_1",
+      vars: {
+        prompt: "Write a concise summary about quantum computing that consists of EXACTLY 25 words. Do not write 24 words, do not write 26 words. Count words accurately before outputting.",
+      },
+      assert: [
+        {
+          type: "word_count_exact",
+          count: 25,
+        },
+      ],
+      metadata: {
+        category: "rule_following",
+        title: "Exact 25-Word Length Constraint",
+        expected: "Exactly 25 whitespace-delimited tokens",
+      },
     },
     {
-      vars: { prompt: "What is the capital city of Australia?\nA) Sydney\nB) Melbourne\nC) Canberra\nD) Brisbane\nAnswer with only the letter: A, B, C, or D." },
-      assert: [{ type: "contains", value: "C" }],
-      metadata: { category: "language" },
+      id: "rule_2",
+      vars: {
+        prompt: "Write a coherent 2-sentence paragraph explaining what clouds are, without using the letter 'e' anywhere in your response (both uppercase and lowercase). Absolutely no 'e' or 'E'.",
+      },
+      assert: [
+        {
+          type: "lipogram_constraint",
+          forbiddenLetter: "e",
+          minChars: 25,
+        },
+      ],
+      metadata: {
+        category: "rule_following",
+        title: "Negative Letter Lipogram Constraint (Zero 'e')",
+        expected: "Coherent text with zero occurrences of 'e'",
+      },
     },
     {
-      vars: { prompt: "Identify the figure of speech in: 'The wind whispered through the dark forest.' Answer with only the term name." },
-      assert: [{ type: "contains-any", value: ["Personification", "personification"] }],
-      metadata: { category: "language" },
+      id: "rule_3",
+      vars: {
+        prompt: "Output the names of 3 primary colors formatted strictly with triple angle brackets `<<<COLOR_NAME>>>` with each on a new line, and nothing else. Example format:\n<<<Red>>>\n<<<Green>>>\n<<<Blue>>>",
+      },
+      assert: [
+        {
+          type: "delimiter_pattern",
+          regex: "^(<<<[A-Za-z]+>>>\\s*){3}$",
+        },
+      ],
+      metadata: {
+        category: "rule_following",
+        title: "Strict Token Delimiter Matching (`<<<Color>>>`)",
+        expected: "3 matches matching <<<Color>>> exactly",
+      },
     },
     {
-      vars: { prompt: "Which chemical element has the atomic symbol 'Fe'? Answer with only the element name." },
-      assert: [{ type: "contains-any", value: ["Iron", "iron"] }],
-      metadata: { category: "language" },
+      id: "rule_4",
+      vars: {
+        prompt: "Provide one sentence of security advice. Your response MUST begin exactly with `[SECURITY_ADVISORY_START]` and end exactly with `[SECURITY_ADVISORY_END]` with no trailing text.",
+      },
+      assert: [
+        {
+          type: "prefix_suffix_wrap",
+          prefix: "[SECURITY_ADVISORY_START]",
+          suffix: "[SECURITY_ADVISORY_END]",
+        },
+      ],
+      metadata: {
+        category: "rule_following",
+        title: "Strict Boundary Tag Encapsulation",
+        expected: "Enclosed between [SECURITY_ADVISORY_START] and [SECURITY_ADVISORY_END]",
+      },
     },
     {
-      vars: { prompt: "Who is the author of the play 'Hamlet'? Answer with only the author's full name." },
-      assert: [{ type: "contains", value: "Shakespeare" }],
-      metadata: { category: "language" },
-    },
-
-    // ==================== 7. INSTRUCTION FOLLOWING (5 Cases) ====================
-    {
-      vars: { prompt: "Respond with EXACTLY 5 words describing space exploration. Do not output any preamble or punctuation other than spaces." },
-      assert: [{ type: "javascript", value: "output.trim().split(/\\s+/).length === 5" }],
-      metadata: { category: "instruction" },
-    },
-    {
-      vars: { prompt: "Output a valid JSON object containing exactly two keys: `status` with value 'ok' and `code` with integer value 200. Nothing else." },
-      assert: [{ type: "is-json" }, { type: "contains", value: "200" }],
-      metadata: { category: "instruction" },
-    },
-    {
-      vars: { prompt: "Write a short sentence about cats without using the letter 'e' anywhere in your response." },
-      assert: [{ type: "not-contains", value: "e" }],
-      metadata: { category: "instruction" },
-    },
-    {
-      vars: { prompt: "Confirm receipt by replying with exactly one single word: 'CONFIRMED'. Output nothing else." },
-      assert: [{ type: "contains", value: "CONFIRMED" }],
-      metadata: { category: "instruction" },
-    },
-    {
-      vars: { prompt: "Provide a JSON array containing three string color names: red, blue, and yellow. Output only the JSON array." },
-      assert: [{ type: "is-json" }, { type: "contains", value: "red" }],
-      metadata: { category: "instruction" },
+      id: "rule_5",
+      vars: {
+        prompt: "Write 4 words describing the ocean where EVERY SINGLE LETTER is in lowercase. Absolutely no capital letters, punctuation, or numbers.",
+      },
+      assert: [
+        {
+          type: "lowercase_word_count",
+          count: 4,
+        },
+      ],
+      metadata: {
+        category: "rule_following",
+        title: "Case & Grammar Exclusion (4 Pure Lowercase Words)",
+        expected: "Exactly 4 pure lowercase alphabetic words",
+      },
     },
   ];
 };
 
 /**
- * Generates dynamic promptfoo benchmark configuration for a given model
+ * Generates promptfoo config for local CLI runs if executed directly
  */
-export const generatePromptfooConfig = async (modelName, configOutputPath = null) => {
+export const generatePromptfooConfig = async (modelName = "qwen2.5:3b") => {
   const testCases = getBenchmarkTestCases();
-
   const config = {
-    description: `Automated 7-Category Benchmark for ${modelName}`,
+    description: `Deterministic LiveBench Standard Benchmark for ${modelName}`,
     prompts: ["{{prompt}}"],
-    providers: [`ollama:chat:${modelName}`],
-    tests: testCases,
-    evaluateOptions: {
-      maxConcurrency: 4,
-    },
+    providers: [`ollama:${modelName}`],
+    tests: testCases.map((tc) => ({
+      vars: tc.vars,
+      assert: tc.assert,
+      metadata: tc.metadata,
+    })),
   };
 
-  if (configOutputPath) {
-    const targetDir = path.dirname(configOutputPath);
-    if (!fs.existsSync(targetDir)) {
-      fs.mkdirSync(targetDir, { recursive: true });
-    }
-    await fs.promises.writeFile(configOutputPath, JSON.stringify(config, null, 2), "utf8");
-  }
+  const configPath = path.join(process.cwd(), "server", "temp", "promptfoo.config.json");
+  const tempDir = path.dirname(configPath);
+  if (!fs.existsSync(tempDir)) fs.mkdirSync(tempDir, { recursive: true });
 
-  return config;
+  fs.writeFileSync(configPath, JSON.stringify(config, null, 2), "utf8");
+  return configPath;
 };
-
-export default generatePromptfooConfig;

@@ -1,52 +1,51 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useParams, Link } from "react-router-dom";
 import {
-  HiOutlineCpuChip,
+  HiOutlineCommandLine,
   HiOutlineCheckCircle,
   HiOutlineExclamationTriangle,
-  HiOutlineArrowPath,
-  HiOutlineBolt,
-  HiOutlineClock,
-  HiOutlineShieldCheck,
-  HiOutlineRocketLaunch,
   HiOutlineArrowLeft,
-  HiOutlineCommandLine,
+  HiOutlineRocketLaunch,
+  HiOutlineShieldCheck,
+  HiOutlineScale,
+  HiOutlineChevronDown,
+  HiOutlineChevronUp,
+  HiOutlineCodeBracket,
+  HiOutlineVariable,
+  HiOutlineDocumentText,
+  HiOutlineSparkles,
 } from "react-icons/hi2";
+import API from "../api/axios";
 
-export const LiveJobMonitorPage = () => {
+export default function LiveJobMonitorPage() {
   const { jobId } = useParams();
   const [jobData, setJobData] = useState(null);
-  const [error, setError] = useState(null);
   const [isPolling, setIsPolling] = useState(true);
-  const [showCompletionReport, setShowCompletionReport] = useState(false);
+  const [expandedCaseId, setExpandedCaseId] = useState(null);
   const terminalEndRef = useRef(null);
 
-  const fetchStatus = async () => {
-    try {
-      const res = await fetch(`http://localhost:5000/api/benchmark/status/${jobId}`);
-      if (!res.ok) {
-        throw new Error("Job not found or error loading status.");
-      }
-      const data = await res.json();
-      if (data.success) {
-        setJobData(data);
-        if (data.status === "completed") setShowCompletionReport(true);
-        if (data.status === "completed" || data.status === "failed") {
-          setIsPolling(false);
-        }
-      }
-    } catch (err) {
-      console.warn("Polling error:", err.message);
-      setError(err.message);
-    }
-  };
-
+  // Poll BullMQ / MongoDB Job Status
   useEffect(() => {
+    let interval;
+    const fetchStatus = async () => {
+      try {
+        const { data } = await API.get(`/benchmark/job/${jobId}`);
+        if (data && data.job) {
+          setJobData(data.job);
+          if (data.job.status === "completed" || data.job.status === "failed") {
+            setIsPolling(false);
+          }
+        }
+      } catch (err) {
+        console.error("Polling error:", err);
+      }
+    };
+
     fetchStatus();
-    let interval = null;
     if (isPolling) {
-      interval = setInterval(fetchStatus, 1500);
+      interval = setInterval(fetchStatus, 800);
     }
+
     return () => {
       if (interval) clearInterval(interval);
     };
@@ -84,6 +83,13 @@ export const LiveJobMonitorPage = () => {
   const progress = jobData?.progress || 0;
   const metrics = jobData?.metrics;
   const logs = (jobData?.logs || []).map(sanitizeLog);
+  const testResults = metrics?.testResults || [];
+
+  // 4 Deterministic Categories
+  const mathScore = metrics?.deterministicBreakdown?.math_logic ?? metrics?.categoryScores?.math_logic ?? metrics?.categoryScores?.reasoning ?? 0;
+  const codeScore = metrics?.deterministicBreakdown?.code_execution ?? metrics?.categoryScores?.code_execution ?? metrics?.categoryScores?.coding ?? 0;
+  const schemaScore = metrics?.deterministicBreakdown?.schema_adherence ?? metrics?.categoryScores?.schema_adherence ?? metrics?.categoryScores?.data_analysis ?? 0;
+  const ruleScore = metrics?.deterministicBreakdown?.rule_following ?? metrics?.categoryScores?.rule_following ?? metrics?.categoryScores?.instruction ?? 0;
 
   return (
     <div className="min-h-screen bg-[#fafafa] text-zinc-900 font-sans selection:bg-[#ea580c] selection:text-white py-12 px-4 sm:px-8">
@@ -114,7 +120,7 @@ export const LiveJobMonitorPage = () => {
             {status === "running" && (
               <span className="px-3 py-1.5 rounded-none bg-orange-50 border border-orange-200 text-[#ea580c] font-bold flex items-center gap-2">
                 <span className="w-2 h-2 rounded-none bg-[#ea580c] animate-pulse" />
-                <span>BENCHMARKING ({progress}%)</span>
+                <span>EVALUATING ({progress}%)</span>
               </span>
             )}
             {status === "completed" && (
@@ -126,7 +132,7 @@ export const LiveJobMonitorPage = () => {
             {status === "queued" && (
               <span className="px-3 py-1.5 rounded-none bg-amber-50 border border-amber-200 text-amber-700 font-bold flex items-center gap-2">
                 <span className="w-2 h-2 rounded-none bg-amber-500 animate-pulse" />
-                <span>QUEUED IN BULLMQ</span>
+                <span>QUEUED IN ENGINE</span>
               </span>
             )}
             {status === "failed" && (
@@ -138,71 +144,86 @@ export const LiveJobMonitorPage = () => {
           </div>
         </div>
 
-        {/* Progress Bar Container */}
+        {/* Deterministic Standard Badge */}
+        <div className="flex items-center justify-between p-3.5 bg-white border border-[#e4e4e7] font-mono text-xs shadow-xs">
+          <div className="flex items-center gap-2 text-emerald-800 font-bold">
+            <HiOutlineShieldCheck className="text-base text-emerald-600 shrink-0" />
+            <span>Verified by Deterministic Ground-Truth Engine (LiveBench Standard)</span>
+          </div>
+          <span className="text-zinc-400 text-[11px] hidden sm:inline">Zero LLM Judge Bias • Programmatic Verification</span>
+        </div>
+
+        {/* Execution Pipeline Progress Bar */}
         <div className="p-6 bg-white border border-[#e4e4e7] rounded-none shadow-xs space-y-3 font-mono text-xs">
-           <div className="flex items-center justify-between text-zinc-700">
-            <span className="uppercase tracking-wider font-bold flex items-center gap-2">
-              <HiOutlineBolt className="text-[#ea580c]" />
-              <span>Execution Pipeline Progress</span>
+          <div className="flex items-center justify-between text-zinc-700">
+            <span className="font-bold uppercase tracking-wider flex items-center gap-2 text-zinc-950">
+              <span className="text-[#ea580c]">⚡</span> Execution Pipeline Progress
             </span>
-             <span className="font-bold text-[#ea580c]">{status === "completed" ? "100% COMPLETE" : `${progress}%`}</span>
+            <span className="text-[#ea580c] font-bold">{progress}%</span>
           </div>
 
-          <div className="w-full h-2.5 bg-zinc-100 border border-[#e4e4e7] rounded-none overflow-hidden">
+          <div className="w-full bg-zinc-100 h-2 rounded-none overflow-hidden border border-[#e4e4e7]">
             <div
-              className="h-full bg-[#ea580c] transition-all duration-300 rounded-none"
+              className="bg-[#ea580c] h-full transition-all duration-300 rounded-none"
               style={{ width: `${progress}%` }}
             />
           </div>
 
-            <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-1.5 pt-1 text-[10px]">
-              {[
-                "01 Reasoning",
-                "02 Coding",
-                "03 Agentic",
-                "04 Mathematics",
-                "05 Data Analysis",
-                "06 Language",
-                "07 Instruction",
-              ].map((stage, index) => {
-                const threshold = (index + 1) * 14;
-                const active = progress >= threshold || status === "completed";
-                return (
-                  <div
-                    key={stage}
-                    className={`border px-2 py-1.5 text-center transition-colors ${
-                      active
-                        ? "border-orange-200 bg-orange-50 text-[#ea580c] font-bold"
-                        : "border-zinc-200 bg-zinc-50 text-zinc-400"
-                    }`}
-                  >
-                    {stage}
-                  </div>
-                );
-              })}
-            </div>
-            <div className="flex items-center justify-between border-t border-zinc-100 pt-3 font-mono text-[10px] text-zinc-400">
-              <span>{status === "completed" ? "All 35 test cases evaluated and scorecard persisted in MongoDB." : `Executing benchmark suite: ${Math.min(35, Math.floor(Math.max(0, progress - 10) / 85 * 35))}/35 cases completed.`}</span>
-              <span className={status === "completed" ? "font-bold text-emerald-700" : "text-[#ea580c]"}>{status === "completed" ? "READY" : "LIVE"}</span>
-            </div>
+          {/* 4 Deterministic Pipeline Stages */}
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 pt-2 text-[11px]">
+            {[
+              "01 Math & Exact Logic",
+              "02 Code Execution",
+              "03 Schema Adherence",
+              "04 Rule Following",
+            ].map((stage, index) => {
+              const threshold = (index + 1) * 24;
+              const active = progress >= threshold || status === "completed";
+              return (
+                <div
+                  key={stage}
+                  className={`border px-2 py-1.5 text-center transition-colors ${
+                    active
+                      ? "border-orange-200 bg-orange-50 text-[#ea580c] font-bold"
+                      : "border-zinc-200 bg-zinc-50 text-zinc-400"
+                  }`}
+                >
+                  {stage}
+                </div>
+              );
+            })}
+          </div>
+
+          <div className="flex items-center justify-between border-t border-zinc-100 pt-3 font-mono text-[10px] text-zinc-400">
+            <span>
+              {status === "completed"
+                ? "All 20 objective test cases verified against ground truth."
+                : `Executing deterministic suite: ${Math.min(20, Math.floor(Math.max(0, progress - 10) / 85 * 20))}/20 cases completed.`}
+            </span>
+            <span className={status === "completed" ? "font-bold text-emerald-700" : "text-[#ea580c]"}>
+              {status === "completed" ? "DETERMINISTIC VERIFIED" : "LIVE"}
+            </span>
+          </div>
         </div>
 
-        {/* Scorecard Results (Revealed when completed) */}
+        {/* ==================== SCORECARD RESULTS (When Completed) ==================== */}
         {status === "completed" && metrics && (
-          <div className="space-y-4 animate-fade-in">
+          <div className="space-y-6 animate-fade-in">
             {/* Top Scorecard Metrics */}
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 font-mono">
-              <div className="p-5 bg-white border border-emerald-300 rounded-none shadow-xs space-y-1">
-                <span className="text-[10px] text-zinc-500 block uppercase">Overall Pass Rate</span>
-                <div className="text-2xl font-bold text-emerald-700">
+              <div className="p-5 bg-white border-2 border-emerald-500 rounded-none shadow-xs space-y-1">
+                <span className="text-[10px] text-zinc-500 block uppercase">Composite LiveBench Score</span>
+                <div className="text-3xl font-extrabold text-emerald-700">
                   {metrics.overallPassRate}%
                 </div>
-                <span className="text-[10px] text-zinc-400 font-sans">Weighted 35-assertion score</span>
+                <span className="text-[10px] text-zinc-400 font-sans">
+                  {metrics.passedCases}/20 Assertions Verified
+                </span>
               </div>
 
               <div className="p-5 bg-white border border-[#e4e4e7] rounded-none shadow-xs space-y-1">
                 <span className="text-[10px] text-zinc-500 block uppercase">Inference Latency</span>
-                <div className="text-2xl font-bold text-zinc-950">
+                <div className="text-3xl font-extrabold text-zinc-950">
                   {metrics.avgLatencyMs} ms
                 </div>
                 <span className="text-[10px] text-zinc-400 font-sans">Avg Time-To-First-Token</span>
@@ -210,42 +231,211 @@ export const LiveJobMonitorPage = () => {
 
               <div className="p-5 bg-white border border-[#e4e4e7] rounded-none shadow-xs space-y-1">
                 <span className="text-[10px] text-zinc-500 block uppercase">Throughput Speed</span>
-                <div className="text-2xl font-bold text-[#ea580c]">
+                <div className="text-3xl font-extrabold text-[#ea580c]">
                   {metrics.tokensPerSecond} TPS
                 </div>
-                <span className="text-[10px] text-zinc-400 font-sans">Local GPU/CPU token rate</span>
+                <span className="text-[10px] text-zinc-400 font-sans">Tokens Generated per Second</span>
               </div>
             </div>
 
-            {/* 7-Category Breakdown Bars */}
+            {/* 4 Objective Category Breakdowns */}
             <div className="p-6 bg-white border border-[#e4e4e7] rounded-none shadow-xs space-y-4 font-mono text-xs">
-              <span className="font-bold text-zinc-900 uppercase tracking-wider block">
-                7-Domain Capability Breakdown
-              </span>
+              <div className="flex items-center justify-between">
+                <span className="font-bold text-zinc-900 uppercase tracking-wider block">
+                  Deterministic Domain Breakdown
+                </span>
+                <span className="text-[10px] text-zinc-500">Programmatic Ground Truth</span>
+              </div>
 
-              <div className="space-y-3">
-                {[
-                  { label: "Reasoning (Logic & Multi-Step Deduction)", score: metrics.categoryScores?.reasoning },
-                  { label: "Coding (Algorithms & Syntax Validations)", score: metrics.categoryScores?.coding },
-                  { label: "Agentic Coding (Tool JSON & Patching)", score: metrics.categoryScores?.agentic_coding },
-                  { label: "Mathematics (Algebra, Arithmetic & Rates)", score: metrics.categoryScores?.mathematics },
-                  { label: "Data Analysis (JSON/Table Aggregations)", score: metrics.categoryScores?.data_analysis },
-                  { label: "Language (MMLU & Comprehension)", score: metrics.categoryScores?.language },
-                  { label: "Instruction Following (Strict Constraints)", score: metrics.categoryScores?.instruction },
-                ].map((item) => (
-                  <div key={item.label} className="space-y-1">
-                    <div className="flex justify-between text-[11px]">
-                      <span className="text-zinc-600">{item.label}</span>
-                      <span className="font-bold text-emerald-700">{item.score ?? 0}%</span>
-                    </div>
-                    <div className="w-full h-1.5 bg-zinc-100 border border-[#e4e4e7] rounded-none overflow-hidden">
-                      <div
-                        className="h-full bg-emerald-600 rounded-none"
-                        style={{ width: `${item.score ?? 0}%` }}
-                      />
-                    </div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                {/* 1. Math Logic */}
+                <div className="p-4 border border-[#e4e4e7] bg-[#fafafa] space-y-2">
+                  <div className="flex items-center justify-between">
+                    <span className="font-bold text-zinc-800 flex items-center gap-1.5">
+                      <HiOutlineVariable className="text-[#ea580c]" />
+                      <span>Math & Exact Logic</span>
+                    </span>
+                    <span className="text-base font-bold text-emerald-700">{mathScore}% Pass</span>
                   </div>
-                ))}
+                  <div className="w-full h-2 bg-zinc-200 overflow-hidden">
+                    <div className="h-full bg-emerald-600 transition-all duration-500" style={{ width: `${mathScore}%` }} />
+                  </div>
+                  <p className="text-[10px] text-zinc-500 font-sans">GSM8K logic, arithmetic & combinatorics</p>
+                </div>
+
+                {/* 2. Code Execution */}
+                <div className="p-4 border border-[#e4e4e7] bg-[#fafafa] space-y-2">
+                  <div className="flex items-center justify-between">
+                    <span className="font-bold text-zinc-800 flex items-center gap-1.5">
+                      <HiOutlineCodeBracket className="text-[#ea580c]" />
+                      <span>Code Execution</span>
+                    </span>
+                    <span className="text-base font-bold text-emerald-700">{codeScore}% Pass</span>
+                  </div>
+                  <div className="w-full h-2 bg-zinc-200 overflow-hidden">
+                    <div className="h-full bg-emerald-600 transition-all duration-500" style={{ width: `${codeScore}%` }} />
+                  </div>
+                  <p className="text-[10px] text-zinc-500 font-sans">Sandboxed Node.js VM unit test execution</p>
+                </div>
+
+                {/* 3. Schema Adherence */}
+                <div className="p-4 border border-[#e4e4e7] bg-[#fafafa] space-y-2">
+                  <div className="flex items-center justify-between">
+                    <span className="font-bold text-zinc-800 flex items-center gap-1.5">
+                      <HiOutlineDocumentText className="text-[#ea580c]" />
+                      <span>Schema Adherence</span>
+                    </span>
+                    <span className="text-base font-bold text-emerald-700">{schemaScore}% Pass</span>
+                  </div>
+                  <div className="w-full h-2 bg-zinc-200 overflow-hidden">
+                    <div className="h-full bg-emerald-600 transition-all duration-500" style={{ width: `${schemaScore}%` }} />
+                  </div>
+                  <p className="text-[10px] text-zinc-500 font-sans">Strict JSON key typing & structure extraction</p>
+                </div>
+
+                {/* 4. Rule Following */}
+                <div className="p-4 border border-[#e4e4e7] bg-[#fafafa] space-y-2">
+                  <div className="flex items-center justify-between">
+                    <span className="font-bold text-zinc-800 flex items-center gap-1.5">
+                      <HiOutlineSparkles className="text-[#ea580c]" />
+                      <span>Rule Following</span>
+                    </span>
+                    <span className="text-base font-bold text-emerald-700">{ruleScore}% Pass</span>
+                  </div>
+                  <div className="w-full h-2 bg-zinc-200 overflow-hidden">
+                    <div className="h-full bg-emerald-600 transition-all duration-500" style={{ width: `${ruleScore}%` }} />
+                  </div>
+                  <p className="text-[10px] text-zinc-500 font-sans">Word counts, lipograms, token delimiters</p>
+                </div>
+              </div>
+            </div>
+
+            {/* ==================== INTERACTIVE TEST BREAKDOWN DRAWER ==================== */}
+            {testResults.length > 0 && (
+              <div className="p-6 bg-white border border-[#e4e4e7] rounded-none shadow-xs space-y-4 font-mono text-xs">
+                <div className="flex items-center justify-between border-b border-[#f4f4f5] pb-3">
+                  <div>
+                    <h3 className="font-bold text-sm text-zinc-950 font-sans">
+                      20-Question Ground-Truth Breakdown Drawer
+                    </h3>
+                    <p className="text-[11px] text-zinc-500">
+                      Click any test to inspect the prompt, ground truth expectation, model output, and verification reason.
+                    </p>
+                  </div>
+                  <span className="px-2.5 py-1 bg-zinc-100 text-zinc-700 text-[11px] font-bold">
+                    {metrics.passedCases}/{metrics.totalCases || 20} PASSED
+                  </span>
+                </div>
+
+                <div className="space-y-2">
+                  {testResults.map((tc, idx) => {
+                    const isExpanded = expandedCaseId === (tc.id || idx);
+                    return (
+                      <div
+                        key={tc.id || idx}
+                        className={`border transition-all ${
+                          tc.passed
+                            ? "border-emerald-200 bg-emerald-50/30"
+                            : "border-rose-200 bg-rose-50/30"
+                        }`}
+                      >
+                        {/* Summary Row */}
+                        <div
+                          onClick={() => setExpandedCaseId(isExpanded ? null : (tc.id || idx))}
+                          className="p-3.5 flex items-center justify-between cursor-pointer hover:bg-zinc-50/80 transition-colors select-none"
+                        >
+                          <div className="flex items-center gap-3">
+                            <span
+                              className={`px-2 py-0.5 text-[10px] font-bold ${
+                                tc.passed
+                                  ? "bg-emerald-600 text-white"
+                                  : "bg-rose-600 text-white"
+                              }`}
+                            >
+                              {tc.passed ? "PASS ✓" : "FAIL ✗"}
+                            </span>
+                            <span className="font-bold text-zinc-900">
+                              #{idx + 1}. {tc.title || tc.id}
+                            </span>
+                            <span className="text-[10px] text-zinc-400 uppercase hidden sm:inline">
+                              [{tc.category}]
+                            </span>
+                          </div>
+
+                          <div className="flex items-center gap-3">
+                            <span className="text-[11px] text-zinc-500">{tc.latencyMs}ms</span>
+                            {isExpanded ? <HiOutlineChevronUp /> : <HiOutlineChevronDown />}
+                          </div>
+                        </div>
+
+                        {/* Expanded Drawer Details */}
+                        {isExpanded && (
+                          <div className="p-4 border-t border-inherit bg-white space-y-3 font-sans text-xs animate-fadeIn">
+                            <div className="space-y-1">
+                              <span className="font-mono text-[10px] font-bold uppercase text-zinc-400 block">
+                                Input Prompt:
+                              </span>
+                              <div className="p-2.5 bg-[#fafafa] border border-[#e4e4e7] text-zinc-800 text-xs font-mono whitespace-pre-wrap">
+                                {tc.prompt}
+                              </div>
+                            </div>
+
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 font-mono text-[11px]">
+                              <div className="space-y-1">
+                                <span className="text-[10px] font-bold uppercase text-zinc-400 block">
+                                  Ground Truth Expected:
+                                </span>
+                                <div className="p-2 bg-emerald-50 border border-emerald-200 text-emerald-900">
+                                  {tc.expected}
+                                </div>
+                              </div>
+
+                              <div className="space-y-1">
+                                <span className="text-[10px] font-bold uppercase text-zinc-400 block">
+                                  Deterministic Verdict Reason:
+                                </span>
+                                <div className={`p-2 border ${tc.passed ? "bg-emerald-50 border-emerald-200 text-emerald-900" : "bg-rose-50 border-rose-200 text-rose-900"}`}>
+                                  {tc.reason}
+                                </div>
+                              </div>
+                            </div>
+
+                            <div className="space-y-1">
+                              <span className="font-mono text-[10px] font-bold uppercase text-zinc-400 block">
+                                Actual Model Output:
+                              </span>
+                              <div className="p-2.5 bg-zinc-950 text-white font-mono text-xs whitespace-pre-wrap max-h-48 overflow-y-auto">
+                                {tc.output || "(Empty output)"}
+                              </div>
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+
+            {/* CTA Navigation Buttons */}
+            <div className="p-6 bg-white border border-[#e4e4e7] rounded-none shadow-xs flex flex-col sm:flex-row items-center justify-between gap-4 font-mono text-xs">
+              <div>
+                <div className="font-bold text-zinc-900">Evaluation Finished</div>
+                <div className="text-zinc-500 text-[11px]">Model listing is ranked in the LiveBench Leaderboard.</div>
+              </div>
+              <div className="flex gap-2 w-full sm:w-auto">
+                <Link
+                  to="/live-bench"
+                  className="px-5 py-2.5 bg-black hover:bg-zinc-800 text-white font-bold transition-all text-center flex-1 sm:flex-initial"
+                >
+                  View Global Leaderboard →
+                </Link>
+                <Link
+                  to="/models"
+                  className="px-5 py-2.5 border border-zinc-300 hover:bg-zinc-50 text-zinc-800 font-bold transition-all text-center flex-1 sm:flex-initial"
+                >
+                  AI Models
+                </Link>
               </div>
             </div>
           </div>
@@ -258,78 +448,34 @@ export const LiveJobMonitorPage = () => {
               <HiOutlineCommandLine className="text-[#ea580c] text-sm" />
               <span className="text-zinc-200 font-bold">Live Execution Terminal Logs</span>
             </div>
-            <div className="flex items-center gap-1.5 text-[10px]">
+            <span className="text-[10px] text-emerald-500 flex items-center gap-1 font-bold">
               <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-              <span>Promptfoo Daemon Active</span>
-            </div>
+              <span>Engine Active</span>
+            </span>
           </div>
 
-          <div className="p-4 space-y-1.5 max-h-72 overflow-y-auto font-mono text-[11px] leading-relaxed text-zinc-300 scrollbar-thin">
-            {logs.length === 0 ? (
-              <div className="text-zinc-600 italic">Waiting for execution telemetry...</div>
-            ) : (
-              logs.map((log, idx) => (
-                <div key={idx} className="flex items-start gap-2">
-                  <span className="text-[#ea580c] select-none">›</span>
-                  <span className={log.includes("complete") ? "text-emerald-400 font-bold" : ""}>
-                    {log}
-                  </span>
-                </div>
-              ))
-            )}
+          <div className="p-4 max-h-72 overflow-y-auto space-y-1.5 text-zinc-300 font-mono text-[11px] leading-relaxed">
+            {logs.map((log, idx) => (
+              <div
+                key={idx}
+                className={`flex gap-2 ${
+                  log.includes("ERROR") || log.includes("failed") || log.includes("stopped")
+                    ? "text-rose-400 font-bold"
+                    : log.includes("PASS") || log.includes("complete") || log.includes("validated")
+                    ? "text-emerald-400"
+                    : log.includes("FAIL")
+                    ? "text-amber-400"
+                    : "text-zinc-300"
+                }`}
+              >
+                <span className="text-zinc-600 select-none">&gt;</span>
+                <span className="whitespace-pre-wrap">{log}</span>
+              </div>
+            ))}
             <div ref={terminalEndRef} />
           </div>
         </div>
-
-        {/* Action Controls */}
-        <div className="pt-2 flex items-center justify-between font-mono text-xs">
-          <Link
-            to="/test"
-            className="px-4 py-2.5 bg-white hover:bg-zinc-50 border border-zinc-300 text-zinc-700 rounded-none transition-all flex items-center gap-2 cursor-pointer"
-          >
-            <HiOutlineArrowLeft />
-            <span>Benchmark Another Model</span>
-          </Link>
-
-          <div className="flex items-center gap-3">
-            <Link
-              to="/models"
-              className="px-5 py-2.5 bg-white hover:bg-zinc-50 border border-zinc-300 text-zinc-800 rounded-none transition-all font-semibold"
-            >
-              Browse Marketplace
-            </Link>
-
-            {status === "completed" && (
-              <Link
-                to="/marketplace"
-                className="px-6 py-2.5 bg-[#ea580c] hover:bg-[#c2410c] text-white font-bold rounded-none transition-all flex items-center gap-1.5 shadow-xs active:scale-95 cursor-pointer"
-              >
-                <HiOutlineRocketLaunch className="text-sm" />
-                <span>View Marketplace Scorecards</span>
-              </Link>
-            )}
-          </div>
-        </div>
       </div>
-      {showCompletionReport && status === "completed" && metrics && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-zinc-950/60 p-4" role="dialog" aria-modal="true" aria-labelledby="benchmark-report-title">
-          <div className="w-full max-w-lg space-y-5 border border-zinc-200 bg-white p-6 shadow-2xl">
-            <div className="flex items-start justify-between gap-4">
-              <div><div className="font-mono text-[10px] font-bold uppercase tracking-wider text-[#ea580c]">Benchmark complete</div><h2 id="benchmark-report-title" className="mt-1 text-xl font-bold text-zinc-950">{jobData.modelName} scorecard</h2></div>
-              <button type="button" onClick={() => setShowCompletionReport(false)} className="font-mono text-xs text-zinc-500 hover:text-zinc-950">Close</button>
-            </div>
-            <div className="grid grid-cols-3 gap-2 font-mono text-center">
-              <div className="border border-emerald-200 bg-emerald-50 p-3"><div className="text-[10px] text-zinc-500">PASS RATE</div><div className="mt-1 text-xl font-bold text-emerald-700">{metrics.overallPassRate}%</div></div>
-              <div className="border border-zinc-200 bg-zinc-50 p-3"><div className="text-[10px] text-zinc-500">AVG LATENCY</div><div className="mt-1 text-xl font-bold text-zinc-900">{metrics.avgLatencyMs}ms</div></div>
-              <div className="border border-zinc-200 bg-zinc-50 p-3"><div className="text-[10px] text-zinc-500">CASES</div><div className="mt-1 text-xl font-bold text-zinc-900">{metrics.passedCases}/{metrics.totalCases}</div></div>
-            </div>
-            <p className="font-mono text-xs text-zinc-600">This result is now included in CodeFury Creator Rankings and will be ranked against other completed creator models by pass rate.</p>
-            <div className="flex justify-end gap-2"><button type="button" onClick={() => setShowCompletionReport(false)} className="border border-zinc-300 px-4 py-2 font-mono text-xs text-zinc-700">Review details</button><Link to="/live-bench" onClick={() => setShowCompletionReport(false)} className="bg-[#ea580c] px-4 py-2 font-mono text-xs font-bold text-white hover:bg-[#c2410c]">Open Live Bench</Link></div>
-          </div>
-        </div>
-      )}
     </div>
   );
-};
-
-export default LiveJobMonitorPage;
+}
