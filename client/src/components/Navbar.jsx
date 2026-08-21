@@ -58,12 +58,25 @@ const Navbar = () => {
             <Link
               to="/models"
               className={`px-3 py-1.5 rounded-none transition-all ${
-                location.pathname === "/models"
+                location.pathname === "/models" || location.pathname.startsWith("/models/")
                   ? "bg-black text-white font-bold"
                   : "text-zinc-700 hover:text-black hover:bg-zinc-100 font-medium"
               }`}
             >
               AI Models
+            </Link>
+
+            {/* Agent Marketplace Link */}
+            <Link
+              to="/agents"
+              className={`px-3 py-1.5 rounded-none transition-all flex items-center gap-1.5 ${
+                location.pathname === "/agents" || location.pathname.startsWith("/agents/")
+                  ? "bg-black text-white font-bold"
+                  : "text-zinc-700 hover:text-black hover:bg-zinc-100 font-medium"
+              }`}
+            >
+              <span className="w-1.5 h-1.5 bg-emerald-500 rounded-none hidden sm:inline" />
+              <span>Agent Marketplace</span>
             </Link>
 
             {/* About Link */}

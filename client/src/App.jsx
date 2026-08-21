@@ -9,6 +9,8 @@ import LiveBenchPage from "./pages/LiveBenchPage";
 import LiveJobMonitorPage from "./pages/LiveJobMonitorPage";
 import MarketplacePage from "./pages/MarketplacePage";
 import ModelDetailPage from "./pages/ModelDetailPage";
+import AgentMarketplacePage from "./pages/AgentMarketplacePage";
+import AgentDetailPage from "./pages/AgentDetailPage";
 import AuthPage from "./pages/AuthPage";
 
 function AppLayout() {
@@ -31,6 +33,10 @@ function AppLayout() {
         <Route path="/marketplace" element={<MarketplacePage />} />
         <Route path="/models" element={<MarketplacePage />} />
         <Route path="/models/:id" element={<ModelDetailPage />} />
+        {/* Agent Marketplace */}
+        <Route path="/agents" element={<AgentMarketplacePage />} />
+        <Route path="/agent-marketplace" element={<AgentMarketplacePage />} />
+        <Route path="/agents/:id" element={<AgentDetailPage />} />
         <Route path="/about" element={<About />} />
         <Route path="/login" element={<AuthPage />} />
         <Route path="/register" element={<AuthPage />} />
