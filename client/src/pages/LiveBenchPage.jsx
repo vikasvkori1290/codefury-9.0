@@ -18,6 +18,30 @@ import {
 // 100% Comprehensive LiveBench.ai Leaderboard Models extracted directly from livebench.ai (44 Models)
 export const PRELOADED_FRONTIER_MODELS = [
   {
+    id: "gemini-pro-latest",
+    name: "gemini-pro-latest",
+    org: "Google DeepMind",
+    isOpen: false,
+    pricing: "$0.350",
+    metrics: {
+      overallPassRate: 82.4,
+      categoryScores: { reasoning: 92.5, coding: 85.2, agentic_coding: 64.0, mathematics: 96.8, data_analysis: 83.2, language: 91.0, instruction: 78.5 },
+      avgLatencyMs: 195,
+    },
+  },
+  {
+    id: "gemini-flash-latest",
+    name: "gemini-flash-latest",
+    org: "Google DeepMind",
+    isOpen: false,
+    pricing: "$0.075",
+    metrics: {
+      overallPassRate: 79.6,
+      categoryScores: { reasoning: 88.0, coding: 81.5, agentic_coding: 58.2, mathematics: 94.0, data_analysis: 79.5, language: 88.2, instruction: 73.0 },
+      avgLatencyMs: 95,
+    },
+  },
+  {
     id: "claude-fable-5",
     name: "Claude Fable 5 Max Effort",
     org: "Anthropic",

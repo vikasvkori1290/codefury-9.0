@@ -57,10 +57,33 @@ export const LiveJobMonitorPage = () => {
     terminalEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [jobData?.logs]);
 
+  const sanitizeDisplayName = (raw) => {
+    if (!raw) return "Local Model";
+    if (
+      raw.startsWith("AIza") ||
+      raw.startsWith("AQ.") ||
+      raw.startsWith("gsk_") ||
+      raw.startsWith("sk-") ||
+      raw.startsWith("xai-") ||
+      raw.length > 25
+    ) {
+      return "Remote API Model";
+    }
+    return raw;
+  };
+
+  const sanitizeLog = (line) => {
+    if (!line) return "";
+    return String(line).replace(
+      /(AIza[0-9A-Za-z-_]{15,}|gsk_[0-9A-Za-z]{15,}|sk-[0-9A-Za-z]{15,}|AQ\.[0-9A-Za-z-_]{15,}|xai-[0-9A-Za-z-_]{15,})/g,
+      "[REDACTED_KEY]"
+    );
+  };
+
   const status = jobData?.status || "queued";
   const progress = jobData?.progress || 0;
   const metrics = jobData?.metrics;
-  const logs = jobData?.logs || [];
+  const logs = (jobData?.logs || []).map(sanitizeLog);
 
   return (
     <div className="min-h-screen bg-[#fafafa] text-zinc-900 font-sans selection:bg-[#ea580c] selection:text-white py-12 px-4 sm:px-8">
@@ -79,7 +102,7 @@ export const LiveJobMonitorPage = () => {
             </div>
             <h1 className="text-2xl font-bold tracking-tight text-zinc-950 font-sans flex items-center gap-2.5">
               <span>Benchmark Telemetry:</span>
-              <span className="text-[#ea580c] font-mono">{jobData?.modelName || "Local Model"}</span>
+              <span className="text-[#ea580c] font-mono">{sanitizeDisplayName(jobData?.modelName)}</span>
             </h1>
             <p className="text-xs font-mono text-zinc-500">
               Job ID: <span className="text-zinc-700 font-bold">{jobId}</span>

@@ -32,7 +32,23 @@ export const registerModel = async (req, res, next) => {
       endpoint,
     } = req.body;
 
-    const finalModelName = modelName || name;
+    let finalModelName = (modelName || name || "").trim();
+    let finalApiKey = apiKey ? apiKey.trim() : "";
+
+    // Security Guard: Prevent API key string from accidentally being stored as the public model name
+    const isKeyLike =
+      finalModelName.startsWith("AIza") ||
+      finalModelName.startsWith("AQ.") ||
+      finalModelName.startsWith("gsk_") ||
+      finalModelName.startsWith("sk-") ||
+      finalModelName.startsWith("xai-") ||
+      finalModelName.length > 30;
+
+    if (isKeyLike) {
+      if (!finalApiKey) finalApiKey = finalModelName;
+      finalModelName = apiProvider === "google" ? "gemini-1.5-flash" : apiProvider === "openai" ? "gpt-4o-mini" : "remote-api-model";
+    }
+
     if (!finalModelName || !finalModelName.trim()) {
       return res.status(400).json({
         success: false,
@@ -43,11 +59,11 @@ export const registerModel = async (req, res, next) => {
     const uploadedFile = req.file;
     let finalProvider = provider;
     let uploadedFilePath = null;
-    const isApiModel = Boolean(apiKey) || provider === "custom_api";
-    if (isApiModel && !apiKey?.trim()) {
+    const isApiModel = Boolean(finalApiKey) || provider === "custom_api";
+    if (isApiModel && !finalApiKey) {
       return res.status(400).json({ success: false, message: "An API key is required for remote model benchmarking." });
     }
-    const encryptedApiKey = apiKey ? encryptCredential(apiKey.trim()) : null;
+    const encryptedApiKey = finalApiKey ? encryptCredential(finalApiKey) : null;
 
     if (uploadedFile) {
       finalProvider = "modelfile_upload";
