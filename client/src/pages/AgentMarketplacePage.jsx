@@ -253,224 +253,116 @@ export const AgentMarketplacePage = () => {
   }, [search, category, sortBy, toolFilter]);
 
   return (
-    <div className="min-h-screen bg-[#fafafa] text-zinc-900 font-sans selection:bg-[#ea580c] selection:text-white py-10 px-4 sm:px-8">
+    <div className="min-h-screen bg-[#fafafa] text-zinc-900 font-sans selection:bg-[#ea580c] selection:text-white py-8 px-4 sm:px-8">
       <div className="max-w-6xl mx-auto space-y-6">
-        {/* Hero */}
-        <div className="p-6 sm:p-8 bg-white border border-[#e4e4e7] shadow-xs flex flex-col lg:flex-row lg:items-center justify-between gap-6">
-          <div className="space-y-2.5">
-            <div className="inline-flex items-center gap-2 px-2.5 py-1 bg-[#fff7ed] border border-orange-200 text-xs font-mono text-[#ea580c] font-bold">
-              <HiOutlinePuzzlePiece />
-              <span>Agent Marketplace • 8 Verified Agents • Tool-Using & Autonomous</span>
+        <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 border-b border-[#e4e4e7] pb-5">
+          <div className="space-y-2">
+            <div className="inline-flex items-center gap-2 text-xs font-mono text-[#ea580c] font-bold uppercase tracking-wide">
+              <HiOutlinePuzzlePiece /> Agent Marketplace
             </div>
-            <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-zinc-950">
-              Agent Marketplace
-            </h1>
-            <p className="text-xs sm:text-sm text-zinc-500 max-w-2xl leading-relaxed">
-              Discover production-ready AI agents. Filter by capability, stack & tools. Install in one click with ModelHub routing, auth & billing.
-            </p>
-            <div className="flex flex-wrap items-center gap-2 pt-1 font-mono text-[11px]">
-              <span className="px-2 py-1 bg-zinc-900 text-white font-bold">58k+ installs</span>
-              <span className="px-2 py-1 bg-white border border-[#e4e4e7] text-zinc-700">200+ tool integrations</span>
-              <span className="px-2 py-1 bg-white border border-[#e4e4e7] text-zinc-700">Avg 94% task success</span>
-            </div>
+            <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-zinc-950">Find the right agent for the job.</h1>
+            <p className="text-xs sm:text-sm text-zinc-500 max-w-2xl">Production-ready agents with verified capabilities, connected tools, and transparent run history.</p>
           </div>
-
-          <div className="flex flex-col gap-3 shrink-0">
-            <Link
-              to="/agents/request"
-              className="px-5 py-2.5 bg-zinc-900 hover:bg-black text-white font-bold text-xs font-mono text-center transition-all shadow-xs"
-            >
-              + Submit Your Agent
-            </Link>
-            <Link
-              to="/live-bench"
-              className="px-5 py-2.5 bg-[#ea580c] hover:bg-[#c2410c] text-white font-bold text-xs font-mono text-center flex items-center justify-center gap-1.5 shadow-xs"
-            >
-              <HiOutlinePlay />
-              <span>Try in Live Bench</span>
-            </Link>
-            <p className="text-[11px] text-zinc-500 font-mono text-center">85% creator revenue share • 1-click deploy</p>
-          </div>
+          <Link to="/agents/request" className="px-4 py-2 bg-zinc-900 hover:bg-black text-white font-bold text-xs font-mono text-center shadow-xs shrink-0">+ Submit Your Agent</Link>
         </div>
 
-        {/* Stats strip */}
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 font-mono text-xs">
-          <div className="p-4 bg-white border border-[#e4e4e7] shadow-xs">
-            <span className="text-[10px] text-zinc-400 block uppercase font-semibold">Agents Listed</span>
-            <div className="text-xl font-bold text-zinc-900">{AGENTS.length} Agents</div>
-            <span className="text-[10px] text-zinc-500">Verified & sandboxed</span>
-          </div>
-          <div className="p-4 bg-white border border-[#e4e4e7] shadow-xs">
-            <span className="text-[10px] text-zinc-400 block uppercase font-semibold">Avg Rating</span>
-            <div className="text-xl font-bold text-amber-600 flex items-center gap-1"><HiOutlineStar className="text-amber-500" /> 4.75 / 5</div>
-            <span className="text-[10px] text-zinc-500">Across all categories</span>
-          </div>
-          <div className="p-4 bg-white border border-[#e4e4e7] shadow-xs">
-            <span className="text-[10px] text-zinc-400 block uppercase font-semibold">Tools Connected</span>
-            <div className="text-xl font-bold text-zinc-900">200+ Integrations</div>
-            <span className="text-[10px] text-zinc-500">Slack, GitHub, Jira, Notion…</span>
-          </div>
-          <div className="p-4 bg-white border border-[#e4e4e7] shadow-xs">
-            <span className="text-[10px] text-zinc-400 block uppercase font-semibold">Monthly Runs</span>
-            <div className="text-xl font-bold text-emerald-700">1.2M+</div>
-            <span className="text-[10px] text-zinc-500">P95 latency 420ms</span>
-          </div>
-        </div>
-
-        {/* Search & Filters */}
-        <div className="bg-white border border-[#e4e4e7] p-4 shadow-xs space-y-3 font-mono text-xs">
-          <div className="flex flex-col lg:flex-row gap-3">
-            <div className="flex-1 relative">
-              <HiOutlineMagnifyingGlass className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-400 text-sm" />
-              <input
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                placeholder="Search agents, creators (@aletheia_labs), tools (GitHub, Slack) or capability..."
-                className="w-full bg-[#fafafa] border border-[#e4e4e7] focus:border-[#ea580c] text-zinc-900 pl-9 pr-3.5 py-2 outline-none"
-              />
+        <div className="grid grid-cols-1 lg:grid-cols-[220px_minmax(0,1fr)] gap-6 items-start">
+          {/* Left filter rail */}
+          <aside className="bg-white border border-[#e4e4e7] p-4 shadow-xs space-y-5 font-mono text-xs lg:sticky lg:top-20">
+            <div className="flex items-center justify-between border-b border-[#e4e4e7] pb-3">
+              <h2 className="font-bold uppercase tracking-wide text-zinc-900">Filter agents</h2>
+              {(search || category !== "All" || toolFilter !== "All") && (
+                <button onClick={() => { setSearch(""); setCategory("All"); setToolFilter("All"); }} className="text-[#ea580c] font-bold hover:underline cursor-pointer">Reset</button>
+              )}
             </div>
-            <div className="flex items-center gap-2 shrink-0">
-              <span className="text-zinc-500 uppercase text-[11px] font-bold">Sort:</span>
-              <select
-                value={sortBy}
-                onChange={(e) => setSortBy(e.target.value)}
-                className="bg-[#fafafa] border border-[#e4e4e7] text-zinc-800 px-3 py-2 outline-none cursor-pointer focus:border-[#ea580c]"
-              >
+
+            <label className="block space-y-1.5">
+              <span className="text-[10px] text-zinc-500 uppercase font-bold">Search</span>
+              <div className="relative">
+                <HiOutlineMagnifyingGlass className="absolute left-2.5 top-1/2 -translate-y-1/2 text-zinc-400" />
+                <input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Name or company" className="w-full bg-[#fafafa] border border-[#e4e4e7] focus:border-[#ea580c] pl-8 pr-2 py-2 outline-none text-xs" />
+              </div>
+            </label>
+
+            <div className="space-y-2">
+              <span className="text-[10px] text-zinc-500 uppercase font-bold">Category</span>
+              <div className="space-y-1">
+                {AGENT_CATEGORIES.map((cat) => (
+                  <button key={cat} onClick={() => setCategory(cat)} className={`w-full text-left px-2.5 py-1.5 border transition-all cursor-pointer ${category === cat ? "bg-zinc-900 text-white border-zinc-900 font-bold" : "bg-white text-zinc-600 border-transparent hover:bg-zinc-50 hover:border-[#e4e4e7]"}`}>{cat}</button>
+                ))}
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <span className="text-[10px] text-zinc-500 uppercase font-bold flex items-center gap-1"><HiOutlineWrenchScrewdriver /> Connected tool</span>
+              <div className="flex flex-wrap gap-1.5">
+                {allTools.map((tool) => (
+                  <button key={tool} onClick={() => setToolFilter(tool)} className={`px-2 py-1 border text-[10px] transition-all cursor-pointer ${toolFilter === tool ? "bg-[#ea580c] text-white border-[#ea580c] font-bold" : "bg-white text-zinc-600 border-[#e4e4e7] hover:border-zinc-400"}`}>{tool}</button>
+                ))}
+              </div>
+            </div>
+
+            <label className="block space-y-1.5 border-t border-[#e4e4e7] pt-4">
+              <span className="text-[10px] text-zinc-500 uppercase font-bold">Sort by</span>
+              <select value={sortBy} onChange={(e) => setSortBy(e.target.value)} className="w-full bg-[#fafafa] border border-[#e4e4e7] text-zinc-800 px-2 py-2 outline-none cursor-pointer focus:border-[#ea580c]">
                 <option value="popular">Most Popular</option>
                 <option value="rating">Highest Rated</option>
                 <option value="price">Lowest Price</option>
                 <option value="latency">Lowest Latency</option>
               </select>
+            </label>
+          </aside>
+
+          <main className="space-y-4">
+            <div className="flex items-center justify-between font-mono text-xs">
+              <span className="text-zinc-500"><strong className="text-zinc-900">{filtered.length}</strong> agents available</span>
+              <span className="text-zinc-400">{AGENTS.filter((agent) => agent.verified).length} verified publishers</span>
             </div>
-          </div>
 
-          <div className="flex flex-wrap items-center gap-2">
-            <span className="text-[11px] font-bold text-zinc-500 uppercase">Category:</span>
-            {AGENT_CATEGORIES.map((cat) => (
-              <button
-                key={cat}
-                onClick={() => setCategory(cat)}
-                className={`px-3 py-1 text-[11px] border transition-all cursor-pointer ${category === cat ? "bg-zinc-900 text-white font-bold border-zinc-900" : "bg-[#fafafa] text-zinc-600 border-[#e4e4e7] hover:border-zinc-400 hover:text-black"}`}
-              >
-                {cat}
-              </button>
-            ))}
-          </div>
-
-          <div className="flex flex-wrap items-center gap-2">
-            <span className="text-[11px] font-bold text-zinc-500 uppercase flex items-center gap-1"><HiOutlineWrenchScrewdriver /> Stack:</span>
-            {allTools.map((t) => (
-              <button
-                key={t}
-                onClick={() => setToolFilter(t)}
-                className={`px-2.5 py-1 text-[11px] border transition-all cursor-pointer ${toolFilter === t ? "bg-[#ea580c] text-white font-bold border-[#ea580c]" : "bg-white text-zinc-600 border-[#e4e4e7] hover:border-zinc-400 hover:text-black"}`}
-              >
-                {t}
-              </button>
-            ))}
-          </div>
-
-          <div className="flex items-center justify-between pt-1 text-[11px] text-zinc-500">
-            <span>{filtered.length} agents found • {AGENTS.filter(a=>a.verified).length} verified</span>
-            {(search || category !== "All" || toolFilter !== "All") && (
-              <button onClick={() => {setSearch(""); setCategory("All"); setToolFilter("All");}} className="text-[#ea580c] font-bold hover:underline cursor-pointer">Clear filters</button>
-            )}
-          </div>
-        </div>
-
-        {/* Agent Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {filtered.map((agent) => (
-            <Link
-              key={agent.id}
-              to={`/agents/${agent.id}`}
-              className="bg-white border border-[#e4e4e7] hover:border-zinc-400 p-5 flex flex-col justify-between transition-all group shadow-xs space-y-4 text-left"
-            >
-              <div className="space-y-3">
-                <div className="flex items-start justify-between gap-2">
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 bg-zinc-900 text-white flex items-center justify-center font-mono font-bold text-sm shrink-0">
-                      {agent.avatar}
-                    </div>
-                    <div className="min-w-0">
-                      <h3 className="text-sm font-bold text-zinc-950 group-hover:text-[#ea580c] transition-colors truncate">{agent.displayName}</h3>
-                      <p className="text-xs font-mono text-zinc-500">{agent.creator}</p>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {filtered.map((agent) => (
+                <article key={agent.id} className="bg-white border border-[#e4e4e7] hover:border-zinc-400 p-5 transition-all group shadow-xs">
+                  <div className="flex items-start gap-3">
+                    <div className="w-11 h-11 bg-zinc-900 text-white flex items-center justify-center font-mono font-bold shrink-0">{agent.avatar}</div>
+                    <div className="min-w-0 flex-1">
+                      <div className="flex items-start justify-between gap-2">
+                        <div className="min-w-0">
+                          <h3 className="text-base font-bold text-zinc-950 group-hover:text-[#ea580c] transition-colors truncate">{agent.displayName}</h3>
+                          <p className="text-xs text-zinc-500 font-mono flex items-center gap-1 mt-0.5"><HiOutlinePuzzlePiece className="text-zinc-400" /> {agent.creator}</p>
+                        </div>
+                        {agent.verified && <HiOutlineShieldCheck className="text-emerald-600 text-lg shrink-0" title="Verified publisher" />}
+                      </div>
                     </div>
                   </div>
-                  {agent.verified && (
-                    <span className="px-2 py-0.5 bg-emerald-50 border border-emerald-200 text-emerald-700 font-mono text-[10px] font-bold flex items-center gap-1 shrink-0">
-                      <HiOutlineShieldCheck /> Verified
-                    </span>
-                  )}
-                </div>
 
-                <div className="flex flex-wrap gap-1.5">
-                  <span className="px-2 py-0.5 bg-zinc-100 border border-[#e4e4e7] text-[11px] font-mono text-zinc-700">{agent.category}</span>
-                  <span className={`px-2 py-0.5 border text-[11px] font-mono font-bold uppercase ${agent.type === "autonomous" ? "bg-orange-50 border-orange-200 text-[#ea580c]" : agent.type === "assistant" ? "bg-blue-50 border-blue-200 text-blue-700" : "bg-zinc-50 border-zinc-200 text-zinc-700"}`}>{agent.type}</span>
-                  {agent.featured && <span className="px-2 py-0.5 bg-amber-50 border border-amber-200 text-amber-700 text-[11px] font-mono font-bold">★ Featured</span>}
-                </div>
+                  <p className="text-xs text-zinc-600 leading-relaxed mt-4 line-clamp-2">{agent.description}</p>
 
-                <p className="text-xs text-zinc-600 leading-relaxed line-clamp-2">{agent.description}</p>
-
-                <div className="flex flex-wrap gap-1.5">
-                  {agent.capabilities.slice(0, 3).map((c) => (
-                    <span key={c} className="px-2 py-0.5 bg-[#fafafa] border border-[#e4e4e7] text-[11px] font-mono text-zinc-600">{c}</span>
-                  ))}
-                </div>
-
-                <div className="flex items-center gap-1.5 flex-wrap pt-1">
-                  <span className="text-[10px] font-mono text-zinc-400 uppercase font-semibold flex items-center gap-1"><HiOutlineWrenchScrewdriver /> Tools:</span>
-                  {agent.tools.slice(0, 4).map((t) => (
-                    <span key={t} className="px-1.5 py-0.5 bg-white border border-[#e4e4e7] text-[10px] font-mono text-zinc-700">{t}</span>
-                  ))}
-                  {agent.tools.length > 4 && <span className="text-[10px] text-zinc-400">+{agent.tools.length - 4}</span>}
-                </div>
-              </div>
-
-              <div className="space-y-3 pt-3 border-t border-[#e4e4e7] font-mono">
-                <div className="grid grid-cols-3 gap-2 text-xs">
-                  <div>
-                    <span className="text-[10px] text-zinc-400 block uppercase font-semibold flex items-center gap-1"><HiOutlineStar className="text-amber-500" /> Rating</span>
-                    <span className="text-zinc-900 font-bold">{agent.rating} ★</span>
+                  <div className="flex flex-wrap gap-1.5 mt-4">
+                    <span className="px-2 py-1 bg-zinc-100 border border-[#e4e4e7] text-[10px] font-mono text-zinc-700">{agent.category}</span>
+                    <span className="px-2 py-1 bg-[#fff7ed] border border-orange-200 text-[10px] font-mono text-[#ea580c] font-bold uppercase">{agent.type}</span>
+                    {agent.tags.slice(0, 2).map((tag) => <span key={tag} className="px-2 py-1 bg-white border border-[#e4e4e7] text-[10px] font-mono text-zinc-600">{tag}</span>)}
                   </div>
-                  <div>
-                    <span className="text-[10px] text-zinc-400 block uppercase font-semibold">Installs</span>
-                    <span className="text-zinc-800 font-bold flex items-center gap-1"><HiOutlineArrowDownTray className="text-zinc-500" />{agent.installs}</span>
-                  </div>
-                  <div>
-                    <span className="text-[10px] text-zinc-400 block uppercase font-semibold">Price</span>
-                    <span className="text-zinc-700 font-medium">{agent.pricingFormatted}</span>
-                  </div>
-                </div>
-                <div className="grid grid-cols-2 gap-2 text-[11px]">
-                  <span className="px-2 py-1 bg-emerald-50 border border-emerald-200 text-emerald-800 font-bold text-center">{agent.successRate}% Success</span>
-                  <span className="px-2 py-1 bg-white border border-[#e4e4e7] text-zinc-700 text-center">{agent.latencyMs}ms avg</span>
-                </div>
-                <div className="flex gap-2">
-                  <span className="flex-1 py-2 bg-white border border-zinc-300 text-zinc-800 text-xs font-bold text-center group-hover:bg-zinc-50 transition-colors">View Agent →</span>
-                  <span className="flex-1 py-2 bg-[#ea580c] group-hover:bg-[#c2410c] text-white text-xs font-bold text-center transition-colors">Install</span>
-                </div>
-              </div>
-            </Link>
-          ))}
-        </div>
 
-        {filtered.length === 0 && (
-          <div className="bg-white border border-dashed border-[#e4e4e7] p-10 text-center font-mono text-xs text-zinc-500">
-            No agents match your filters. Try clearing filters or search with a different term.
-          </div>
-        )}
+                  <div className="flex items-center gap-1.5 flex-wrap mt-4 pt-3 border-t border-[#e4e4e7]">
+                    <span className="text-[10px] font-mono text-zinc-400 uppercase font-bold flex items-center gap-1"><HiOutlineWrenchScrewdriver /> Tools</span>
+                    {agent.tools.slice(0, 3).map((tool) => <span key={tool} className="px-1.5 py-0.5 bg-[#fafafa] border border-[#e4e4e7] text-[10px] font-mono text-zinc-700">{tool}</span>)}
+                    {agent.tools.length > 3 && <span className="text-[10px] text-zinc-400">+{agent.tools.length - 3}</span>}
+                  </div>
 
-        {/* Bottom CTA */}
-        <div className="bg-zinc-900 border border-zinc-800 p-6 sm:p-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-white">
-          <div className="space-y-1">
-            <h3 className="text-base font-bold flex items-center gap-2"><HiOutlineSparkles className="text-[#ea580c]" /> Build & monetize your own agent</h3>
-            <p className="text-xs text-zinc-400 font-mono">Publish to the marketplace, get discovery, managed auth, billing & 85% revenue share.</p>
-          </div>
-          <div className="flex gap-3 font-mono text-xs">
-            <Link to="/test" className="px-5 py-2.5 bg-white text-zinc-900 font-bold hover:bg-zinc-100 transition-colors">Benchmark First</Link>
-            <Link to="/agents/request" className="px-5 py-2.5 bg-[#ea580c] hover:bg-[#c2410c] text-white font-bold transition-colors">Submit Agent</Link>
-          </div>
+                  <div className="flex items-end justify-between gap-3 mt-4 font-mono">
+                    <div className="flex items-center gap-4 text-xs">
+                      <span><span className="block text-[10px] text-zinc-400 uppercase">Rating</span><strong>{agent.rating} ★</strong></span>
+                      <span><span className="block text-[10px] text-zinc-400 uppercase">Runs</span><strong>{agent.installs}</strong></span>
+                      <span><span className="block text-[10px] text-zinc-400 uppercase">Price</span><strong className="text-[#ea580c]">{agent.pricingFormatted}</strong></span>
+                    </div>
+                    <Link to={`/agents/${agent.id}`} className="px-4 py-2 bg-zinc-900 hover:bg-[#ea580c] text-white text-xs font-bold transition-colors shrink-0">View Agent →</Link>
+                  </div>
+                </article>
+              ))}
+            </div>
+
+            {filtered.length === 0 && <div className="bg-white border border-dashed border-[#e4e4e7] p-10 text-center font-mono text-xs text-zinc-500">No agents match your filters. Try resetting the sidebar.</div>}
+          </main>
         </div>
       </div>
     </div>
