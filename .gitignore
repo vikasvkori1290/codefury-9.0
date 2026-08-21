@@ -28,3 +28,4 @@ temp/
 server/uploads/
 uploads/
 server/data_store.json
+client/bun.lock
