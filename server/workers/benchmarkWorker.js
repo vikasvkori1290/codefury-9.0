@@ -29,7 +29,7 @@ export const runPromptfooBenchmarkWorker = async (jobId, modelName) => {
     } catch (_) {}
   }
   if (!job) {
-    job = jobStore.getJob(jobId);
+    job = job-Store.getJob(jobId);
   }
 
   if (!job) {
