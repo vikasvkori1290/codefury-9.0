@@ -12,6 +12,8 @@ import ModelDetailPage from "./pages/ModelDetailPage";
 import AgentMarketplacePage from "./pages/AgentMarketplacePage";
 import AgentDetailPage from "./pages/AgentDetailPage";
 import AuthPage from "./pages/AuthPage";
+import ComparePage from "./pages/ComparePage";
+import PlaygroundPage from "./pages/PlaygroundPage";
 
 function AppLayout() {
   const location = useLocation();
@@ -33,6 +35,8 @@ function AppLayout() {
         <Route path="/marketplace" element={<MarketplacePage />} />
         <Route path="/models" element={<MarketplacePage />} />
         <Route path="/models/:id" element={<ModelDetailPage />} />
+        <Route path="/compare" element={<ComparePage />} />
+        <Route path="/playground/:modelId" element={<PlaygroundPage />} />
         {/* Agent Marketplace */}
         <Route path="/agents" element={<AgentMarketplacePage />} />
         <Route path="/agent-marketplace" element={<AgentMarketplacePage />} />

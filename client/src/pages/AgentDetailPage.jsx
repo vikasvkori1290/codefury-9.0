@@ -36,7 +36,7 @@ const REVIEWS = [
 export const AgentDetailPage = () => {
   const { id } = useParams();
   const agent = AGENTS.find((a) => a.id === id);
-  const [activeTab, setActiveTab] = useState("overview"); // overview | tools | benchmark | pricing | reviews
+  const [activeTab, setActiveTab] = useState("overview"); // overview | tools | benchmark | reviews
   const [isInstallCopied, setIsInstallCopied] = useState(false);
   const [installMode, setInstallMode] = useState("curl"); // curl | python | node
 
@@ -70,6 +70,13 @@ console.log(result.output);`,
     setIsInstallCopied(true);
     setTimeout(() => setIsInstallCopied(false), 2000);
   };
+
+  const platformCommands = {
+    windows: { manager: `winget install ModelHub.Agent\nmodelhub agent run ${agent.id}`, package: `Invoke-WebRequest https://downloads.modelhub.dev/agents/${agent.id}/windows.zip -OutFile agent.zip\nExpand-Archive agent.zip`, curl: `curl.exe -L https://downloads.modelhub.dev/agents/${agent.id}/install.ps1 -o install.ps1\n./install.ps1` },
+    linux: { manager: `curl -fsSL https://apt.modelhub.dev/install.sh | sh\nmodelhub agent install ${agent.id}`, package: `curl -L https://downloads.modelhub.dev/agents/${agent.id}/linux.tar.gz | tar -xz`, curl: `curl -fsSL https://downloads.modelhub.dev/agents/${agent.id}/install.sh | sh` },
+    macos: { manager: `brew tap modelhub/tap\nbrew install modelhub-agent\nmodelhub agent install ${agent.id}`, package: `curl -L https://downloads.modelhub.dev/agents/${agent.id}/macos.tar.gz | tar -xz`, curl: `curl -fsSL https://downloads.modelhub.dev/agents/${agent.id}/install.sh | sh` },
+  };
+  const downloadPackage = () => { const blob = new Blob([JSON.stringify({ agent: agent.id, platform: installPlatform, command: platformCommands[installPlatform][installMethod] }, null, 2)], { type: "application/json" }); const url = URL.createObjectURL(blob); const link = document.createElement("a"); link.href = url; link.download = `${agent.id}-package.json`; link.click(); URL.revokeObjectURL(url); };
 
   return (
     <div className="min-h-screen bg-[#fafafa] text-zinc-900 font-sans selection:bg-[#ea580c] selection:text-white py-10 px-4 sm:px-8">
@@ -126,13 +133,7 @@ console.log(result.output);`,
               <div className="text-3xl font-bold text-emerald-700">{agent.successRate}%</div>
               <span className="text-[10px] text-zinc-400 block">Avg latency {agent.latencyMs}ms</span>
             </div>
-            <button
-              onClick={() => setActiveTab("pricing")}
-              className="w-full sm:w-auto px-6 py-3 bg-[#ea580c] hover:bg-[#c2410c] text-white font-bold text-xs font-mono flex items-center justify-center gap-2 shadow-xs active:scale-95 cursor-pointer"
-            >
-              <HiOutlineArrowDownTray /> <span>Install Agent (1-Click)</span>
-            </button>
-            <Link
+             <Link
               to="/live-bench"
               className="w-full sm:w-auto px-6 py-2.5 bg-white border border-zinc-300 text-zinc-800 font-bold text-xs font-mono text-center hover:bg-zinc-50 flex items-center justify-center gap-2"
             >
@@ -142,7 +143,7 @@ console.log(result.output);`,
         </div>
 
         {/* STATS BAR */}
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 font-mono text-xs">
+         <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 font-mono text-xs">
           <div className="p-4 bg-white border border-[#e4e4e7] shadow-xs space-y-1">
             <span className="text-[10px] text-zinc-400 block uppercase font-semibold">Installs</span>
             <div className="text-xl font-bold text-zinc-900">{agent.installs}</div>
@@ -158,11 +159,6 @@ console.log(result.output);`,
             <div className="text-xl font-bold text-zinc-900">{agent.latencyMs} ms</div>
             <span className="text-[10px] text-zinc-500">End-to-end run</span>
           </div>
-          <div className="p-4 bg-white border border-[#e4e4e7] shadow-xs space-y-1">
-            <span className="text-[10px] text-zinc-400 block uppercase font-semibold">Pricing</span>
-            <div className="text-xl font-bold text-[#ea580c]">{agent.pricingFormatted}</div>
-            <span className="text-[10px] text-zinc-500">Tier: {agent.priceTier}</span>
-          </div>
         </div>
 
         {/* TABS */}
@@ -172,7 +168,6 @@ console.log(result.output);`,
               { id: "overview", label: "Overview", icon: <HiOutlinePuzzlePiece /> },
               { id: "tools", label: "Tools & Capabilities", icon: <HiOutlineWrenchScrewdriver /> },
               { id: "benchmark", label: "Benchmark & Runs", icon: <HiOutlineChartBar /> },
-              { id: "pricing", label: "Install & Pricing", icon: <HiOutlineCurrencyDollar /> },
               { id: "reviews", label: "Reviews", icon: <HiOutlineStar /> },
             ].map((t) => (
               <button
@@ -217,9 +212,9 @@ console.log(result.output);`,
                     <p className="text-xs font-bold font-mono">Run it where your work already lives — Slack, GitHub, or API</p>
                     <p className="text-[11px] text-zinc-400 font-mono">All runs are logged, auditable & reversible. Human-in-loop approvals supported.</p>
                   </div>
-                  <button onClick={() => setActiveTab("pricing")} className="px-5 py-2.5 bg-[#ea580c] hover:bg-[#c2410c] text-white font-bold text-xs font-mono flex items-center gap-1.5 shrink-0 cursor-pointer">
-                    <HiOutlineRocketLaunch /> Install to Workspace
-                  </button>
+                   <Link to="/live-bench" className="px-5 py-2.5 bg-[#ea580c] hover:bg-[#c2410c] text-white font-bold text-xs font-mono flex items-center gap-1.5 shrink-0">
+                     <HiOutlinePlay /> Run in Live Bench
+                   </Link>
                 </div>
               </>
             )}
@@ -296,7 +291,7 @@ console.log(result.output);`,
               </>
             )}
 
-            {activeTab === "pricing" && (
+            {false && activeTab === "pricing" && (
               <>
                 <div className="grid sm:grid-cols-3 gap-4 font-mono text-xs">
                   <div className="p-5 bg-white border-2 border-zinc-900 space-y-2">
@@ -353,7 +348,14 @@ console.log(result.output);`,
                     </div>
                     <pre className="p-4 text-xs text-zinc-200 font-mono overflow-x-auto leading-5"><code>{installSnippet[installMode]}</code></pre>
                   </div>
-                  <p className="text-[11px] text-zinc-500 font-mono">All installs are routed through ModelHub — unified billing, auth & tracing. <span className="text-zinc-800 font-bold">85% to creator {agent.creator}</span>.</p>
+                 <p className="text-[11px] text-zinc-500 font-mono">All installs are routed through ModelHub — unified billing, auth & tracing. <span className="text-zinc-800 font-bold">85% to creator {agent.creator}</span>.</p>
+                 <div className="mt-6 border-t border-[#e4e4e7] pt-5 space-y-3">
+                   <div><h4 className="text-xs font-bold uppercase font-mono">Install locally</h4><p className="text-[11px] text-zinc-500 mt-1">We selected {installPlatform} based on your device.</p></div>
+                   <div className="grid grid-cols-3 gap-2">{[["windows", "Windows"], ["linux", "Linux"], ["macos", "macOS"]].map(([value, label]) => <button key={value} onClick={() => setInstallPlatform(value)} className={`py-2 border text-xs font-bold ${installPlatform === value ? "bg-zinc-950 text-white border-zinc-950" : "border-zinc-300 bg-white"}`}>{label}</button>)}</div>
+                   <div className="grid grid-cols-3 gap-2">{[["manager", installPlatform === "macos" ? "Homebrew" : installPlatform === "windows" ? "WinGet" : "Package manager"], ["package", "Direct package"], ["curl", "curl script"]].map(([value, label]) => <button key={value} onClick={() => setInstallMethod(value)} className={`p-2 border text-left text-[11px] ${installMethod === value ? "border-orange-500 bg-orange-50" : "border-zinc-200"}`}><strong className="block">{label}</strong><span className="text-[10px] text-zinc-500">{value === "package" ? "Download archive" : "Copy command"}</span></button>)}</div>
+                   <div className="bg-[#0c0c0e] border border-zinc-800"><div className="flex justify-between px-3 py-2 text-[10px] text-zinc-400 font-mono border-b border-zinc-700"><span>{installPlatform} / {installMethod}</span><button onClick={() => navigator.clipboard.writeText(platformCommands[installPlatform][installMethod])} className="text-white bg-zinc-800 px-2 py-1">Copy</button></div><pre className="p-4 text-xs text-zinc-200 overflow-x-auto"><code>{platformCommands[installPlatform][installMethod]}</code></pre></div>
+                   <button onClick={downloadPackage} className="px-4 py-2 bg-[#ea580c] text-white text-xs font-bold">Download package</button>
+                 </div>
                 </div>
               </>
             )}

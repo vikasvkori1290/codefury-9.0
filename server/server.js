@@ -4,6 +4,7 @@ import cors from "cors";
 import morgan from "morgan";
 import connectDB from "./config/db.js";
 import authRoutes from "./routes/auth.routes.js";
+import chatRoutes from "./routes/chat.routes.js";
 import benchmarkRoutes from "./routes/benchmark.routes.js";
 import modelRoutes from "./routes/model.routes.js";
 import deploymentRoutes from "./routes/deployment.routes.js";
@@ -36,6 +37,7 @@ app.get("/api/health", (req, res) => {
 });
 
 app.use("/api/auth", authRoutes);
+app.use("/api/chat", chatRoutes);
 app.use("/api/models", modelRoutes);
 app.use("/api/benchmark", benchmarkRoutes);
 app.use("/api", deploymentRoutes);

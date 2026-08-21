@@ -232,9 +232,10 @@ export const MarketplacePage = () => {
   useEffect(() => {
     API.get("/models")
       .then(({ data }) => {
-        setMarketplaceModels(Array.isArray(data.models) ? data.models.map(normalizeModel) : []);
+        const models = Array.isArray(data.models) && data.models.length > 0 ? data.models : MARKETPLACE_MODELS;
+        setMarketplaceModels(models.map(normalizeModel));
       })
-      .catch(() => setMarketplaceModels([]))
+      .catch(() => setMarketplaceModels(MARKETPLACE_MODELS.map(normalizeModel)))
       .finally(() => setIsLoading(false));
   }, []);
 
@@ -394,7 +395,14 @@ export const MarketplacePage = () => {
                     to={`/models/${model.id}`}
                     className="flex-1 py-2 bg-white hover:bg-zinc-50 border border-zinc-300 text-zinc-800 text-xs font-bold text-center rounded-none transition-colors"
                   >
-                    View Scorecard →
+                    Research Model →
+                  </Link>
+
+                  <Link
+                    to={`/playground/${model.id}`}
+                    className="flex-1 py-2 bg-zinc-950 hover:bg-zinc-800 text-white text-xs font-bold text-center rounded-none transition-colors"
+                  >
+                    Try Chat
                   </Link>
 
                   <button
