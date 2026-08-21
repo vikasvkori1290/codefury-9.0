@@ -11,6 +11,7 @@ import {
   HiOutlineScale,
   HiOutlineWrenchScrewdriver,
   HiOutlineChartBar,
+  HiOutlineChatBubbleLeftRight,
 } from "react-icons/hi2";
 import DeployModal from "../components/modals/DeployModal";
 import API from "../api/axios";
@@ -614,12 +615,20 @@ export const MarketplacePage = () => {
                       </div>
 
                       <div className="flex items-center gap-1.5 shrink-0">
+                        <Link
+                          to={`/playground/${model.id}`}
+                          className="p-2 bg-white hover:bg-zinc-100 border border-[#e4e4e7] hover:border-zinc-400 text-zinc-700 text-xs font-bold transition-colors"
+                          title="Chat in Playground"
+                        >
+                          <HiOutlineChatBubbleLeftRight className="text-xs" />
+                        </Link>
+
                         <button
                           onClick={() => setDeployModel(model)}
-                          className="px-2.5 py-2 bg-orange-50 hover:bg-orange-100 text-[#ea580c] border border-orange-200 text-xs font-bold transition-colors cursor-pointer"
+                          className="p-2 bg-orange-50 hover:bg-orange-100 text-[#ea580c] border border-orange-200 text-xs font-bold transition-colors cursor-pointer"
                           title="1-Click API Run"
                         >
-                          <HiOutlinePlay />
+                          <HiOutlinePlay className="text-xs" />
                         </button>
 
                         <Link
