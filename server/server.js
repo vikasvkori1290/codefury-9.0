@@ -5,6 +5,7 @@ import morgan from "morgan";
 import connectDB from "./config/db.js";
 import authRoutes from "./routes/auth.routes.js";
 import benchmarkRoutes from "./routes/benchmark.routes.js";
+import modelRoutes from "./routes/model.routes.js";
 
 // Load env vars
 dotenv.config();
@@ -15,8 +16,8 @@ connectDB();
 const app = express();
 
 // --------------- Middleware ---------------
-app.use(express.json({ limit: "10mb" }));
-app.use(express.urlencoded({ extended: true }));
+app.use(express.json({ limit: "50mb" }));
+app.use(express.urlencoded({ extended: true, limit: "50mb" }));
 app.use(
   cors({
     origin: process.env.CLIENT_URL || "http://localhost:5173",
@@ -34,6 +35,7 @@ app.get("/api/health", (req, res) => {
 });
 
 app.use("/api/auth", authRoutes);
+app.use("/api/models", modelRoutes);
 app.use("/api/benchmark", benchmarkRoutes);
 
 // --------------- Error Handler ---------------

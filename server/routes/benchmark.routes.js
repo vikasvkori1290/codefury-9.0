@@ -1,12 +1,16 @@
 import express from "express";
 import { runBenchmark, getAvailableModels } from "../controllers/benchmark.controller.js";
+import { getBenchmarkStatus } from "../controllers/model.controller.js";
 
 const router = express.Router();
 
-// POST /api/benchmark - Parallel Multi-Model Dispatcher
+// POST /api/benchmark - Multi-model parallel inference dispatcher
 router.post("/", runBenchmark);
 
-// GET /api/benchmark/models - Available Models Catalog
+// GET /api/benchmark/models - Available models specifications
 router.get("/models", getAvailableModels);
+
+// GET /api/benchmark/status/:jobId - Track status, progress %, logs, and metrics of a Benchmark Job
+router.get("/status/:jobId", getBenchmarkStatus);
 
 export default router;
