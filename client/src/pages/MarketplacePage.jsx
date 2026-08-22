@@ -277,15 +277,6 @@ const INTENT_TAXONOMY = [
   },
 ];
 
-// Quick suggestions for one-click natural language discovery
-const QUICK_INTENT_SUGGESTIONS = [
-  { label: "🌐 Build a website / app", query: "i want to build a website with react and coding" },
-  { label: "📐 Solve math & logic", query: "solve mathematics equations and GSM8K logic" },
-  { label: "📄 Extract structured JSON", query: "extract unstructured text into clean JSON schema" },
-  { label: "⚡ Fastest models (<150ms)", query: "ultra fast low latency models" },
-  { label: "🆓 Open-weights local models", query: "open weights local models" },
-];
-
 export const MarketplacePage = () => {
   const [search, setSearch] = useState("");
   const [sortBy, setSortBy] = useState("relevant");
@@ -608,23 +599,6 @@ export const MarketplacePage = () => {
                 )}
               </div>
 
-              {/* Quick Suggestion Chips */}
-              <div className="flex items-center gap-1.5 overflow-x-auto pb-1 text-[11px] font-mono scrollbar-none">
-                <span className="text-zinc-400 shrink-0 select-none">Suggestions:</span>
-                {QUICK_INTENT_SUGGESTIONS.map((item) => (
-                  <button
-                    key={item.label}
-                    onClick={() => setSearch(item.query)}
-                    className={`px-2.5 py-1 rounded-none border whitespace-nowrap transition-colors cursor-pointer ${
-                      search === item.query
-                        ? "bg-black text-white border-black font-bold"
-                        : "bg-white border-[#e4e4e7] text-zinc-600 hover:border-zinc-400 hover:text-black"
-                    }`}
-                  >
-                    {item.label}
-                  </button>
-                ))}
-              </div>
             </div>
 
             {/* AI Intent Recommendation Banner */}
