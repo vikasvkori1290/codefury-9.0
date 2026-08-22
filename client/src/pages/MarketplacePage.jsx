@@ -12,6 +12,11 @@ import {
   HiOutlineWrenchScrewdriver,
   HiOutlineChartBar,
   HiOutlineChatBubbleLeftRight,
+  HiOutlineCheckCircle,
+  HiOutlineCurrencyDollar,
+  HiOutlineClock,
+  HiOutlineXMark,
+  HiOutlineArrowTrendingUp,
 } from "react-icons/hi2";
 import DeployModal from "../components/modals/DeployModal";
 import API from "../api/axios";
@@ -518,6 +523,35 @@ export const MarketplacePage = () => {
   return (
     <div className="min-h-screen bg-[#fafafa] text-zinc-900 font-sans selection:bg-[#ea580c] selection:text-white py-8 px-4 sm:px-8">
       <div className="max-w-6xl mx-auto space-y-6">
+
+        {/* ==================== TOP ACTION: FIND YOUR MODEL ==================== */}
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-white border border-[#e4e4e7] p-4 shadow-xs">
+          <div className="flex items-center gap-3">
+            <div className="w-9 h-9 bg-[#ea580c] text-white flex items-center justify-center font-bold text-base shadow-xs shrink-0">
+              <HiOutlineSparkles />
+            </div>
+            <div>
+              <h2 className="text-sm font-bold text-zinc-950 flex items-center gap-2">
+                <span>Looking for a specific model?</span>
+                <span className="bg-orange-50 text-[#ea580c] border border-orange-200 text-[10px] font-mono font-bold px-2 py-0.5 uppercase hidden sm:inline">
+                  Gemini 3.5 Flash
+                </span>
+              </h2>
+              <p className="text-xs text-zinc-500 font-mono mt-0.5">
+                Describe your workload, latency, or budget and Gemini will match the optimal model.
+              </p>
+            </div>
+          </div>
+
+          <Link
+            to="/find-model"
+            className="inline-flex items-center justify-center gap-2 bg-zinc-900 hover:bg-[#ea580c] text-white font-mono text-xs font-bold px-5 py-2.5 transition-all shadow-xs shrink-0 cursor-pointer"
+          >
+            <HiOutlineSparkles className="text-sm" />
+            <span>Find Your Model →</span>
+          </Link>
+        </div>
+
         {/* ==================== TWO-COLUMN LAYOUT (IDENTICAL TO AGENTS) ==================== */}
         <div className="grid grid-cols-1 lg:grid-cols-[220px_minmax(0,1fr)] gap-6 items-start">
           {/* ==================== LEFT FILTER RAIL ==================== */}

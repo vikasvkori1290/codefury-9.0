@@ -5,6 +5,7 @@ import {
   HiOutlineBeaker,
   HiOutlineCreditCard,
   HiOutlineXMark,
+  HiOutlineSparkles,
 } from "react-icons/hi2";
 import { useAuth } from "../context/AuthContext";
 
@@ -61,7 +62,7 @@ const Navbar = () => {
           <nav className="hidden lg:flex items-center gap-1 font-mono text-xs">
             <Link
               to="/test"
-                className={navLinkClass(location.pathname === "/test")}
+              className={navLinkClass(location.pathname === "/test")}
             >
               <span className="w-1.5 h-1.5 bg-[#ea580c] rounded-none hidden sm:inline" />
               <span>Test Bench</span>

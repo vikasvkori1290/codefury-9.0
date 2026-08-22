@@ -11,6 +11,7 @@ import TestPage from "./pages/TestPage";
 import LiveBenchPage from "./pages/LiveBenchPage";
 import LiveJobMonitorPage from "./pages/LiveJobMonitorPage";
 import MarketplacePage from "./pages/MarketplacePage";
+import FindYourModelPage from "./pages/FindYourModelPage";
 import ModelDetailPage from "./pages/ModelDetailPage";
 import AgentMarketplacePage from "./pages/AgentMarketplacePage";
 import AgentDetailPage from "./pages/AgentDetailPage";
@@ -76,6 +77,9 @@ function AppLayout() {
           />
           {/* Live Bench Page (/live-bench) is a public capability leaderboard */}
           <Route path="/live-bench" element={<LiveBenchPage />} />
+          {/* Gemini AI Matchmaker: Find Your Model */}
+          <Route path="/find-model" element={<FindYourModelPage />} />
+          <Route path="/find-your-model" element={<FindYourModelPage />} />
           {/* AI Models / Marketplace Explorer: Browsing list is public */}
           <Route path="/marketplace" element={<MarketplacePage />} />
           <Route path="/models" element={<MarketplacePage />} />
