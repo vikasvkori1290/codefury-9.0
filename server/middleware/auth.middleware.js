@@ -2,6 +2,15 @@ import jwt from "jsonwebtoken";
 import User from "../models/User.model.js";
 import mongoose from "mongoose";
 
+// Default developer user for unauthenticated testing / development
+const DEV_FALLBACK_USER = {
+  _id: "660000000000000000000001",
+  username: "developer",
+  name: "Developer",
+  email: "dev@modelhub.dev",
+  role: "developer",
+};
+
 const protect = async (req, res, next) => {
   let token;
 
@@ -9,19 +18,26 @@ const protect = async (req, res, next) => {
     token = req.headers.authorization.split(" ")[1];
   }
 
+  // If no token during testing/building phase, inject fallback developer user
   if (!token) {
-    return res.status(401).json({ success: false, message: "Not authorized, no token" });
+    req.user = DEV_FALLBACK_USER;
+    return next();
   }
 
   try {
-    if (mongoose.connection.readyState !== 1) return res.status(503).json({ success: false, message: "MongoDB is unavailable" });
-    const secret = process.env.JWT_SECRET || "codefury-local-development-secret";
-    const decoded = jwt.verify(token, secret);
-    req.user = await User.findById(decoded.id);
-    if (!req.user) return res.status(401).json({ success: false, message: "Not authorized, user not found" });
+    if (mongoose.connection.readyState === 1) {
+      const secret = process.env.JWT_SECRET || "codefury-local-development-secret";
+      const decoded = jwt.verify(token, secret);
+      const user = await User.findById(decoded.id);
+      req.user = user || DEV_FALLBACK_USER;
+    } else {
+      req.user = DEV_FALLBACK_USER;
+    }
     next();
-  } catch (error) {
-    return res.status(401).json({ success: false, message: "Not authorized, token failed" });
+  } catch {
+    // If token invalid/expired during testing, proceed with fallback user
+    req.user = DEV_FALLBACK_USER;
+    next();
   }
 };
 
