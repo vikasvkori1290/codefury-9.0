@@ -908,6 +908,10 @@ export const LiveBenchPage = () => {
 
     // Sort
     return list.sort((a, b) => {
+      // Force creator models to the bottom
+      if (a.isCreatorTested && !b.isCreatorTested) return 1;
+      if (!a.isCreatorTested && b.isCreatorTested) return -1;
+
       let valA = 0;
       let valB = 0;
 
@@ -1092,16 +1096,6 @@ export const LiveBenchPage = () => {
             </div>
           </div>
 
-          {/* Creator Models Highlight Legend Banner */}
-          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 px-3.5 py-2.5 bg-[#fff7ed] border border-orange-200 text-[#ea580c] font-bold text-xs font-mono shadow-xs">
-            <div className="flex items-center gap-2">
-              <HiOutlineSparkles className="text-sm shrink-0" />
-              <span>🧪 CREATOR-TESTED MODELS HIGHLIGHTED IN ORANGE</span>
-            </div>
-            <span className="text-[10px] text-zinc-600 font-normal">
-              Ranked strictly by overall LiveBench pass rate alongside 44 global frontier baselines
-            </span>
-          </div>
 
         </div>
 
@@ -1143,11 +1137,7 @@ export const LiveBenchPage = () => {
                       return (
                         <tr
                           key={model.id || model.name}
-                          className={`transition-colors cursor-pointer group ${
-                            isCreator
-                              ? "bg-[#fff7ed] hover:bg-[#ffedd5] border-l-4 border-l-[#ea580c]"
-                              : "hover:bg-[#f8faff]"
-                          }`}
+                          className="transition-colors cursor-pointer hover:bg-[#f8faff] group"
                           title={`${model.name} (${model.org}) — Overall Score: ${pass.toFixed(1)}%`}
                         >
                           {/* Model & Logo */}
@@ -1155,20 +1145,12 @@ export const LiveBenchPage = () => {
                             <div className="flex items-center gap-2.5 min-w-0">
                               <BrandLogo brand={brandInfo.brand} logo={brandInfo.logo} />
                               <div className="flex items-center gap-1.5 min-w-0 flex-wrap">
-                                <span className={`font-bold text-xs truncate transition-colors ${
-                                  isCreator ? "text-[#c2410c]" : "text-zinc-950 group-hover:text-[#ea580c]"
-                                }`}>
+                                <span className="font-bold text-xs truncate transition-colors text-zinc-950 group-hover:text-[#ea580c]">
                                   {model.name.toLowerCase()}
                                 </span>
-                                {isCreator ? (
-                                  <span className="px-1.5 py-0.5 bg-[#ea580c] text-white text-[9px] font-mono font-bold tracking-wider uppercase shrink-0">
-                                    🧪 CREATOR TESTED
-                                  </span>
-                                ) : (
-                                  <span className="text-[10px] text-zinc-400 font-normal">
-                                    {brandInfo.tag}
-                                  </span>
-                                )}
+                                <span className="text-[10px] text-zinc-400 font-normal">
+                                  {brandInfo.tag}
+                                </span>
                               </div>
                             </div>
                           </td>
@@ -1417,11 +1399,7 @@ export const LiveBenchPage = () => {
                         <React.Fragment key={model.id}>
                           <tr
                             onClick={() => setExpandedModelId(isExpanded ? null : model.id)}
-                            className={`transition-colors cursor-pointer ${
-                              isCreator
-                                ? "bg-[#fff7ed] hover:bg-[#ffedd5] border-l-4 border-l-[#ea580c]"
-                                : "hover:bg-[#f8faff]"
-                            }`}
+                            className="transition-colors cursor-pointer hover:bg-[#f8faff]"
                           >
                             {/* Model Name & Org */}
                             <td className="py-3.5 px-4">
@@ -1435,14 +1413,9 @@ export const LiveBenchPage = () => {
                                 </span>
                                 <div>
                                   <div className="flex items-center gap-1.5 flex-wrap">
-                                    <span className={`font-bold text-xs ${isCreator ? "text-[#c2410c]" : "text-zinc-950"}`}>
+                                    <span className="font-bold text-xs text-zinc-950">
                                       {model.name}
                                     </span>
-                                    {isCreator && (
-                                      <span className="px-1.5 py-0.5 bg-[#ea580c] text-white text-[9px] font-mono font-bold tracking-wider uppercase shrink-0">
-                                        🧪 CREATOR TESTED
-                                      </span>
-                                    )}
                                     {model.isOpen && !isCreator && (
                                       <span className="px-1.5 py-0.2 text-[9px] font-mono border border-emerald-300 text-emerald-700 bg-emerald-50">
                                         open
