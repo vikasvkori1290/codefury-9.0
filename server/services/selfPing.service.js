@@ -7,12 +7,17 @@ import mongoose from "mongoose";
  * Keeps server instance warm and MongoDB connection pool active
  */
 export const startSelfPingService = () => {
+  // On Vercel serverless, don't run persistent interval that blocks lambda execution
+  if (process.env.VERCEL) {
+    return;
+  }
+
   // Interval: 8 minutes (480,000 ms) to comfortably beat 10-15m idle timeouts
   const INTERVAL_MS = 8 * 60 * 1000;
 
   console.log("💓 [HEARTBEAT SERVICE] Automatic 8-minute self-ping & DB warm-up initialized.");
 
-  setInterval(async () => {
+  const timer = setInterval(async () => {
     try {
       // 1. Warm MongoDB Connection
       if (mongoose.connection.readyState === 1) {
@@ -23,7 +28,6 @@ export const startSelfPingService = () => {
       // 2. HTTP Self-Ping if URL is configured
       const targetUrl =
         process.env.BACKEND_URL ||
-        (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : null) ||
         (process.env.RENDER_EXTERNAL_URL ? process.env.RENDER_EXTERNAL_URL : null);
 
       if (targetUrl) {
@@ -42,4 +46,9 @@ export const startSelfPingService = () => {
       console.warn(`💓 [HEARTBEAT WARNING] ${error.message}`);
     }
   }, INTERVAL_MS);
+
+  // Unref timer so Node process can cleanly exit or scale without hanging
+  if (timer.unref) {
+    timer.unref();
+  }
 };
