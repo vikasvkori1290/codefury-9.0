@@ -1,6 +1,11 @@
 import axios from "axios";
 
-export const API_BASE_URL = (import.meta.env.VITE_API_URL || "http://localhost:5000/api").replace(/\/$/, "");
+const isLocalhost = typeof window !== "undefined" && (window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1");
+
+export const API_BASE_URL = (
+  import.meta.env.VITE_API_URL || 
+  (isLocalhost ? "http://localhost:5000/api" : "https://codefury-9-0-eta.vercel.app/api")
+).replace(/\/$/, "");
 
 const API = axios.create({
   baseURL: API_BASE_URL,
