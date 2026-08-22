@@ -18,6 +18,7 @@ import AgentSubmissionPage from "./pages/AgentSubmissionPage";
 import AuthPage from "./pages/AuthPage";
 import ComparePage from "./pages/ComparePage";
 import PlaygroundPage from "./pages/PlaygroundPage";
+import PlanPage from "./pages/PlanPage";
 
 import ScrollToTop from "./components/ScrollToTop";
 import ProtectedRoute from "./components/ProtectedRoute";
@@ -115,6 +116,14 @@ function AppLayout() {
           />
           <Route path="/agents/:id" element={<AgentDetailPage />} />
           <Route path="/about" element={<About />} />
+          <Route
+            path="/plan"
+            element={
+              <ProtectedRoute>
+                <PlanPage />
+              </ProtectedRoute>
+            }
+          />
           <Route path="/login" element={<AuthPage />} />
           <Route path="/register" element={<AuthPage />} />
           {/* Wildcard Fallback */}

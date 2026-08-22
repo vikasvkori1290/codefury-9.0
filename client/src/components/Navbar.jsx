@@ -1,14 +1,43 @@
-import React, { useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { HiOutlineBars3, HiOutlineXMark } from "react-icons/hi2";
+import {
+  HiOutlineBars3,
+  HiOutlineBeaker,
+  HiOutlineChevronDown,
+  HiOutlineCreditCard,
+  HiOutlineUserCircle,
+  HiOutlineXMark,
+} from "react-icons/hi2";
 import { useAuth } from "../context/AuthContext";
 
 const Navbar = () => {
   const { user, logout } = useAuth();
   const location = useLocation();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isProfileOpen, setIsProfileOpen] = useState(false);
+  const profileRef = useRef(null);
 
   const closeMenu = () => setIsMenuOpen(false);
+
+  useEffect(() => {
+    const handlePointerDown = (event) => {
+      if (!profileRef.current?.contains(event.target)) {
+        setIsProfileOpen(false);
+      }
+    };
+    const handleKeyDown = (event) => {
+      if (event.key === "Escape") setIsProfileOpen(false);
+    };
+
+    document.addEventListener("pointerdown", handlePointerDown);
+    document.addEventListener("keydown", handleKeyDown);
+    return () => {
+      document.removeEventListener("pointerdown", handlePointerDown);
+      document.removeEventListener("keydown", handleKeyDown);
+    };
+  }, []);
+
+  const closeProfile = () => setIsProfileOpen(false);
 
   const navLinkClass = (active) =>
     `px-3 py-2 transition-all flex items-center gap-1.5 ${
@@ -67,16 +96,54 @@ const Navbar = () => {
         {/* Right Actions */}
         <div className="flex items-center gap-2 text-xs font-sans shrink-0">
           {user ? (
-            <div className="flex items-center gap-3">
-              <span className="text-zinc-700 font-medium hidden md:inline">
-                {user.name}
-              </span>
+            <div className="relative" ref={profileRef}>
               <button
-                onClick={logout}
-                className="px-3 py-2 border border-zinc-300 text-zinc-700 hover:text-black hover:bg-zinc-50 font-medium transition-all cursor-pointer font-mono"
+                type="button"
+                aria-label="Open profile menu"
+                aria-expanded={isProfileOpen}
+                onClick={() => setIsProfileOpen((open) => !open)}
+                className="flex items-center gap-1.5 text-zinc-900 hover:text-[#ea580c] transition-colors cursor-pointer"
               >
-                Log out
+                <HiOutlineUserCircle className="text-[#ea580c]" size={29} />
+                <HiOutlineChevronDown
+                  size={14}
+                  className={`transition-transform ${isProfileOpen ? "rotate-180" : ""}`}
+                />
               </button>
+              {isProfileOpen && (
+                <div className="absolute right-0 top-11 z-50 w-52 border-2 border-black bg-white p-2 text-left shadow-[4px_4px_0_#ea580c]">
+                  <div className="border-b border-zinc-200 px-3 py-2 mb-1">
+                    <p className="truncate font-bold text-zinc-900">{user.name}</p>
+                    <p className="truncate font-mono text-[10px] text-zinc-500">{user.email}</p>
+                  </div>
+                  <Link
+                    to="/test"
+                    onClick={closeProfile}
+                    className="flex items-center gap-2 px-3 py-2 font-mono text-xs text-zinc-700 hover:bg-[#fff0e8] hover:text-[#ea580c]"
+                  >
+                    <HiOutlineBeaker size={16} />
+                    Test Bench
+                  </Link>
+                  <Link
+                    to="/plan"
+                    onClick={closeProfile}
+                    className="flex items-center gap-2 px-3 py-2 font-mono text-xs text-zinc-700 hover:bg-[#fff0e8] hover:text-[#ea580c]"
+                  >
+                    <HiOutlineCreditCard size={16} />
+                    Plan
+                  </Link>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      closeProfile();
+                      logout();
+                    }}
+                    className="flex w-full items-center gap-2 border-t border-zinc-200 mt-1 px-3 py-2 font-mono text-xs text-zinc-700 hover:bg-red-50 hover:text-red-700 cursor-pointer"
+                  >
+                    Log out
+                  </button>
+                </div>
+              )}
             </div>
           ) : (
             <div className="hidden sm:flex items-center gap-2">
