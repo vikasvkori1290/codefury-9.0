@@ -23,7 +23,6 @@ export const AgentDetailPage = () => {
   const submittedAgents = (() => { try { return JSON.parse(localStorage.getItem("modelhub-submitted-agents") || "[]"); } catch { return []; } })();
   const agent = [...submittedAgents, ...AGENTS].find((item) => item.id === id);
   const [platform, setPlatform] = useState("macos");
-  const [method, setMethod] = useState("manager");
   const [copied, setCopied] = useState(false);
 
   if (!agent) {
@@ -35,36 +34,23 @@ export const AgentDetailPage = () => {
   }
 
   const commands = {
-    macos: {
-      manager: `brew tap modelhub/tap\nbrew install modelhub-agent\nmodelhub agent install ${agent.id}`,
-      curl: `curl -fsSL https://downloads.modelhub.dev/agents/${agent.id}/install.sh | sh`,
-      package: `curl -L https://downloads.modelhub.dev/agents/${agent.id}/macos.dmg -o modelhub-agent.dmg\nopen modelhub-agent.dmg`,
-    },
-    linux: {
-      manager: `curl -fsSL https://apt.modelhub.dev/install.sh | sh\nmodelhub agent install ${agent.id}`,
-      curl: `curl -fsSL https://downloads.modelhub.dev/agents/${agent.id}/install.sh | sh`,
-      package: `curl -L https://downloads.modelhub.dev/agents/${agent.id}/linux.AppImage -o modelhub-agent\nchmod +x modelhub-agent`,
-    },
-    windows: {
-      manager: `winget install ModelHub.Agent\nmodelhub agent install ${agent.id}`,
-      curl: `powershell -ExecutionPolicy Bypass -c "irm https://downloads.modelhub.dev/agents/${agent.id}/install.ps1 | iex"`,
-      package: `curl -L https://downloads.modelhub.dev/agents/${agent.id}/windows.msi -o modelhub-agent.msi\nstart modelhub-agent.msi`,
-    },
+    macos: `curl -fsSL https://downloads.modelhub.dev/agents/${agent.id}/install.sh | sh`,
+    linux: `curl -fsSL https://downloads.modelhub.dev/agents/${agent.id}/install.sh | sh`,
+    windows: `powershell -ExecutionPolicy Bypass -c "irm https://downloads.modelhub.dev/agents/${agent.id}/install.ps1 | iex"`,
+  };
+  const packageUrls = {
+    macos: `https://downloads.modelhub.dev/agents/${agent.id}/macos.dmg`,
+    linux: `https://downloads.modelhub.dev/agents/${agent.id}/linux.AppImage`,
+    windows: `https://downloads.modelhub.dev/agents/${agent.id}/windows.msi`,
   };
   if (agent.installCommand) {
-    commands.macos.manager = agent.installCommand;
-    commands.linux.manager = agent.installCommand;
-    commands.windows.manager = agent.installCommand;
+    commands.macos = agent.installCommand;
+    commands.linux = agent.installCommand;
+    commands.windows = agent.installCommand;
   }
 
-  const methodLabels = {
-    manager: platform === "macos" ? "Homebrew" : platform === "windows" ? "WinGet" : "Package manager",
-    curl: "curl installer",
-    package: platform === "macos" ? ".dmg package" : platform === "windows" ? ".msi package" : ".AppImage package",
-  };
-
   const copyCommand = () => {
-    navigator.clipboard.writeText(commands[platform][method]);
+    navigator.clipboard.writeText(commands[platform]);
     setCopied(true);
     setTimeout(() => setCopied(false), 1800);
   };
@@ -124,22 +110,18 @@ export const AgentDetailPage = () => {
           <div className="text-center space-y-2">
             <span className="text-[10px] font-mono uppercase tracking-widest text-[#ea580c] font-bold">Get started</span>
             <h2 className="text-xl font-bold">Install {agent.displayName}</h2>
-            <p className="text-xs text-zinc-500">Select your operating system and use the installation method you prefer.</p>
+            <p className="text-xs text-zinc-500">Select your operating system, then copy the command or download the package.</p>
           </div>
 
           <div className="flex justify-center">
             <div className="inline-flex p-1 bg-[#fafafa] border border-[#e4e4e7] font-mono text-xs">
-              {PLATFORM_LABELS.map(([value, label]) => <button key={value} onClick={() => { setPlatform(value); setMethod("manager"); }} className={`px-6 py-2.5 border cursor-pointer ${platform === value ? "bg-zinc-950 text-white border-zinc-950 font-bold" : "border-transparent text-zinc-600 hover:text-black"}`}>{label}</button>)}
+              {PLATFORM_LABELS.map(([value, label]) => <button key={value} onClick={() => setPlatform(value)} className={`px-6 py-2.5 border cursor-pointer ${platform === value ? "bg-zinc-950 text-white border-zinc-950 font-bold" : "border-transparent text-zinc-600 hover:text-black"}`}>{label}</button>)}
             </div>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-            {[["manager", methodLabels.manager, "Recommended"], ["curl", methodLabels.curl, "Terminal"], ["package", methodLabels.package, "Download"]].map(([value, label, detail]) => <button key={value} onClick={() => setMethod(value)} className={`p-4 border text-left cursor-pointer ${method === value ? "border-[#ea580c] bg-[#fff7ed]" : "border-[#e4e4e7] bg-white hover:border-zinc-400"}`}><strong className="block text-xs">{label}</strong><span className="text-[11px] text-zinc-500 font-mono">{detail}</span></button>)}
-          </div>
-
           <div className="bg-[#0c0c0e] border border-zinc-800 overflow-hidden">
-            <div className="flex items-center justify-between px-4 py-2 bg-[#141418] border-b border-zinc-800 text-[11px] text-zinc-400 font-mono"><span>{platform} / {method}</span><button onClick={copyCommand} className="flex items-center gap-1 px-2 py-1 bg-[#24242a] text-zinc-200 cursor-pointer">{copied ? <HiOutlineCheck className="text-emerald-400" /> : <HiOutlineClipboard />}{copied ? "Copied" : "Copy"}</button></div>
-            <pre className="p-5 text-xs text-zinc-200 font-mono leading-6 overflow-x-auto"><code>{commands[platform][method]}</code></pre>
+            <div className="flex items-center justify-between px-4 py-2 bg-[#141418] border-b border-zinc-800 text-[11px] text-zinc-400 font-mono"><span>{platform} / install</span><div className="flex items-center gap-2"><button onClick={copyCommand} className="flex items-center gap-1 px-2 py-1 bg-[#24242a] text-zinc-200 cursor-pointer">{copied ? <HiOutlineCheck className="text-emerald-400" /> : <HiOutlineClipboard />}{copied ? "Copied" : "Copy"}</button><a href={packageUrls[platform]} download className="flex items-center gap-1 px-2 py-1 bg-[#ea580c] text-white hover:bg-[#c2410c]"><HiOutlineArrowDownTray />Download</a></div></div>
+            <pre className="p-5 text-xs text-zinc-200 font-mono leading-6 overflow-x-auto"><code>{commands[platform]}</code></pre>
           </div>
 
           <div className="flex flex-col sm:flex-row items-center justify-between gap-3 p-4 bg-[#fafafa] border border-[#e4e4e7] text-xs">

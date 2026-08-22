@@ -97,13 +97,6 @@ const Navbar = () => {
               >
                 Sign up
               </Link>
-              <Link
-                to="/test"
-                className="bg-[#ea580c] hover:bg-[#c2410c] text-white font-semibold px-4 py-1.5 rounded-none transition-all flex items-center gap-1 active:scale-95 shadow-xs font-mono"
-              >
-                <span>Live Test</span>
-                <span className="text-white/80">›</span>
-              </Link>
             </div>
           )}
         </div>
