@@ -164,9 +164,18 @@ const CATEGORIES = [
   "General",
 ];
 
+const POPULAR_HUGGINGFACE_MODELS = [
+  { repo: "meta-llama/Llama-3.2-3B-Instruct", name: "Llama 3.2 (3B Instruct)", category: "Reasoning" },
+  { repo: "deepseek-ai/DeepSeek-R1-Distill-Qwen-8B", name: "DeepSeek R1 Distill (8B)", category: "Reasoning" },
+  { repo: "Qwen/Qwen2.5-Coder-7B-Instruct", name: "Qwen 2.5 Coder (7B)", category: "Code" },
+  { repo: "mistralai/Mistral-7B-Instruct-v0.3", name: "Mistral 7B Instruct v0.3", category: "General" },
+  { repo: "google/gemma-2-2b-it", name: "Gemma 2 (2B IT)", category: "General" },
+  { repo: "microsoft/Phi-3.5-mini-instruct", name: "Phi-3.5 Mini Instruct", category: "Reasoning" },
+];
+
 export const CreatorModelSubmitForm = () => {
   const navigate = useNavigate();
-  const [submissionMode, setSubmissionMode] = useState("ollama"); // 'ollama' | 'file' | 'api_key'
+  const [submissionMode, setSubmissionMode] = useState("ollama"); // 'ollama' | 'file' | 'huggingface' | 'api_key'
   const [modelName, setModelName] = useState("qwen2.5:3b");
   const [isCustomModel, setIsCustomModel] = useState(false);
   const [creatorHandle, setCreatorHandle] = useState("@my_creator_org");
@@ -174,7 +183,7 @@ export const CreatorModelSubmitForm = () => {
   const [pricing, setPricing] = useState("0.00015");
   const [uploadedFile, setUploadedFile] = useState(null);
 
-  // API Key fields
+  // API Key & Hugging Face fields
   const [apiProvider, setApiProvider] = useState("google");
   const [apiKey, setApiKey] = useState("");
   const [customEndpoint, setCustomEndpoint] = useState("");
@@ -184,6 +193,12 @@ export const CreatorModelSubmitForm = () => {
 
   const handleSelectOllamaPreset = (m) => {
     setModelName(m.tag);
+    setIsCustomModel(false);
+    setCategory(m.category);
+  };
+
+  const handleSelectHuggingFacePreset = (m) => {
+    setModelName(m.repo);
     setIsCustomModel(false);
     setCategory(m.category);
   };
@@ -221,7 +236,7 @@ export const CreatorModelSubmitForm = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!modelName.trim()) {
-      toast.error("Please specify a model name or tag.");
+      toast.error("Please specify a model name or repository tag.");
       return;
     }
 
@@ -259,10 +274,14 @@ export const CreatorModelSubmitForm = () => {
           creator: creatorHandle.trim(),
           category,
           pricing: parseFloat(pricing) || 0.00015,
-          provider: submissionMode === "api_key" ? "custom_api" : "ollama_local",
+          provider: (submissionMode === "api_key" || submissionMode === "huggingface") ? "custom_api" : "ollama_local",
         };
 
-        if (submissionMode === "api_key") {
+        if (submissionMode === "huggingface") {
+          payload.apiProvider = "huggingface";
+          if (apiKey.trim()) payload.apiKey = apiKey.trim();
+          if (customEndpoint.trim()) payload.endpoint = customEndpoint.trim();
+        } else if (submissionMode === "api_key") {
           if (apiKey.trim()) payload.apiKey = apiKey.trim();
           payload.apiProvider = apiProvider;
           payload.endpoint = customEndpoint.trim() || undefined;
@@ -298,17 +317,17 @@ export const CreatorModelSubmitForm = () => {
               1. Select Submission Mode
             </label>
             <span className="text-[11px] font-mono text-zinc-400">
-              Ollama Local • Modelfile / GGUF • Remote API Key
+              Ollama Local • Modelfile / GGUF • Hugging Face • Remote API Key
             </span>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 p-1 bg-[#fafafa] border border-[#e4e4e7] rounded-none font-mono text-xs">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2 p-1 bg-[#fafafa] border border-[#e4e4e7] rounded-none font-mono text-xs">
             {/* Mode A: Ollama Tag */}
             <button
               type="button"
               onClick={() => {
                 setSubmissionMode("ollama");
-                if (!modelName || modelName.includes("gpt") || modelName.includes("gemini")) {
+                if (!modelName || modelName.includes("/") || modelName.includes("gpt") || modelName.includes("gemini")) {
                   setModelName("qwen2.5:3b");
                 }
               }}
@@ -336,13 +355,32 @@ export const CreatorModelSubmitForm = () => {
               <span>Upload Modelfile / .gguf</span>
             </button>
 
-            {/* Mode C: API Key */}
+            {/* Mode C: Hugging Face */}
+            <button
+              type="button"
+              onClick={() => {
+                setSubmissionMode("huggingface");
+                if (!modelName || !modelName.includes("/")) {
+                  setModelName("meta-llama/Llama-3.2-3B-Instruct");
+                }
+              }}
+              className={`py-3 px-3 rounded-none transition-all flex items-center justify-center gap-2 cursor-pointer border ${
+                submissionMode === "huggingface"
+                  ? "bg-white text-zinc-950 font-bold border-[#e4e4e7] shadow-xs"
+                  : "bg-transparent text-zinc-600 hover:text-zinc-950 border-transparent hover:bg-zinc-100"
+              }`}
+            >
+              <HiOutlineSparkles className={`text-sm ${submissionMode === "huggingface" ? "text-[#ea580c]" : "text-zinc-500"}`} />
+              <span>🤗 Hugging Face</span>
+            </button>
+
+            {/* Mode D: API Key */}
             <button
               type="button"
               onClick={() => {
                 setSubmissionMode("api_key");
                 if (!modelName || modelName.includes(":")) {
-                  setModelName("gemini-2.0-flash");
+                  setModelName("gemini-2.5-flash");
                 }
               }}
               className={`py-3 px-3 rounded-none transition-all flex items-center justify-center gap-2 cursor-pointer border ${
@@ -352,7 +390,7 @@ export const CreatorModelSubmitForm = () => {
               }`}
             >
               <HiOutlineKey className={`text-sm ${submissionMode === "api_key" ? "text-[#ea580c]" : "text-zinc-500"}`} />
-              <span>API Key</span>
+              <span>Remote API Key</span>
             </button>
           </div>
         </div>
@@ -441,7 +479,96 @@ export const CreatorModelSubmitForm = () => {
           </div>
         )}
 
-        {/* C. API KEY */}
+        {/* C. HUGGING FACE INFERENCE */}
+        {submissionMode === "huggingface" && (
+          <div className="space-y-4 pt-1">
+            {/* Model Repo Identifier */}
+            <div className="space-y-1.5">
+              <label className="text-xs font-mono font-semibold text-zinc-800">
+                Hugging Face Model Repo / Tag:
+              </label>
+              <input
+                type="text"
+                value={modelName}
+                onChange={(e) => setModelName(e.target.value)}
+                placeholder="e.g. meta-llama/Llama-3.2-3B-Instruct, deepseek-ai/DeepSeek-R1-Distill-Qwen-8B, Qwen/Qwen2.5-Coder-7B-Instruct"
+                className="w-full bg-[#fafafa] border border-[#e4e4e7] focus:border-[#ea580c] text-zinc-900 text-xs font-mono rounded-none px-3.5 py-2.5 outline-none transition-all"
+                required
+              />
+            </div>
+
+            {/* Quick Presets */}
+            <div className="space-y-1.5">
+              <span className="text-[11px] font-mono text-zinc-500 block">
+                Quick Select Popular Hugging Face Models:
+              </span>
+              <div className="flex flex-wrap gap-2">
+                {POPULAR_HUGGINGFACE_MODELS.map((m) => (
+                  <button
+                    key={m.repo}
+                    type="button"
+                    onClick={() => handleSelectHuggingFacePreset(m)}
+                    className={`px-3 py-1 text-[11px] font-mono rounded-none transition-all cursor-pointer border ${
+                      modelName === m.repo
+                        ? "bg-orange-50 text-[#ea580c] border-[#ea580c] font-bold"
+                        : "bg-[#fafafa] text-zinc-600 border-[#e4e4e7] hover:border-zinc-400 hover:text-black"
+                    }`}
+                  >
+                    {m.name}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* HF Access Token */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-1">
+              <div className="space-y-1.5">
+                <div className="flex items-center justify-between">
+                  <label className="text-xs font-mono font-semibold text-zinc-800">
+                    Hugging Face Access Token (hf_...):
+                  </label>
+                  <button
+                    type="button"
+                    onClick={() => setShowApiKey(!showApiKey)}
+                    className="text-[10px] font-mono text-zinc-500 hover:text-zinc-900 flex items-center gap-1 cursor-pointer"
+                  >
+                    {showApiKey ? <HiOutlineEyeSlash /> : <HiOutlineEye />}
+                    <span>{showApiKey ? "Hide" : "Show"}</span>
+                  </button>
+                </div>
+                <input
+                  type={showApiKey ? "text" : "password"}
+                  value={apiKey}
+                  onChange={(e) => setApiKey(e.target.value)}
+                  placeholder="hf_xxxxxxxxxxxxxxxxxxxxxxx"
+                  className="w-full bg-[#fafafa] border border-[#e4e4e7] focus:border-[#ea580c] text-zinc-900 text-xs font-mono rounded-none px-3.5 py-2.5 outline-none"
+                />
+                <p className="text-[10px] font-mono text-zinc-400">
+                  Required for gated/private models. Encrypted with AES-256-GCM.
+                </p>
+              </div>
+
+              {/* Optional Custom Dedicated Endpoint */}
+              <div className="space-y-1.5">
+                <label className="text-xs font-mono font-semibold text-zinc-800">
+                  Custom Dedicated Endpoint URL (Optional):
+                </label>
+                <input
+                  type="text"
+                  value={customEndpoint}
+                  onChange={(e) => setCustomEndpoint(e.target.value)}
+                  placeholder="https://xxxx.us-east-1.aws.endpoints.huggingface.cloud"
+                  className="w-full bg-[#fafafa] border border-[#e4e4e7] focus:border-[#ea580c] text-zinc-900 text-xs font-mono rounded-none px-3.5 py-2.5 outline-none"
+                />
+                <p className="text-[10px] font-mono text-zinc-400">
+                  Leave empty to use Hugging Face Serverless Inference Router.
+                </p>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* D. REMOTE API KEY */}
         {submissionMode === "api_key" && (
           <div className="space-y-4 pt-1">
             {/* Provider Selector */}
@@ -454,7 +581,7 @@ export const CreatorModelSubmitForm = () => {
                 onChange={(e) => handleSelectApiProvider(e.target.value)}
                 className="w-full bg-[#fafafa] border border-[#e4e4e7] focus:border-[#ea580c] text-zinc-900 text-xs font-mono rounded-none px-3 py-2.5 outline-none cursor-pointer"
               >
-                {API_PROVIDERS.filter((p) => p.id === "google" || p.id === "xai").map((p) => (
+                {API_PROVIDERS.map((p) => (
                   <option key={p.id} value={p.id}>
                     {p.name}
                   </option>

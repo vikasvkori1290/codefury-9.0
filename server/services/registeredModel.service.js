@@ -11,7 +11,7 @@ const providerError = async (response) => {
 
 const requestJson = async (url, options) => {
   const controller = new AbortController();
-  const timeoutId = setTimeout(() => controller.abort(), 8000); // 8-second safety timeout
+  const timeoutId = setTimeout(() => controller.abort(), 25000); // 25-second safety timeout for cold-start inferences
 
   try {
     const response = await fetch(url, {
@@ -24,7 +24,7 @@ const requestJson = async (url, options) => {
   } catch (err) {
     clearTimeout(timeoutId);
     if (err.name === "AbortError") {
-      throw new Error("Provider request timed out after 8 seconds.");
+      throw new Error("Provider request timed out after 25 seconds.");
     }
     throw err;
   }
@@ -34,11 +34,15 @@ export const runRegisteredModel = async ({ model, prompt }) => {
   const started = performance.now();
   let provider = model.apiProvider || "openai";
   const isOpenCodeProvider = provider.startsWith("opencode");
+  const isHuggingFace = provider === "huggingface" || provider === "hf" || String(model.modelIdentifier || model.name).includes("/");
   const apiKey = (model.apiKeyEncrypted ? decryptCredential(model.apiKeyEncrypted) : null)
-    || (isOpenCodeProvider ? (process.env.OPENCODE_API_KEY || process.env.DEEPSEEK_API_KEY) : null);
+    || (isOpenCodeProvider ? (process.env.OPENCODE_API_KEY || process.env.DEEPSEEK_API_KEY) : null)
+    || (isHuggingFace ? (process.env.HF_TOKEN || process.env.HUGGINGFACE_API_KEY || process.env.GROQ_API_KEY || process.env.OPENCODE_API_KEY) : null);
   if (!apiKey) throw new Error("No API credential is configured for this model.");
   // Smart key auto-routing
-  if (apiKey.startsWith("gsk_")) {
+  if (apiKey.startsWith("hf_")) {
+    provider = "huggingface";
+  } else if (apiKey.startsWith("gsk_") && !isHuggingFace) {
     provider = "groq";
   } else if (apiKey.startsWith("AIza")) {
     provider = "google";
@@ -258,6 +262,109 @@ export const runRegisteredModel = async ({ model, prompt }) => {
         lastError = err;
       }
     }
+    if (!text && lastError) throw lastError;
+  } else if (provider === "huggingface" || provider === "hf") {
+    // Hugging Face Serverless Inference / Router / Dedicated Endpoints
+    const isCustomEndpoint = Boolean(model.endpoint);
+    const candidateUrls = isCustomEndpoint
+      ? [model.endpoint]
+      : [
+          "https://router.huggingface.co/hf-inference/v1/chat/completions",
+          `https://api-inference.huggingface.co/models/${encodeURIComponent(modelIdentifier)}/v1/chat/completions`,
+          `https://api-inference.huggingface.co/models/${encodeURIComponent(modelIdentifier)}`,
+        ];
+
+    let lastError = null;
+    if (apiKey && apiKey.startsWith("hf_")) {
+      for (const url of candidateUrls) {
+        try {
+          if (url.endsWith("/chat/completions") || isCustomEndpoint) {
+            const data = await requestJson(url, {
+              method: "POST",
+              headers: {
+                authorization: `Bearer ${apiKey}`,
+                "content-type": "application/json",
+              },
+              body: JSON.stringify({
+                model: modelIdentifier,
+                messages: [{ role: "user", content: prompt }],
+                temperature: 0.1,
+                max_tokens: maxOutputTokens,
+              }),
+            });
+            text = data.choices?.[0]?.message?.content?.trim() || data.output_text;
+            usage = { input_tokens: data.usage?.prompt_tokens, output_tokens: data.usage?.completion_tokens };
+          } else {
+            // Raw pipeline inference format
+            const data = await requestJson(url, {
+              method: "POST",
+              headers: {
+                authorization: `Bearer ${apiKey}`,
+                "content-type": "application/json",
+              },
+              body: JSON.stringify({
+                inputs: prompt,
+                parameters: {
+                  max_new_tokens: maxOutputTokens,
+                  temperature: 0.1,
+                  return_full_text: false,
+                },
+              }),
+            });
+            if (Array.isArray(data) && data[0]?.generated_text) {
+              text = data[0].generated_text.trim();
+            } else if (typeof data === "object" && data.generated_text) {
+              text = data.generated_text.trim();
+            }
+          }
+          if (text) break;
+        } catch (err) {
+          lastError = err;
+        }
+      }
+    }
+
+    // High-availability open-weight fallback if HF router has no token or is unavailable
+    if (!text) {
+      const groqKey = process.env.GROQ_API_KEY || process.env.GROK_API_KEY;
+      const opencodeKey = process.env.OPENCODE_API_KEY || process.env.DEEPSEEK_API_KEY;
+      
+      const mLower = modelIdentifier.toLowerCase();
+      let fallbackModel = "llama-3.1-8b-instant";
+      if (mLower.includes("qwen")) fallbackModel = "qwen/qwen3.6-27b";
+      else if (mLower.includes("llama")) fallbackModel = "llama-3.3-70b-versatile";
+      else if (mLower.includes("deepseek")) fallbackModel = "openai/gpt-oss-120b";
+      else if (mLower.includes("mistral")) fallbackModel = "llama-3.1-8b-instant";
+
+      if (groqKey) {
+        const candidateFallbacks = [
+          fallbackModel,
+          "llama-3.1-8b-instant",
+          "qwen/qwen3.6-27b",
+          "openai/gpt-oss-120b",
+        ];
+        for (const fModel of [...new Set(candidateFallbacks)]) {
+          try {
+            const gData = await requestJson("https://api.groq.com/openai/v1/chat/completions", {
+              method: "POST",
+              headers: { authorization: `Bearer ${groqKey}`, "content-type": "application/json" },
+              body: JSON.stringify({
+                model: fModel,
+                messages: [{ role: "user", content: prompt }],
+                temperature: 0.1,
+                max_tokens: maxOutputTokens,
+              }),
+            });
+            text = gData.choices?.[0]?.message?.content?.trim();
+            usage = { input_tokens: gData.usage?.prompt_tokens, output_tokens: gData.usage?.completion_tokens };
+            if (text) break;
+          } catch (err) {
+            lastError = err;
+          }
+        }
+      }
+    }
+
     if (!text && lastError) throw lastError;
   } else {
     // OpenAI or compatible REST / vLLM / Ollama OpenAI endpoint

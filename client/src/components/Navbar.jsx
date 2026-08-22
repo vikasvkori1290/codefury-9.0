@@ -7,6 +7,7 @@ import {
   HiOutlineXMark,
   HiOutlineSparkles,
 } from "react-icons/hi2";
+import { FaGithub } from "react-icons/fa6";
 import { useAuth } from "../context/AuthContext";
 
 const Navbar = () => {
@@ -101,6 +102,17 @@ const Navbar = () => {
 
         {/* Right Actions */}
         <div className="flex items-center gap-2 text-xs font-sans shrink-0">
+          {/* GitHub Repo Link */}
+          <a
+            href="https://github.com/vikasvkori1290/codefury-9.0"
+            target="_blank"
+            rel="noopener noreferrer"
+            title="View on GitHub (vikasvkori1290/codefury-9.0)"
+            className="flex items-center justify-center h-8 w-8 text-zinc-700 hover:text-black hover:bg-zinc-100 border border-zinc-200 transition-all cursor-pointer shadow-2xs hover:border-zinc-400"
+          >
+            <FaGithub className="text-base" />
+          </a>
+
           {user ? (
             <div className="relative" ref={profileRef}>
               <button
@@ -184,6 +196,15 @@ const Navbar = () => {
             <Link to="/models" onClick={closeMenu} className={navLinkClass(location.pathname === "/models" || location.pathname.startsWith("/models/"))}>AI Models</Link>
             <Link to="/agents" onClick={closeMenu} className={navLinkClass(location.pathname === "/agents" || location.pathname.startsWith("/agents/"))}>Agent Marketplace</Link>
             <Link to="/docs" onClick={closeMenu} className={navLinkClass(location.pathname === "/docs")}>Docs</Link>
+            <a
+              href="https://github.com/vikasvkori1290/codefury-9.0"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center gap-2 px-3 py-2 text-zinc-700 hover:text-black hover:bg-zinc-100 transition-colors"
+            >
+              <FaGithub className="text-base" />
+              <span>GitHub Repository</span>
+            </a>
             {!user && <div className="pt-3 mt-2 border-t border-zinc-100 sm:hidden">
               <Link to="/login" onClick={closeMenu} className="block bg-[#ea580c] px-3 py-2 text-center font-bold text-white">Sign in</Link>
             </div>}

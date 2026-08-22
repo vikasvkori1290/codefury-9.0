@@ -205,6 +205,28 @@ const verifyDeterministicAssertion = (output, assertion) => {
     return { passed: false, reason: `Constraint failed (lowercase: ${isAllLower}, pure words: ${isPureAlpha}, count: ${words.length}/${assertion.count})` };
   }
 
+  // 9. Zero Internal Whitespace
+  if (assertion.type === "no_internal_whitespace") {
+    const hasSpace = /\s/.test(rawText.trim());
+    if (!hasSpace) {
+      return { passed: true, reason: "Strict zero-whitespace payload verified." };
+    }
+    return { passed: false, reason: "Forbidden whitespace characters found inside payload." };
+  }
+
+  // 10. Alliteration Constraint
+  if (assertion.type === "alliteration_constraint") {
+    const words = rawText.trim().split(/\s+/).filter(Boolean);
+    const targetLetter = (assertion.letter || "s").toLowerCase();
+    const allStartWithLetter = words.every((w) => w.toLowerCase().startsWith(targetLetter));
+    const noPunctuation = !/[.,/#!$%^&*;:{}=\-_`~()?]/.test(rawText);
+
+    if (words.length === assertion.count && allStartWithLetter && noPunctuation) {
+      return { passed: true, reason: `Strict ${assertion.count}-word alliteration with letter '${targetLetter.toUpperCase()}' verified.` };
+    }
+    return { passed: false, reason: `Failed alliteration (words: ${words.length}/${assertion.count}, all start with '${targetLetter}': ${allStartWithLetter}, clean punctuation: ${noPunctuation})` };
+  }
+
   // Default fallback substring
   if (assertion.type === "contains") {
     const passed = rawText.toLowerCase().includes(String(assertion.value).toLowerCase());
@@ -220,26 +242,26 @@ const verifyDeterministicAssertion = (output, assertion) => {
 const getSimulatedGroundTruth = (testCase) => {
   const id = testCase.id || "";
   switch (id) {
-    case "math_1": return "18";
-    case "math_2": return "270";
-    case "math_3": return "40";
-    case "math_4": return "28";
-    case "math_5": return "2";
-    case "code_1": return "function isPalindrome(str) {\n  const clean = str.toLowerCase().replace(/[^a-z0-9]/g, '');\n  return clean === clean.split('').reverse().join('');\n}";
-    case "code_2": return "function deepClone(obj) {\n  if (obj === null || typeof obj !== 'object') return obj;\n  if (Array.isArray(obj)) return obj.map(deepClone);\n  const copy = {};\n  for (const k in obj) { if (Object.prototype.hasOwnProperty.call(obj, k)) copy[k] = deepClone(obj[k]); }\n  return copy;\n}";
-    case "code_3": return "function uniqueArray(arr) {\n  return Array.from(new Set(arr));\n}";
-    case "code_4": return "function isValidParentheses(s) {\n  const stack = [];\n  const pairs = { ')': '(', ']': '[', '}': '{' };\n  for (const ch of s) {\n    if ('([{'.includes(ch)) stack.push(ch);\n    else if (stack.pop() !== pairs[ch]) return false;\n  }\n  return stack.length === 0;\n}";
-    case "code_5": return "function flattenArray(arr) {\n  return arr.reduce((acc, val) => Array.isArray(val) ? acc.concat(flattenArray(val)) : acc.concat(val), []);\n}";
-    case "schema_1": return '{\n  "invoice_id": "INV-2026-88",\n  "date": "2026-04-15",\n  "recipient": "Acme Corp",\n  "total": 1450,\n  "paid": true\n}';
-    case "schema_2": return '{\n  "level": "ERROR",\n  "service": "auth-service",\n  "user_id": "usr_9984",\n  "ip": "192.168.1.45",\n  "status_code": 401\n}';
-    case "schema_3": return '{\n  "model_name": "Titan RTX Pro",\n  "price_usd": 2499,\n  "in_stock": true,\n  "vram_gb": 24,\n  "tdp_watts": 350\n}';
-    case "schema_4": return '{\n  "sentiment": "mixed",\n  "rating": 3,\n  "pros": ["Fast battery charging"],\n  "cons": ["Poor display brightness in direct sunlight"]\n}';
-    case "schema_5": return '{\n  "people": ["Dr. Sarah Connor", "Dr. Miles Dyson"],\n  "locations": ["Cyberdyne Systems", "Sunnyvale, California"]\n}';
-    case "rule_1": return "Quantum computing harnesses superposition and entanglement to solve complex optimization and cryptographic problems exponentially faster than classical computers for specialized tasks.";
-    case "rule_2": return "A cloud floats high up in our sky. It holds rain drop by drop until falling down on us.";
-    case "rule_3": return "<<<Red>>>\n<<<Green>>>\n<<<Blue>>>";
-    case "rule_4": return "[SECURITY_ADVISORY_START] Always enforce multi-factor authentication on administrative entry points to prevent unauthorized network access. [SECURITY_ADVISORY_END]";
-    case "rule_5": return "deep blue vast tide";
+    case "math_1": return "3/11";
+    case "math_2": return "4.8";
+    case "math_3": return "53";
+    case "math_4": return "22425";
+    case "math_5": return "28";
+    case "code_1": return "function lengthOfLongestSubstring(s) {\n  let max = 0, start = 0;\n  const map = new Map();\n  for (let i = 0; i < s.length; i++) {\n    if (map.has(s[i])) start = Math.max(start, map.get(s[i]) + 1);\n    map.set(s[i], i);\n    max = Math.max(max, i - start + 1);\n  }\n  return max;\n}";
+    case "code_2": return "function deepEqual(a, b) {\n  if (a === b) return true;\n  if (a == null || b == null || typeof a !== 'object' || typeof b !== 'object') return false;\n  const keysA = Object.keys(a), keysB = Object.keys(b);\n  if (keysA.length !== keysB.length) return false;\n  for (const k of keysA) {\n    if (!Object.prototype.hasOwnProperty.call(b, k) || !deepEqual(a[k], b[k])) return false;\n  }\n  return true;\n}";
+    case "code_3": return "function maxSubarraySum(nums) {\n  let maxSoFar = nums[0], currMax = nums[0];\n  for (let i = 1; i < nums.length; i++) {\n    currMax = Math.max(nums[i], currMax + nums[i]);\n    maxSoFar = Math.max(maxSoFar, currMax);\n  }\n  return maxSoFar;\n}";
+    case "code_4": return "function hasCycle(numNodes, edges) {\n  const adj = Array.from({ length: numNodes }, () => []);\n  for (const [u, v] of edges) adj[v].push(u);\n  const visited = new Array(numNodes).fill(0);\n  function dfs(node) {\n    if (visited[node] === 1) return true;\n    if (visited[node] === 2) return false;\n    visited[node] = 1;\n    for (const neighbor of adj[node]) if (dfs(neighbor)) return true;\n    visited[node] = 2;\n    return false;\n  }\n  for (let i = 0; i < numNodes; i++) if (dfs(i)) return true;\n  return false;\n}";
+    case "code_5": return "function minDistance(word1, word2) {\n  const m = word1.length, n = word2.length;\n  const dp = Array.from({ length: m + 1 }, () => new Array(n + 1).fill(0));\n  for (let i = 0; i <= m; i++) dp[i][0] = i;\n  for (let j = 0; j <= n; j++) dp[0][j] = j;\n  for (let i = 1; i <= m; i++) {\n    for (let j = 1; j <= n; j++) {\n      if (word1[i - 1] === word2[j - 1]) dp[i][j] = dp[i - 1][j - 1];\n      else dp[i][j] = 1 + Math.min(dp[i - 1][j], dp[i][j - 1], dp[i - 1][j - 1]);\n    }\n  }\n  return dp[m][n];\n}";
+    case "schema_1": return '{\n  "invoice_id": "INV-2026-X99",\n  "client_id": "CLI-402",\n  "subtotal": 1200,\n  "tax_rate": 0.15,\n  "tax_amount": 180,\n  "total_due": 1380,\n  "is_paid": false,\n  "currency": "USD"\n}';
+    case "schema_2": return '{\n  "span_id": "4f9a7c2e-8b11-4089-a2de-199c4b220d91",\n  "service": "payment-gateway",\n  "duration_ms": 42.5,\n  "success": true,\n  "http_code": 200,\n  "ip": "10.0.4.12"\n}';
+    case "schema_3": return '{\n  "node_name": "cluster-us-east-01",\n  "region": "us-east-1",\n  "cores": 64,\n  "memory_gb": 256,\n  "gpu_model": "NVIDIA-H100-80GB",\n  "is_active": true,\n  "hourly_rate": 3.85\n}';
+    case "schema_4": return '{\n  "patient_id": "PT-7821",\n  "test_name": "Fasting Blood Glucose",\n  "value": 142.5,\n  "is_abnormal": true,\n  "flag": "HIGH",\n  "fasting": true\n}';
+    case "schema_5": return '{\n  "order_id": "ORD-9901",\n  "items": [\n    { "name": "Laptop", "quantity": 2, "price": 999 },\n    { "name": "Mouse", "quantity": 3, "price": 25 }\n  ],\n  "total": 2073\n}';
+    case "rule_1": return "A cold dark night brings pouring rain onto solid ground whilst howling winds roar around our silent damp city.";
+    case "rule_2": return "<[TIP_1]>Always utilize hardware security keys for critical infrastructure accounts.</[TIP_1]>\n<[TIP_2]>Enforce strict least privilege access controls across all production clusters.</[TIP_2]>\n<[TIP_3]>Rotate API keys automatically every thirty days using automated secrets managers.</[TIP_3]>";
+    case "rule_3": return "### #FF5733 ###\n### #33FF57 ###\n### #3357FF ###\n### #F3FF33 ###";
+    case "rule_4": return "[LANGUAGES_START]c,go,rust,python,java[LANGUAGES_END]";
+    case "rule_5": return "seven swift sailors sail south";
     default: return "OK";
   }
 };

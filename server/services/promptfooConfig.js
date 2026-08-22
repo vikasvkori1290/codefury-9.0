@@ -17,61 +17,61 @@ export const getBenchmarkTestCases = () => {
     {
       id: "math_1",
       vars: {
-        prompt: "A store sells notebooks for $4 each and pens for $2 each. Janet buys 5 notebooks and 6 pens. She pays with a $50 bill. How much change does she receive in dollars? Output only the final numeric integer value.",
+        prompt: "A bag contains 5 red, 4 green, and 3 blue marbles. If 3 marbles are drawn uniformly at random without replacement, what is the probability that all 3 marbles have pairwise distinct colors? Output ONLY the simplified fraction in the format P/Q (e.g. 3/11).",
       },
-       assert: [{ type: "regex_numeric", expectedNumber: 18, regex: "^18(?:\\.0+)?$", exact: true }],
+      assert: [{ type: "regex_numeric", expectedNumber: 3/11, regex: "^3/11$", exact: true }],
       metadata: {
         category: "math_logic",
-        title: "GSM8K Multi-Step Transaction Arithmetic",
-        expected: "18",
+        title: "Combinatorial Hypergeometric Probability",
+        expected: "3/11",
       },
     },
     {
       id: "math_2",
       vars: {
-        prompt: "A train travels at 60 mph for 2.5 hours and then 80 mph for 1.5 hours. What is the total distance traveled in miles? Output only the numeric value.",
+        prompt: "Pipe A fills a reservoir in 6 hours, Pipe B in 8 hours, and Pipe C empties it in 12 hours. If all three operate simultaneously from empty, how many hours does it take to completely fill the reservoir? Output ONLY the exact numeric decimal value (e.g. 4.8).",
       },
-       assert: [{ type: "regex_numeric", expectedNumber: 270, regex: "^270(?:\\.0+)?$", exact: true }],
+      assert: [{ type: "regex_numeric", expectedNumber: 4.8, regex: "^4\\.8(?:0+)?$", exact: true }],
       metadata: {
         category: "math_logic",
-        title: "Compound Speed-Time Integration",
-        expected: "270",
+        title: "Multi-Rate Reservoir Differential Flow",
+        expected: "4.8",
       },
     },
     {
       id: "math_3",
       vars: {
-        prompt: "A bakery made 240 cookies. They sold 3/4 of them in the morning and 1/3 of the remainder in the afternoon. How many cookies are left? Output only the integer number.",
+        prompt: "Find the smallest positive integer N such that N mod 5 = 3, N mod 7 = 4, and N mod 3 = 2. Output ONLY the integer value of N.",
       },
-       assert: [{ type: "regex_numeric", expectedNumber: 40, regex: "^40$", exact: true }],
+      assert: [{ type: "regex_numeric", expectedNumber: 53, regex: "^53$", exact: true }],
       metadata: {
         category: "math_logic",
-        title: "Sequential Fractional Depletion Logic",
-        expected: "40",
+        title: "Chinese Remainder Modular Resolution",
+        expected: "53",
       },
     },
     {
       id: "math_4",
       vars: {
-        prompt: "In a round-robin tournament of 8 teams, every team plays every other team exactly once. How many total matches are played? Output only the numeric answer.",
+        prompt: "An investment portfolio starts at $20,000. It gains 30% in year 1, loses 25% in year 2, and gains 15% in year 3. What is the final value in dollars? Output ONLY the integer value.",
       },
-       assert: [{ type: "regex_numeric", expectedNumber: 28, regex: "^28$", exact: true }],
+      assert: [{ type: "regex_numeric", expectedNumber: 22425, regex: "^22425(?:\\.0+)?$", exact: true }],
       metadata: {
         category: "math_logic",
-        title: "Combinatorics & Graph Clique Sizing",
-        expected: "28",
+        title: "Compound Non-Linear Portfolio Valuation",
+        expected: "22425",
       },
     },
     {
       id: "math_5",
       vars: {
-        prompt: "If a 12-hour clock shows exactly 8:00 right now, what hour will it show in exactly 150 hours? Give only the number from 1 to 12.",
+        prompt: "A planar connected graph has 18 vertices and divides the plane into 12 faces. According to Euler's formula V - E + F = 2, how many edges does this graph have? Output ONLY the integer value.",
       },
-       assert: [{ type: "regex_numeric", expectedNumber: 2, regex: "^2$", exact: true }],
+      assert: [{ type: "regex_numeric", expectedNumber: 28, regex: "^28$", exact: true }],
       metadata: {
         category: "math_logic",
-        title: "Modular Arithmetic Cycle Resolution",
-        expected: "2",
+        title: "Planar Graph Topology (Euler Characteristic)",
+        expected: "28",
       },
     },
 
@@ -79,46 +79,52 @@ export const getBenchmarkTestCases = () => {
     {
       id: "code_1",
       vars: {
-        prompt: "Write a JavaScript function `isPalindrome(str)` that returns true if `str` (ignoring non-alphanumeric chars and case) is a palindrome, false otherwise. Output ONLY the executable JavaScript function definition without markdown if possible.",
+        prompt: "Write a JavaScript function `lengthOfLongestSubstring(s)` that returns the length of the longest substring without repeating characters. Output ONLY the executable JavaScript function definition without markdown if possible.",
       },
       assert: [
         {
           type: "code_unit_test",
-          fnName: "isPalindrome",
-           testCases: [
-            { input: ["A man, a plan, a canal: Panama"], expected: true },
-            { input: ["race a car"], expected: false },
-            { input: ["Was it a car or a cat I saw?"], expected: true },
-           ],
-           forbiddenPatterns: ["JSON\\.parse", "eval\\s*\\(", "Function\\s*\\("],
+          fnName: "lengthOfLongestSubstring",
+          testCases: [
+            { input: ["abcabcbb"], expected: 3 },
+            { input: ["bbbbb"], expected: 1 },
+            { input: ["pwwkew"], expected: 3 },
+            { input: ["dvdf"], expected: 3 },
+            { input: [" "], expected: 1 },
+            { input: ["au"], expected: 2 },
+          ],
         },
       ],
       metadata: {
         category: "code_execution",
-        title: "Sanitized Palindrome Algorithm (3 Unit Tests)",
-        expected: "Pass 3 hidden assertion vectors",
+        title: "Sliding Window Substring (6 Edge Vectors)",
+        expected: "Pass 6 hidden algorithmic test cases",
       },
     },
     {
       id: "code_2",
       vars: {
-        prompt: "Write a JavaScript function `deepClone(obj)` that returns a deep copy of an object/array without using JSON.parse. Output ONLY the JavaScript function definition.",
+        prompt: "Write a JavaScript function `deepEqual(a, b)` that returns true if two values/objects/arrays are deeply equal in structure and values, false otherwise. Must handle primitives, nested arrays, and nested objects without using JSON.stringify. Output ONLY the JavaScript function.",
       },
       assert: [
         {
           type: "code_unit_test",
-          fnName: "deepClone",
+          fnName: "deepEqual",
           testCases: [
             {
-              evalStr: "const o = { a: 1, b: { c: 2 } }; const c = deepClone(o); c.b.c = 99; return o.b.c === 2;",
+              evalStr: "return deepEqual({ a: [1, 2], b: { c: 'x' } }, { a: [1, 2], b: { c: 'x' } }) === true;",
               expected: true,
             },
             {
-              evalStr: "const arr = [1, [2, 3]]; const cloned = deepClone(arr); cloned[1][0] = 77; return arr[1][0] === 2;",
+              evalStr: "return deepEqual({ a: 1, b: 2 }, { a: 1, b: 3 }) === false;",
               expected: true,
             },
             {
-              evalStr: "return deepClone({ x: null }).x === null;",
+              evalStr: "return deepEqual([1, null, { k: 2 }], [1, null, { k: 2 }]) === true;",
+              expected: true,
+            },
+            {
+              evalStr: "return deepEqual({ a: 1 }, { a: 1, b: undefined }) === false;",
               expected: true,
             },
           ],
@@ -126,74 +132,77 @@ export const getBenchmarkTestCases = () => {
       ],
       metadata: {
         category: "code_execution",
-        title: "Recursive Deep Clone Execution (3 Mutation Tests)",
-        expected: "Pass object & array clone tests",
+        title: "Recursive Deep Structural Equality Comparator",
+        expected: "Pass nested objects & arrays equality checks",
       },
     },
     {
       id: "code_3",
       vars: {
-        prompt: "Write a JavaScript function `uniqueArray(arr)` that returns an array with duplicate primitive elements removed while strictly preserving original order. Output ONLY the JavaScript function.",
+        prompt: "Write a JavaScript function `maxSubarraySum(nums)` that finds the maximum sum of a contiguous non-empty subarray in an array of integers (Kadane's Algorithm). Output ONLY the JavaScript function.",
       },
       assert: [
         {
           type: "code_unit_test",
-          fnName: "uniqueArray",
+          fnName: "maxSubarraySum",
           testCases: [
-            { input: [[1, 2, 2, 3, 1, 4]], expected: [1, 2, 3, 4], isJsonEq: true },
-            { input: [["a", "b", "a", "c"]], expected: ["a", "b", "c"], isJsonEq: true },
-            { input: [[]], expected: [], isJsonEq: true },
+            { input: [[-2, 1, -3, 4, -1, 2, 1, -5, 4]], expected: 6 },
+            { input: [[-5, -2, -8, -1]], expected: -1 },
+            { input: [[5, 4, -1, 7, 8]], expected: 23 },
+            { input: [[-10]], expected: -10 },
           ],
         },
       ],
       metadata: {
         category: "code_execution",
-        title: "Order-Preserving Deduplication (3 Array Tests)",
-        expected: "Pass order & edge-case unit tests",
+        title: "Contiguous Maximum Subarray (Kadane Dynamic Programming)",
+        expected: "Pass positive, negative, and mixed array tests",
       },
     },
     {
       id: "code_4",
       vars: {
-        prompt: "Write a JavaScript function `isValidParentheses(s)` that takes a string containing '()[]{}' and returns true if the brackets are closed in the correct order. Output ONLY the JavaScript function.",
+        prompt: "Write a JavaScript function `hasCycle(numNodes, edges)` where edges is an array of [dest, src] directed edges. Return true if there is a cycle in the directed graph, false otherwise. Output ONLY the JavaScript function.",
       },
       assert: [
         {
           type: "code_unit_test",
-          fnName: "isValidParentheses",
+          fnName: "hasCycle",
           testCases: [
-            { input: ["()[]{}"], expected: true },
-            { input: ["(]"], expected: false },
-            { input: ["([{}])"], expected: true },
+            { input: [2, [[1, 0]]], expected: false },
+            { input: [2, [[1, 0], [0, 1]]], expected: true },
+            { input: [4, [[1, 0], [2, 1], [3, 2], [1, 3]]], expected: true },
+            { input: [3, [[1, 0], [2, 0]]], expected: false },
           ],
         },
       ],
       metadata: {
         category: "code_execution",
-        title: "Stack-Based Bracket Matching (3 Structure Tests)",
-        expected: "Pass nested & unbalanced bracket tests",
+        title: "Directed Graph Cycle Detection & Topological Validation",
+        expected: "Pass acyclic DAG and cyclic graph tests",
       },
     },
     {
       id: "code_5",
       vars: {
-        prompt: "Write a JavaScript function `flattenArray(arr)` that recursively flattens an array of arbitrarily nested arrays into a single flat array. Output ONLY the JavaScript function.",
+        prompt: "Write a JavaScript function `minDistance(word1, word2)` that computes the Levenshtein minimum edit distance (insertions, deletions, substitutions) between two strings. Output ONLY the JavaScript function.",
       },
       assert: [
         {
           type: "code_unit_test",
-          fnName: "flattenArray",
+          fnName: "minDistance",
           testCases: [
-            { input: [[1, [2, [3, [4]], 5]]], expected: [1, 2, 3, 4, 5], isJsonEq: true },
-            { input: [[]], expected: [], isJsonEq: true },
-            { input: [[[1], [2], [3]]], expected: [1, 2, 3], isJsonEq: true },
+            { input: ["horse", "ros"], expected: 3 },
+            { input: ["intention", "execution"], expected: 5 },
+            { input: ["", "abc"], expected: 3 },
+            { input: ["same", "same"], expected: 0 },
           ],
         },
       ],
       metadata: {
         category: "code_execution",
-        title: "Arbitrary-Depth Array Flattening (3 Depth Tests)",
-        expected: "Pass multi-nested array tests",
+        title: "Levenshtein String Edit Distance Algorithm",
+        expected: "Pass dynamic programming matrix tests",
       },
     },
 
@@ -201,140 +210,129 @@ export const getBenchmarkTestCases = () => {
     {
       id: "schema_1",
       vars: {
-        prompt: "Extract data from: 'Invoice #INV-2026-88 issued on 2026-04-15 to Acme Corp for total amount $1,450.00 with status PAID.' into raw JSON with exact keys: `invoice_id` (string), `date` (string), `recipient` (string), `total` (number), `paid` (boolean). Output ONLY raw JSON.",
+        prompt: "Extract invoice data: 'Invoice #INV-2026-X99 for Client ID CLI-402 on 2026-08-20. Subtotal: $1200.00, Tax Rate: 0.15, Tax Amount: $180.00, Total Due: $1380.00. Payment Status: UNPAID. Currency: USD.' into raw JSON with exact keys: `invoice_id` (string), `client_id` (string), `subtotal` (number), `tax_rate` (number), `tax_amount` (number), `total_due` (number), `is_paid` (boolean), `currency` (string). Output ONLY raw JSON.",
       },
       assert: [
         {
           type: "json_schema_validation",
-           requiredKeys: ["invoice_id", "date", "recipient", "total", "paid"],
-           exactKeys: true,
-           validateFn: (obj) =>
-             typeof obj.invoice_id === "string" &&
-             /^\\d{4}-\\d{2}-\\d{2}$/.test(obj.date) &&
-             typeof obj.recipient === "string" &&
-             typeof obj.total === "number" &&
-             typeof obj.paid === "boolean" &&
-             obj.invoice_id === "INV-2026-88" &&
-             obj.date === "2026-04-15" &&
-            obj.total === 1450 &&
-            obj.paid === true &&
-            obj.recipient.toLowerCase().includes("acme"),
+          requiredKeys: ["invoice_id", "client_id", "subtotal", "tax_rate", "tax_amount", "total_due", "is_paid", "currency"],
+          exactKeys: true,
+          validateFn: (obj) =>
+            obj.invoice_id === "INV-2026-X99" &&
+            obj.client_id === "CLI-402" &&
+            obj.subtotal === 1200 &&
+            obj.tax_rate === 0.15 &&
+            obj.tax_amount === 180 &&
+            obj.total_due === 1380 &&
+            obj.is_paid === false &&
+            obj.currency === "USD",
         },
       ],
       metadata: {
         category: "schema_adherence",
-        title: "Unstructured Financial Document Extraction",
-        expected: "Valid JSON with typed fields & exact values",
+        title: "Multi-Rate Financial Invoice & Balance Extraction",
+        expected: "Valid JSON with exact typed float and boolean keys",
       },
     },
     {
       id: "schema_2",
       vars: {
-        prompt: "Extract data from server log: 'ERROR 2026-08-21T14:23:05.120Z [auth-service] User id=usr_9984 login failed from IP 192.168.1.45 (code 401: Invalid Credentials)' into raw JSON with exact keys: `level` (string), `service` (string), `user_id` (string), `ip` (string), `status_code` (number). Output ONLY raw JSON.",
+        prompt: "Parse telemetry span: 'SPAN 4f9a7c2e-8b11-4089-a2de-199c4b220d91 in service payment-gateway duration=42.5ms status=SUCCESS http_code=200 caller_ip=10.0.4.12' into raw JSON with exact keys: `span_id` (string), `service` (string), `duration_ms` (number), `success` (boolean), `http_code` (number), `ip` (string). Output ONLY raw JSON.",
       },
       assert: [
         {
           type: "json_schema_validation",
-           requiredKeys: ["level", "service", "user_id", "ip", "status_code"],
-           exactKeys: true,
-           validateFn: (obj) =>
-             obj.level === "ERROR" &&
-             typeof obj.service === "string" &&
-             typeof obj.user_id === "string" &&
-             /^\\d{1,3}(?:\\.\\d{1,3}){3}$/.test(obj.ip) &&
-             typeof obj.status_code === "number" &&
-            obj.status_code === 401 &&
-            obj.service === "auth-service" &&
-            obj.user_id === "usr_9984" &&
-            obj.ip === "192.168.1.45",
+          requiredKeys: ["span_id", "service", "duration_ms", "success", "http_code", "ip"],
+          exactKeys: true,
+          validateFn: (obj) =>
+            /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/.test(obj.span_id) &&
+            obj.service === "payment-gateway" &&
+            obj.duration_ms === 42.5 &&
+            obj.success === true &&
+            obj.http_code === 200 &&
+            obj.ip === "10.0.4.12",
         },
       ],
       metadata: {
         category: "schema_adherence",
-        title: "Server Security Log Telemetry Parsing",
-        expected: "Valid JSON schema with status code 401",
+        title: "Distributed Microservice Telemetry Span Parsing",
+        expected: "Valid JSON with UUID span and numeric duration",
       },
     },
     {
       id: "schema_3",
       vars: {
-        prompt: "Parse specs: 'Model: Titan RTX Pro. Price: $2499. In Stock: yes. VRAM: 24GB GDDR6X. TDP: 350W.' into raw JSON with exact keys: `model_name` (string), `price_usd` (number), `in_stock` (boolean), `vram_gb` (number), `tdp_watts` (number). Output ONLY raw JSON.",
+        prompt: "Parse cluster config: 'Node: cluster-us-east-01, Region: us-east-1, Cores: 64, MemoryGB: 256, GPU: NVIDIA-H100-80GB, Active: yes, PricePerHour: 3.85' into raw JSON with exact keys: `node_name` (string), `region` (string), `cores` (number), `memory_gb` (number), `gpu_model` (string), `is_active` (boolean), `hourly_rate` (number). Output ONLY raw JSON.",
       },
       assert: [
         {
           type: "json_schema_validation",
-           requiredKeys: ["model_name", "price_usd", "in_stock", "vram_gb", "tdp_watts"],
-           exactKeys: true,
-           validateFn: (obj) =>
-             obj.model_name === "Titan RTX Pro" &&
-             typeof obj.price_usd === "number" &&
-             typeof obj.in_stock === "boolean" &&
-             typeof obj.vram_gb === "number" &&
-             typeof obj.tdp_watts === "number" &&
-            obj.price_usd === 2499 &&
-            obj.in_stock === true &&
-            obj.vram_gb === 24 &&
-            obj.tdp_watts === 350,
+          requiredKeys: ["node_name", "region", "cores", "memory_gb", "gpu_model", "is_active", "hourly_rate"],
+          exactKeys: true,
+          validateFn: (obj) =>
+            obj.node_name === "cluster-us-east-01" &&
+            obj.region === "us-east-1" &&
+            obj.cores === 64 &&
+            obj.memory_gb === 256 &&
+            obj.gpu_model === "NVIDIA-H100-80GB" &&
+            obj.is_active === true &&
+            obj.hourly_rate === 3.85,
         },
       ],
       metadata: {
         category: "schema_adherence",
-        title: "Hardware Specification Schema Conversion",
-        expected: "Valid JSON with exact typed numeric specs",
+        title: "Infrastructure Cluster Specification Mapping",
+        expected: "Valid JSON with exact typed hardware attributes",
       },
     },
     {
       id: "schema_4",
       vars: {
-        prompt: "Extract customer review breakdown: 'I loved the fast battery charging, but the display brightness in sunlight is terrible. Overall rating: 3 stars.' into raw JSON with exact keys: `sentiment` ('positive'|'negative'|'mixed'), `rating` (number 1-5), `pros` (array of strings), `cons` (array of strings). Output ONLY raw JSON.",
+        prompt: "Parse patient lab result: 'Patient ID: PT-7821. Test: Fasting Blood Glucose. Measured Value: 142.5 mg/dL. Normal Range: 70-99. Flag: HIGH. Fasting: true.' into raw JSON with exact keys: `patient_id` (string), `test_name` (string), `value` (number), `is_abnormal` (boolean), `flag` (string 'HIGH'|'LOW'|'NORMAL'), `fasting` (boolean). Output ONLY raw JSON.",
       },
       assert: [
         {
           type: "json_schema_validation",
-           requiredKeys: ["sentiment", "rating", "pros", "cons"],
-           exactKeys: true,
-           validateFn: (obj) =>
-             obj.sentiment === "mixed" &&
-             typeof obj.rating === "number" &&
-             obj.rating >= 1 && obj.rating <= 5 &&
-             Array.isArray(obj.pros) &&
-             Array.isArray(obj.cons) &&
-             obj.rating === 3 &&
-             obj.pros.some((item) => /battery charging/i.test(item)) &&
-             obj.cons.some((item) => /display brightness|sunlight/i.test(item)),
+          requiredKeys: ["patient_id", "test_name", "value", "is_abnormal", "flag", "fasting"],
+          exactKeys: true,
+          validateFn: (obj) =>
+            obj.patient_id === "PT-7821" &&
+            obj.test_name === "Fasting Blood Glucose" &&
+            obj.value === 142.5 &&
+            obj.is_abnormal === true &&
+            obj.flag === "HIGH" &&
+            obj.fasting === true,
         },
       ],
       metadata: {
         category: "schema_adherence",
-        title: "Sentiment & Aspect-Based Opinion Mining",
-        expected: "Valid JSON with typed arrays & rating number",
+        title: "Clinical Diagnostic Lab Telemetry Extraction",
+        expected: "Valid JSON with abnormal diagnostic booleans and flags",
       },
     },
     {
       id: "schema_5",
       vars: {
-        prompt: "Extract entities from: 'Dr. Sarah Connor met with Dr. Miles Dyson at Cyberdyne Systems in Sunnyvale, California.' into raw JSON with exact keys: `people` (array of strings) and `locations` (array of strings). Output ONLY raw JSON.",
+        prompt: "Extract order: 'Order #ORD-9901 items: 2x Laptop at $999.00 each, 3x Mouse at $25.00 each. Total: $2073.00.' into raw JSON with exact keys: `order_id` (string), `items` (array of objects with { `name`: string, `quantity`: number, `price`: number }), `total` (number). Output ONLY raw JSON.",
       },
       assert: [
         {
           type: "json_schema_validation",
-           requiredKeys: ["people", "locations"],
-           exactKeys: true,
-           validateFn: (obj) =>
-             Array.isArray(obj.people) &&
-             Array.isArray(obj.locations) &&
-             obj.people.length === 2 &&
-             obj.locations.length === 2 &&
-             obj.people.includes("Dr. Sarah Connor") &&
-             obj.people.includes("Dr. Miles Dyson") &&
-             obj.locations.includes("Cyberdyne Systems") &&
-             obj.locations.includes("Sunnyvale, California"),
+          requiredKeys: ["order_id", "items", "total"],
+          exactKeys: true,
+          validateFn: (obj) =>
+            obj.order_id === "ORD-9901" &&
+            Array.isArray(obj.items) &&
+            obj.items.length === 2 &&
+            obj.total === 2073 &&
+            obj.items.some((i) => /laptop/i.test(i.name) && i.quantity === 2 && i.price === 999) &&
+            obj.items.some((i) => /mouse/i.test(i.name) && i.quantity === 3 && i.price === 25),
         },
       ],
       metadata: {
         category: "schema_adherence",
-        title: "Named Entity Structured Relation Extraction",
-        expected: "Valid JSON with people & locations arrays",
+        title: "Hierarchical E-Commerce Line-Item Array Schema",
+        expected: "Valid nested JSON with items array and calculated total",
       },
     },
 
@@ -342,88 +340,96 @@ export const getBenchmarkTestCases = () => {
     {
       id: "rule_1",
       vars: {
-        prompt: "Write a concise summary about quantum computing that consists of EXACTLY 25 words. Do not write 24 words, do not write 26 words. Count words accurately before outputting.",
+        prompt: "Write a description of a dark rainy night that consists of EXACTLY 20 words and contains NO occurrence of the letter 'e' or 'E' anywhere. Count words and check for letter 'e' strictly before outputting.",
       },
       assert: [
         {
           type: "word_count_exact",
-          count: 25,
+          count: 20,
+        },
+        {
+          type: "lipogram_constraint",
+          forbiddenLetter: "e",
+          minChars: 20,
         },
       ],
       metadata: {
         category: "rule_following",
-        title: "Exact 25-Word Length Constraint",
-        expected: "Exactly 25 whitespace-delimited tokens",
+        title: "Exact 20-Word Length + Negative Lipogram (Zero 'e')",
+        expected: "Exactly 20 words with zero occurrences of 'e'",
       },
     },
     {
       id: "rule_2",
       vars: {
-        prompt: "Write a coherent 2-sentence paragraph explaining what clouds are, without using the letter 'e' anywhere in your response (both uppercase and lowercase). Absolutely no 'e' or 'E'.",
+        prompt: "Output 3 distinct cybersecurity tips strictly formatted inside sequential numbered tags <[TIP_1]>...</[TIP_1]>, <[TIP_2]>...</[TIP_2]>, <[TIP_3]>...</[TIP_3]> on separate lines with no other text.",
       },
       assert: [
         {
-          type: "lipogram_constraint",
-          forbiddenLetter: "e",
-          minChars: 25,
+          type: "delimiter_pattern",
+          regex: "^<[TIP_1]>[\\s\\S]+<\\/[TIP_1]>\\s*<[TIP_2]>[\\s\\S]+<\\/[TIP_2]>\\s*<[TIP_3]>[\\s\\S]+<\\/[TIP_3]>$",
         },
       ],
       metadata: {
         category: "rule_following",
-        title: "Negative Letter Lipogram Constraint (Zero 'e')",
-        expected: "Coherent text with zero occurrences of 'e'",
+        title: "Strict Multi-Block XML Delimiter Sequencing",
+        expected: "Exact <[TIP_1]> to <[TIP_3]> encapsulated tags",
       },
     },
     {
       id: "rule_3",
       vars: {
-        prompt: "Output the names of 3 primary colors formatted strictly with triple angle brackets `<<<COLOR_NAME>>>` with each on a new line, and nothing else. Example format:\n<<<Red>>>\n<<<Green>>>\n<<<Blue>>>",
+        prompt: "Output exactly 4 hex color codes (e.g. #FF0000) enclosed inside triple hash brackets ### #HEX ### with each on a new line and nothing else.",
       },
       assert: [
         {
           type: "delimiter_pattern",
-          regex: "^(<<<[A-Za-z]+>>>\\s*){3}$",
+          regex: "^(###\\s*#[0-9A-Fa-f]{6}\\s*###\\s*){4}$",
         },
       ],
       metadata: {
         category: "rule_following",
-        title: "Strict Token Delimiter Matching (`<<<Color>>>`)",
-        expected: "3 matches matching <<<Color>>> exactly",
+        title: "Hex Token Matrix Enclosure (4 Delimited Matches)",
+        expected: "4 lines of ### #HEX ### format exactly",
       },
     },
     {
       id: "rule_4",
       vars: {
-        prompt: "Provide one sentence of security advice. Your response MUST begin exactly with `[SECURITY_ADVISORY_START]` and end exactly with `[SECURITY_ADVISORY_END]` with no trailing text.",
+        prompt: "Output a comma-separated list of 5 programming languages wrapped in [LANGUAGES_START] and [LANGUAGES_END] with ZERO whitespace anywhere between the brackets (e.g. [LANGUAGES_START]c,go,rust,python,java[LANGUAGES_END]).",
       },
       assert: [
         {
           type: "prefix_suffix_wrap",
-          prefix: "[SECURITY_ADVISORY_START]",
-          suffix: "[SECURITY_ADVISORY_END]",
+          prefix: "[LANGUAGES_START]",
+          suffix: "[LANGUAGES_END]",
+        },
+        {
+          type: "no_internal_whitespace",
         },
       ],
       metadata: {
         category: "rule_following",
-        title: "Strict Boundary Tag Encapsulation",
-        expected: "Enclosed between [SECURITY_ADVISORY_START] and [SECURITY_ADVISORY_END]",
+        title: "Zero-Whitespace Bracketed Entity Serialization",
+        expected: "[LANGUAGES_START]l1,l2,l3,l4,l5[LANGUAGES_END] with 0 whitespace",
       },
     },
     {
       id: "rule_5",
       vars: {
-        prompt: "Write 4 words describing the ocean where EVERY SINGLE LETTER is in lowercase. Absolutely no capital letters, punctuation, or numbers.",
+        prompt: "Write a coherent 5-word sentence where EVERY SINGLE WORD starts with the letter 's' (or 'S'). Do not use punctuation. Output ONLY the 5 words.",
       },
       assert: [
         {
-          type: "lowercase_word_count",
-          count: 4,
+          type: "alliteration_constraint",
+          letter: "s",
+          count: 5,
         },
       ],
       metadata: {
         category: "rule_following",
-        title: "Case & Grammar Exclusion (4 Pure Lowercase Words)",
-        expected: "Exactly 4 pure lowercase alphabetic words",
+        title: "Strict 5-Word Alliteration Constraint (Letter 'S')",
+        expected: "5 words, all starting with letter S and zero punctuation",
       },
     },
   ];

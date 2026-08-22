@@ -879,27 +879,6 @@ export const LiveBenchPage = () => {
     <div className="min-h-screen bg-[#fafafa] font-sans pb-24 text-zinc-900">
       {/* Main Container */}
       <div className="max-w-7xl mx-auto px-4 sm:px-8 pt-8 space-y-6">
-        {/* Trust Banner */}
-        <div className="bg-white border border-[#e4e4e7] p-5 sm:p-6 shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-          <div className="space-y-1.5">
-            <div className="inline-flex items-center gap-2 px-2.5 py-0.5 bg-emerald-50 border border-emerald-300 text-emerald-800 text-xs font-mono font-bold">
-              <HiOutlineShieldCheck className="text-base text-emerald-600" />
-              <span>Objective Evaluation Standard</span>
-            </div>
-            <h1 className="text-xl sm:text-2xl font-bold text-zinc-950 font-sans tracking-tight">
-              LiveBench Frontier & Open Model Leaderboard
-            </h1>
-            <p className="text-xs sm:text-sm text-zinc-600 font-sans max-w-3xl leading-relaxed">
-              Every score on this leaderboard is programmatically graded using exact-match assertions and sandboxed code execution, inspired by the LiveBench methodology.
-            </p>
-          </div>
-          <div className="flex items-center gap-3 shrink-0 font-mono text-xs">
-            <span className="px-3 py-1.5 bg-zinc-100 border border-zinc-200 text-zinc-700 font-bold">
-              44 Frontier Models
-            </span>
-          </div>
-        </div>
-
         {/* Filters Bar */}
         <div className="bg-white border border-[#e4e4e7] p-4 flex flex-col gap-3 font-mono text-xs shadow-xs">
           <div className="flex flex-col md:flex-row items-stretch md:items-center justify-between gap-4">

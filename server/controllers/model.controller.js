@@ -35,18 +35,19 @@ export const registerModel = async (req, res, next) => {
     let finalModelName = (modelName || name || "").trim();
     let finalApiKey = apiKey ? apiKey.trim() : "";
 
-    // Security Guard: Prevent API key string from accidentally being stored as the public model name
+    // Security Guard: Prevent actual raw API keys from accidentally being stored as the public model name
     const isKeyLike =
-      finalModelName.startsWith("AIza") ||
+      (finalModelName.startsWith("AIza") ||
       finalModelName.startsWith("AQ.") ||
       finalModelName.startsWith("gsk_") ||
       finalModelName.startsWith("sk-") ||
-      finalModelName.startsWith("xai-") ||
-      finalModelName.length > 30;
+      finalModelName.startsWith("hf_") ||
+      finalModelName.startsWith("xai-")) &&
+      !finalModelName.includes("/");
 
     if (isKeyLike) {
       if (!finalApiKey) finalApiKey = finalModelName;
-      finalModelName = apiProvider === "google" ? "gemini-1.5-flash" : apiProvider === "openai" ? "gpt-4o-mini" : "remote-api-model";
+      finalModelName = apiProvider === "google" ? "gemini-1.5-flash" : apiProvider === "huggingface" ? "meta-llama/Llama-3.2-3B-Instruct" : apiProvider === "openai" ? "gpt-4o-mini" : "remote-api-model";
     }
 
     
@@ -55,9 +56,6 @@ export const registerModel = async (req, res, next) => {
         success: false,
         message: "Model name ('modelName') is required.",
       });
-    }
-    if (finalModelName.toLowerCase() !== "grok-4.6") {
-      return res.status(400).json({ success: false, message: "Only the creator-tested model grok-4.6 is currently enabled." });
     }
 
     const uploadedFile = req.file;

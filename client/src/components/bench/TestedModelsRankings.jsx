@@ -82,7 +82,24 @@ export const TestedModelsRankings = () => {
           const sorted = Array.from(uniqueMap.values()).sort(
             (a, b) => b.overallPassRate - a.overallPassRate
           );
-          setTestedModels(sorted);
+
+          // Dynamically compute global rank considering both evaluated models and frontier baselines
+          const ranked = sorted.map((model) => {
+            const higherEvaluatedCount = sorted.filter(
+              (other) => other.name !== model.name && other.overallPassRate > model.overallPassRate
+            ).length;
+            const higherFrontierCount = GLOBAL_FRONTIER_SCORES.filter(
+              (score) => score > model.overallPassRate
+            ).length;
+            const globalRank = 1 + higherEvaluatedCount + higherFrontierCount;
+
+            return {
+              ...model,
+              globalRank,
+            };
+          });
+
+          setTestedModels(ranked);
         }
       })
       .catch(() => {})
