@@ -518,39 +518,6 @@ export const MarketplacePage = () => {
   return (
     <div className="min-h-screen bg-[#fafafa] text-zinc-900 font-sans selection:bg-[#ea580c] selection:text-white py-8 px-4 sm:px-8">
       <div className="max-w-6xl mx-auto space-y-6">
-        {/* ==================== HEADER BANNER (MATCHES AGENT MARKETPLACE) ==================== */}
-        <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 border-b border-[#e4e4e7] pb-5">
-          <div className="space-y-2">
-            <div className="inline-flex items-center gap-2 text-xs font-mono text-[#ea580c] font-bold uppercase tracking-wide">
-              <HiOutlineSparkles /> AI Models Catalog
-            </div>
-            <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-zinc-950 font-sans">
-              Find the right model for the job.
-            </h1>
-            <p className="text-xs sm:text-sm text-zinc-500 max-w-2xl font-sans">
-              Production-ready AI models with verified capabilities, connected tools, and transparent run history.
-            </p>
-          </div>
-
-          <div className="flex items-center gap-2.5 flex-wrap shrink-0">
-            <Link
-              to="/compare"
-              className="px-4 py-2 bg-zinc-900 hover:bg-black text-white font-bold text-xs font-mono text-center shadow-xs shrink-0 flex items-center gap-1.5"
-            >
-              <HiOutlineScale className="text-sm text-[#ea580c]" />
-              <span>Compare Models</span>
-            </Link>
-
-            <Link
-              to="/test"
-              className="px-4 py-2 bg-[#ea580c] hover:bg-[#c2410c] text-white font-bold text-xs font-mono text-center shadow-xs shrink-0 flex items-center gap-1"
-            >
-              <HiOutlineBolt />
-              <span>+ Benchmark Your Model</span>
-            </Link>
-          </div>
-        </div>
-
         {/* ==================== TWO-COLUMN LAYOUT (IDENTICAL TO AGENTS) ==================== */}
         <div className="grid grid-cols-1 lg:grid-cols-[220px_minmax(0,1fr)] gap-6 items-start">
           {/* ==================== LEFT FILTER RAIL ==================== */}
@@ -885,6 +852,39 @@ export const MarketplacePage = () => {
               </div>
             )}
           </main>
+        </div>
+
+        {/* ==================== PAGE INTRODUCTION ==================== */}
+        <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 border-t border-[#e4e4e7] pt-5">
+          <div className="space-y-2">
+            <div className="inline-flex items-center gap-2 text-xs font-mono text-[#ea580c] font-bold uppercase tracking-wide">
+              <HiOutlineSparkles /> AI Models Catalog
+            </div>
+            <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-zinc-950 font-sans">
+              Find the right model for the job.
+            </h1>
+            <p className="text-xs sm:text-sm text-zinc-500 max-w-2xl font-sans">
+              Production-ready AI models with verified capabilities, connected tools, and transparent run history.
+            </p>
+          </div>
+
+          <div className="flex items-center gap-2.5 flex-wrap shrink-0">
+            <Link
+              to="/compare"
+              className="px-4 py-2 bg-zinc-900 hover:bg-black text-white font-bold text-xs font-mono text-center shadow-xs shrink-0 flex items-center gap-1.5"
+            >
+              <HiOutlineScale className="text-sm text-[#ea580c]" />
+              <span>Compare Models</span>
+            </Link>
+
+            <Link
+              to="/test"
+              className="px-4 py-2 bg-[#ea580c] hover:bg-[#c2410c] text-white font-bold text-xs font-mono text-center shadow-xs shrink-0 flex items-center gap-1"
+            >
+              <HiOutlineBolt />
+              <span>+ Benchmark Your Model</span>
+            </Link>
+          </div>
         </div>
       </div>
 
