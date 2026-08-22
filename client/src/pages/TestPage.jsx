@@ -1,5 +1,5 @@
 import React from "react";
-import { HiOutlineSparkles, HiOutlineCpuChip } from "react-icons/hi2";
+import { HiOutlineSparkles } from "react-icons/hi2";
 import CreatorModelSubmitForm from "../components/bench/CreatorModelSubmitForm";
 import TestedModelsRankings from "../components/bench/TestedModelsRankings";
 

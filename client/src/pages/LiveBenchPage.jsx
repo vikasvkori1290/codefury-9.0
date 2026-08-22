@@ -853,50 +853,8 @@ export const LiveBenchPage = () => {
 
   return (
     <div className="min-h-screen bg-[#fafafa] font-sans pb-24 text-zinc-900">
-      {/* Top Header */}
-      <div className="bg-white border-b border-[#e4e4e7] py-8 px-4 sm:px-8">
-        <div className="max-w-7xl mx-auto space-y-3">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-            <div>
-              <div className="flex items-center gap-2">
-                <span className="px-2 py-0.5 text-[10px] font-mono font-bold uppercase tracking-wider bg-orange-50 text-[#ea580c] border border-orange-200">
-                  LiveBench.ai Global Leaderboard
-                </span>
-                <span className="text-[11px] font-mono text-zinc-400">
-                  Contamination-Free Automated Evaluation • 44 Frontier Models
-                </span>
-              </div>
-              <h1 className="text-2xl sm:text-3xl font-bold font-sans tracking-tight text-zinc-950 mt-1">
-                LiveBench LLM Capability Leaderboard
-              </h1>
-              <p className="text-xs sm:text-sm text-zinc-600 max-w-3xl">
-                Official contamination-free benchmark comparing frontier AI models across Reasoning, Coding, Agentic Tool Use, Mathematics, Data Analysis, Language, and Instruction Following.
-              </p>
-            </div>
-
-            <div className="flex items-center gap-2.5 flex-wrap">
-              <Link
-                to="/compare"
-                className="px-4 py-2.5 bg-zinc-900 hover:bg-black text-white text-xs font-mono font-bold flex items-center gap-1.5 transition-all shadow-xs cursor-pointer"
-              >
-                <HiOutlineScale className="text-sm text-[#ea580c]" />
-                <span>Compare Models</span>
-              </Link>
-
-              <Link
-                to="/test"
-                className="px-4 py-2.5 bg-[#ea580c] hover:bg-[#c2410c] text-white text-xs font-mono font-bold flex items-center gap-1.5 transition-all shadow-xs cursor-pointer"
-              >
-                <HiOutlineBolt className="text-sm" />
-                <span>Test Bench & Creator Rankings</span>
-              </Link>
-            </div>
-          </div>
-        </div>
-      </div>
-
       {/* Main Container */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-8 pt-6 space-y-4">
+      <div className="max-w-7xl mx-auto px-4 sm:px-8 pt-8 space-y-6">
         {/* Filters Bar */}
         <div className="bg-white border border-[#e4e4e7] p-4 flex flex-col gap-3 font-mono text-xs shadow-xs">
           <div className="flex flex-col md:flex-row items-stretch md:items-center justify-between gap-4">
@@ -1477,6 +1435,46 @@ export const LiveBenchPage = () => {
             </div>
           </div>
         )}
+
+        {/* ==================== LIVEBENCH BANNER COMPONENT AFTER LEADERBOARD ==================== */}
+        <div className="bg-white border border-[#e4e4e7] p-6 sm:p-8 shadow-xs">
+          <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
+            <div className="space-y-2">
+              <div className="flex items-center gap-2 flex-wrap">
+                <span className="px-2 py-0.5 text-[10px] font-mono font-bold uppercase tracking-wider bg-orange-50 text-[#ea580c] border border-orange-200">
+                  LiveBench.ai Global Leaderboard
+                </span>
+                <span className="text-[11px] font-mono text-zinc-400">
+                  Contamination-Free Automated Evaluation • 44 Frontier Models
+                </span>
+              </div>
+              <h2 className="text-2xl sm:text-3xl font-bold font-sans tracking-tight text-zinc-950">
+                LiveBench LLM Capability Leaderboard
+              </h2>
+              <p className="text-xs sm:text-sm text-zinc-600 max-w-3xl font-sans">
+                Official contamination-free benchmark comparing frontier AI models across Reasoning, Coding, Agentic Tool Use, Mathematics, Data Analysis, Language, and Instruction Following.
+              </p>
+            </div>
+
+            <div className="flex items-center gap-2.5 flex-wrap shrink-0">
+              <Link
+                to="/compare"
+                className="px-4 py-2.5 bg-zinc-900 hover:bg-black text-white text-xs font-mono font-bold flex items-center gap-1.5 transition-all shadow-xs cursor-pointer"
+              >
+                <HiOutlineScale className="text-sm text-[#ea580c]" />
+                <span>Compare Models</span>
+              </Link>
+
+              <Link
+                to="/test"
+                className="px-4 py-2.5 bg-[#ea580c] hover:bg-[#c2410c] text-white text-xs font-mono font-bold flex items-center gap-1.5 transition-all shadow-xs cursor-pointer"
+              >
+                <HiOutlineBolt className="text-sm" />
+                <span>Test Bench & Creator Rankings</span>
+              </Link>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   );
