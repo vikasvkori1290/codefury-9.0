@@ -1,7 +1,6 @@
 [build]
-  base = "client"
-  publish = "dist"
-  command = "npm run build"
+  command = "npm --prefix client ci --legacy-peer-deps && npm --prefix client run build"
+  publish = "client/dist"
 
 [build.environment]
   NPM_FLAGS = "--legacy-peer-deps"
