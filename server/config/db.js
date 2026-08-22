@@ -1,28 +1,41 @@
 import mongoose from "mongoose";
 import "dotenv/config";
 
-// Disable indefinite command buffering so queries fail fast when Atlas is disconnected
-mongoose.set("bufferCommands", false);
-mongoose.set("bufferTimeoutMS", 2000);
+let cached = globalThis.__mongoose_cached;
+if (!cached) {
+  cached = globalThis.__mongoose_cached = { conn: null, promise: null };
+}
 
-let isDbConnected = false;
-
-const connectDB = async () => {
-  try {
-    if (!process.env.MONGO_URI) {
-      console.warn("⚠️ MONGO_URI not defined in .env. Running with in-memory persistence fallback.");
-      return;
-    }
-    const conn = await mongoose.connect(process.env.MONGO_URI, {
-      serverSelectionTimeoutMS: 3000,
-    });
-    isDbConnected = true;
-    console.log(`✅ MongoDB Connected: ${conn.connection.host}`);
-  } catch (error) {
-    isDbConnected = false;
-    console.error(`❌ MongoDB connection failed: ${error.message}`);
+export const connectDB = async () => {
+  if (cached.conn && mongoose.connection.readyState === 1) {
+    return cached.conn;
   }
+
+  if (!process.env.MONGO_URI) {
+    console.warn("⚠️ MONGO_URI not defined in environment variables.");
+    return null;
+  }
+
+  if (!cached.promise) {
+    const opts = {
+      bufferCommands: true,
+      serverSelectionTimeoutMS: 5000,
+    };
+    cached.promise = mongoose.connect(process.env.MONGO_URI, opts).then((m) => {
+      console.log(`✅ MongoDB Connected: ${m.connection.host}`);
+      return m;
+    });
+  }
+
+  try {
+    cached.conn = await cached.promise;
+  } catch (e) {
+    cached.promise = null;
+    console.error(`❌ MongoDB connection error: ${e.message}`);
+  }
+
+  return cached.conn;
 };
 
-export const getDbStatus = () => isDbConnected;
+export const getDbStatus = () => mongoose.connection.readyState === 1;
 export default connectDB;

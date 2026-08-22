@@ -53,6 +53,16 @@ if (process.env.NODE_ENV === "development") {
   app.use(morgan("dev"));
 }
 
+// Ensure MongoDB connection is ready before handling requests
+app.use(async (req, res, next) => {
+  try {
+    await connectDB();
+  } catch (err) {
+    console.warn("DB connection warning in request middleware:", err.message);
+  }
+  next();
+});
+
 // --------------- Routes ---------------
 app.get("/", (req, res) => {
   res.json({

@@ -3,6 +3,7 @@ import mongoose from "mongoose";
 import User from "../models/User.model.js";
 import Otp from "../models/Otp.model.js";
 import { sendOtpEmail } from "../services/email.service.js";
+import connectDB from "../config/db.js";
 
 // Generate JWT token
 const generateToken = (id) => {
@@ -10,6 +11,13 @@ const generateToken = (id) => {
   return jwt.sign({ id }, secret, {
     expiresIn: process.env.JWT_EXPIRE || "7d",
   });
+};
+
+// Helper to guarantee database connection in serverless lambdas
+const ensureDb = async () => {
+  if (mongoose.connection.readyState !== 1) {
+    await connectDB();
+  }
 };
 
 // @desc    Send OTP to email for Sign-Up Verification
@@ -26,8 +34,10 @@ export const sendSignupOtp = async (req, res) => {
       return res.status(400).json({ success: false, message: "Password must be at least 6 characters." });
     }
 
+    await ensureDb();
+
     if (mongoose.connection.readyState !== 1) {
-      return res.status(503).json({ success: false, message: "Database is unavailable." });
+      return res.status(503).json({ success: false, message: "Database is connecting... Please try again in a few seconds." });
     }
 
     const normalizedEmail = email.toLowerCase().trim();
@@ -78,8 +88,10 @@ export const verifySignupOtp = async (req, res) => {
       return res.status(400).json({ success: false, message: "Please provide your email and the 6-digit verification code." });
     }
 
+    await ensureDb();
+
     if (mongoose.connection.readyState !== 1) {
-      return res.status(503).json({ success: false, message: "Database is unavailable." });
+      return res.status(503).json({ success: false, message: "Database is unavailable. Please try again." });
     }
 
     const normalizedEmail = email.toLowerCase().trim();
@@ -133,6 +145,8 @@ export const resendSignupOtp = async (req, res) => {
       return res.status(400).json({ success: false, message: "Email is required." });
     }
 
+    await ensureDb();
+
     const normalizedEmail = email.toLowerCase().trim();
     const pendingRecord = await Otp.findOne({ email: normalizedEmail });
 
@@ -166,6 +180,7 @@ export const resendSignupOtp = async (req, res) => {
 export const register = async (req, res) => {
   try {
     const { name, email, password } = req.body;
+    await ensureDb();
     if (mongoose.connection.readyState !== 1) return res.status(503).json({ success: false, message: "MongoDB is unavailable." });
 
     const normalizedEmail = email?.toLowerCase().trim();
@@ -196,6 +211,7 @@ export const login = async (req, res) => {
       return res.status(400).json({ success: false, message: "Please provide both email and password." });
     }
 
+    await ensureDb();
     if (mongoose.connection.readyState !== 1) return res.status(503).json({ success: false, message: "MongoDB is unavailable." });
 
     const normalizedEmail = email.toLowerCase().trim();

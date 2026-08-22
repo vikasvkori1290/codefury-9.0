@@ -1,7 +1,5 @@
-import { Queue, Worker } from "bullmq";
-import Redis from "ioredis";
-import "dotenv/config";
 import { runPromptfooBenchmarkWorker } from "../workers/benchmarkWorker.js";
+import "dotenv/config";
 
 // Global persistent in-memory store for fallback
 if (!globalThis.__codefury_memory_store) {
@@ -13,47 +11,47 @@ if (!globalThis.__codefury_memory_store) {
 
 export const memoryStore = globalThis.__codefury_memory_store;
 
-const REDIS_HOST = process.env.REDIS_HOST || "127.0.0.1";
-const REDIS_PORT = Number(process.env.REDIS_PORT) || 6379;
-const REDIS_PASSWORD = process.env.REDIS_PASSWORD || undefined;
-
-let redisConnection = null;
 let benchmarkQueue = null;
 let isRedisAvailable = false;
 
-try {
-  redisConnection = new Redis({
-    host: REDIS_HOST,
-    port: REDIS_PORT,
-    password: REDIS_PASSWORD,
-    // BullMQ requires unlimited request retries on worker connections.
-    maxRetriesPerRequest: null,
-    connectTimeout: 1000,
-    enableReadyCheck: false,
-    lazyConnect: true,
-    retryStrategy: () => null,
-  });
+// Only initialize BullMQ Redis if REDIS_URL or external REDIS_HOST is explicitly configured and not in Vercel lambda
+if (!process.env.VERCEL && (process.env.REDIS_URL || (process.env.REDIS_HOST && process.env.REDIS_HOST !== "127.0.0.1"))) {
+  import("ioredis").then(({ default: Redis }) => {
+    import("bullmq").then(({ Queue, Worker }) => {
+      try {
+        const redisConnection = new Redis(process.env.REDIS_URL || {
+          host: process.env.REDIS_HOST,
+          port: Number(process.env.REDIS_PORT) || 6379,
+          password: process.env.REDIS_PASSWORD || undefined,
+          maxRetriesPerRequest: null,
+          connectTimeout: 2000,
+          enableReadyCheck: false,
+          retryStrategy: () => null,
+        });
 
-  redisConnection.on("error", () => {
-    isRedisAvailable = false;
-  });
+        redisConnection.on("error", () => {
+          isRedisAvailable = false;
+        });
 
-  redisConnection.connect().then(() => {
-    isRedisAvailable = true;
-    benchmarkQueue = new Queue("benchmarkQueue", { connection: redisConnection });
-    new Worker(
-      "benchmarkQueue",
-      async (job) => {
-        const { jobId, modelName } = job.data;
-        await runPromptfooBenchmarkWorker(jobId, modelName);
-      },
-      { connection: redisConnection }
-    );
-  }).catch(() => {
-    isRedisAvailable = false;
-  });
-} catch (_) {
-  isRedisAvailable = false;
+        redisConnection.connect().then(() => {
+          isRedisAvailable = true;
+          benchmarkQueue = new Queue("benchmarkQueue", { connection: redisConnection });
+          new Worker(
+            "benchmarkQueue",
+            async (job) => {
+              const { jobId, modelName } = job.data;
+              await runPromptfooBenchmarkWorker(jobId, modelName);
+            },
+            { connection: redisConnection }
+          );
+        }).catch(() => {
+          isRedisAvailable = false;
+        });
+      } catch (_) {
+        isRedisAvailable = false;
+      }
+    }).catch(() => {});
+  }).catch(() => {});
 }
 
 /**
@@ -64,13 +62,17 @@ export const addBenchmarkJob = async ({ jobId, modelName }) => {
     try {
       await benchmarkQueue.add("runBenchmark", { jobId, modelName });
       return;
-    } catch (_) {}
+    } catch (_) {
+      // Fallback
+    }
   }
 
-  // Fast asynchronous worker dispatch
+  // Resilient non-blocking execution
   setTimeout(() => {
-    runPromptfooBenchmarkWorker(jobId, modelName);
-  }, 50);
+    runPromptfooBenchmarkWorker(jobId, modelName).catch((err) => {
+      console.error(`❌ Background benchmark worker error [Job: ${jobId}]:`, err.message);
+    });
+  }, 100);
 };
 
-export { benchmarkQueue };
+export default { addBenchmarkJob, memoryStore };
