@@ -668,7 +668,9 @@ export const MarketplacePage = () => {
                     <div key={model.id} className="flex flex-col justify-between gap-3 border border-orange-100 bg-white p-3">
                       <div>
                         <p className="font-mono text-[10px] text-zinc-400">0{index + 1} / RECOMMENDED</p>
-                        <p className="mt-1 text-sm font-bold text-zinc-950">{model.displayName}</p>
+                        <Link to={`/models/${model.id}`} className="block mt-1">
+                          <p className="text-sm font-bold text-zinc-950 hover:text-[#ea580c] transition-colors">{model.displayName}</p>
+                        </Link>
                         <p className="mt-1 text-xs leading-relaxed text-zinc-600 line-clamp-2">{model.description}</p>
                       </div>
                       <Link to={`/models/${model.id}`} className="self-start bg-zinc-900 px-3 py-2 text-xs font-bold text-white hover:bg-[#ea580c]">Explore model →</Link>
@@ -772,14 +774,26 @@ export const MarketplacePage = () => {
                       <div>
                         {/* Top Header with Avatar & Verified Shield */}
                         <div className="flex items-start gap-3">
-                          <ModelAvatar creator={model.creator} displayName={model.displayName} />
+                          <Link
+                            to={`/models/${model.id}`}
+                            className="shrink-0 hover:opacity-90 transition-opacity cursor-pointer"
+                            title={`View details for ${model.displayName}`}
+                          >
+                            <ModelAvatar creator={model.creator} displayName={model.displayName} />
+                          </Link>
 
                           <div className="min-w-0 flex-1">
                             <div className="flex items-start justify-between gap-2">
                               <div className="min-w-0">
-                                <h3 className="text-base font-bold text-zinc-950 group-hover:text-[#ea580c] transition-colors truncate">
-                                  {model.displayName}
-                                </h3>
+                                <Link
+                                  to={`/models/${model.id}`}
+                                  className="block cursor-pointer"
+                                  title={`View details for ${model.displayName}`}
+                                >
+                                  <h3 className="text-base font-bold text-zinc-950 hover:text-[#ea580c] group-hover:text-[#ea580c] transition-colors truncate">
+                                    {model.displayName}
+                                  </h3>
+                                </Link>
                                 <p className="text-xs text-zinc-500 font-mono flex items-center gap-1 mt-0.5">
                                   <HiOutlineCpuChip className="text-zinc-400" /> Built by {model.creator}
                                 </p>

@@ -16,11 +16,14 @@ API.interceptors.request.use((config) => {
   return config;
 });
 
-// Handle 401 responses globally
+// Handle 401 responses globally (except for sandbox/proxy API testing)
 API.interceptors.response.use(
   (response) => response,
   (error) => {
-    if (error.response?.status === 401) {
+    const url = error.config?.url || "";
+    const isModelInferenceOrProxy = url.includes("/proxy/") || url.includes("/deploy") || url.includes("/models/predict");
+    
+    if (error.response?.status === 401 && !isModelInferenceOrProxy) {
       localStorage.removeItem("token");
       window.location.href = "/login";
     }

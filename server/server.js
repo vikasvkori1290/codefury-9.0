@@ -67,7 +67,7 @@ app.use(async (req, res, next) => {
 app.get("/", (req, res) => {
   res.json({
     status: "ok",
-    service: "ModelHub CodeFury 9.0 API",
+    service: "Forge CodeFury API",
     health: "/api/health",
     version: "1.0.0",
     timestamp: new Date().toISOString(),
@@ -77,7 +77,7 @@ app.get("/", (req, res) => {
 app.get("/health", (req, res) => {
   res.json({
     status: "ok",
-    message: "ModelHub CodeFury 9.0 API is active and healthy 🚀",
+    message: "Forge API is active and healthy 🚀",
     timestamp: new Date().toISOString(),
     uptime: process.uptime(),
   });
@@ -86,7 +86,7 @@ app.get("/health", (req, res) => {
 app.get("/api/health", (req, res) => {
   res.json({
     status: "ok",
-    message: "ModelHub CodeFury 9.0 API is active and healthy 🚀",
+    message: "Forge API is active and healthy 🚀",
     timestamp: new Date().toISOString(),
     uptime: process.uptime(),
   });

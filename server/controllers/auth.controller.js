@@ -126,7 +126,7 @@ export const verifySignupOtp = async (req, res) => {
 
     res.status(201).json({
       success: true,
-      message: "Email verified successfully! Welcome to ModelHub.",
+      message: "Email verified successfully! Welcome to Forge.",
       token,
       user: { _id: user._id, name: user.name, email: user.email, avatar: user.avatar },
     });
