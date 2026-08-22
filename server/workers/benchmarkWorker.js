@@ -14,7 +14,10 @@ import { redactSecret } from "../services/credential.service.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
-const tempDir = path.join(__dirname, "..", "temp");
+// Vercel's deployed bundle is read-only; only /tmp is writable there.
+const tempDir = process.env.VERCEL
+  ? path.join("/tmp", "codefury-benchmarks")
+  : path.join(__dirname, "..", "temp");
 if (!fs.existsSync(tempDir)) fs.mkdirSync(tempDir, { recursive: true });
 
 const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
