@@ -672,17 +672,6 @@ export const AgentMarketplacePage = () => {
   return (
     <div className="min-h-screen bg-[#fafafa] text-zinc-900 font-sans selection:bg-[#ea580c] selection:text-white py-8 px-4 sm:px-8">
       <div className="max-w-6xl mx-auto space-y-6">
-        <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 border-b border-[#e4e4e7] pb-5">
-          <div className="space-y-2">
-            <div className="inline-flex items-center gap-2 text-xs font-mono text-[#ea580c] font-bold uppercase tracking-wide">
-              <HiOutlinePuzzlePiece /> Agent Marketplace
-            </div>
-            <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-zinc-950">Find the right agent for the job.</h1>
-            <p className="text-xs sm:text-sm text-zinc-500 max-w-2xl">Production-ready agents with verified capabilities, connected tools, and transparent run history.</p>
-          </div>
-          <Link to="/agents/request" className="px-4 py-2 bg-zinc-900 hover:bg-black text-white font-bold text-xs font-mono text-center shadow-xs shrink-0">+ Submit Your Agent</Link>
-        </div>
-
         <div className="grid grid-cols-1 lg:grid-cols-[220px_minmax(0,1fr)] gap-6 items-start">
           {/* Left filter rail */}
           <aside className="bg-white border border-[#e4e4e7] p-4 shadow-xs space-y-5 font-mono text-xs lg:sticky lg:top-20">
@@ -847,6 +836,17 @@ export const AgentMarketplacePage = () => {
 
             {filtered.length === 0 && <div className="bg-white border border-dashed border-[#e4e4e7] p-10 text-center font-mono text-xs text-zinc-500">No agents match your filters. Try resetting the sidebar.</div>}
           </main>
+        </div>
+
+        <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 border-t border-[#e4e4e7] pt-5">
+          <div className="space-y-2">
+            <div className="inline-flex items-center gap-2 text-xs font-mono text-[#ea580c] font-bold uppercase tracking-wide">
+              <HiOutlinePuzzlePiece /> Agent Marketplace
+            </div>
+            <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-zinc-950">Find the right agent for the job.</h1>
+            <p className="text-xs sm:text-sm text-zinc-500 max-w-2xl">Production-ready agents with verified capabilities, connected tools, and transparent run history.</p>
+          </div>
+          <Link to="/agents/request" className="px-4 py-2 bg-zinc-900 hover:bg-black text-white font-bold text-xs font-mono text-center shadow-xs shrink-0">+ Submit Your Agent</Link>
         </div>
       </div>
     </div>
