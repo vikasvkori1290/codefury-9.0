@@ -750,18 +750,23 @@ export const AgentMarketplacePage = () => {
               </div>
             )}
 
-            {!isSearching && search.trim() && filtered[0] && (
+            {!isSearching && search.trim() && filtered.length > 0 && (
               <div className="border border-orange-200 bg-[#fffaf5] p-4 shadow-xs animate-fadeIn">
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                  <div className="flex items-start gap-3">
-                    <span className="flex h-9 w-9 items-center justify-center bg-[#ea580c] text-white"><HiOutlineSparkles /></span>
-                    <div>
-                      <p className="font-mono text-[10px] font-bold uppercase tracking-wide text-[#ea580c]">Best match for your request</p>
-                      <p className="mt-1 text-sm font-bold text-zinc-950">{filtered[0].displayName}</p>
-                      <p className="mt-0.5 text-xs text-zinc-600">{filtered[0].description}</p>
+                <div className="flex items-center gap-2">
+                  <HiOutlineSparkles className="text-[#ea580c]" />
+                  <p className="font-mono text-[10px] font-bold uppercase tracking-wide text-[#ea580c]">Top suggestions for your request</p>
+                </div>
+                <div className="mt-3 grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  {filtered.slice(0, 2).map((agent, index) => (
+                    <div key={agent.id} className="flex flex-col justify-between gap-3 border border-orange-100 bg-white p-3">
+                      <div>
+                        <p className="font-mono text-[10px] text-zinc-400">0{index + 1} / RECOMMENDED</p>
+                        <p className="mt-1 text-sm font-bold text-zinc-950">{agent.displayName}</p>
+                        <p className="mt-1 text-xs leading-relaxed text-zinc-600 line-clamp-2">{agent.description}</p>
+                      </div>
+                      <Link to={`/agents/${agent.id}`} className="self-start bg-zinc-900 px-3 py-2 text-xs font-bold text-white hover:bg-[#ea580c]">Explore agent →</Link>
                     </div>
-                  </div>
-                  <Link to={`/agents/${filtered[0].id}`} className="shrink-0 bg-zinc-900 px-3 py-2 text-xs font-bold text-white hover:bg-[#ea580c]">Explore suggestion →</Link>
+                  ))}
                 </div>
               </div>
             )}
