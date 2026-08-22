@@ -279,6 +279,7 @@ const INTENT_TAXONOMY = [
 
 export const MarketplacePage = () => {
   const [search, setSearch] = useState("");
+  const [isSearching, setIsSearching] = useState(false);
   const [sortBy, setSortBy] = useState("relevant");
   const [selectedFilters, setSelectedFilters] = useState({});
   const [expandedGroups, setExpandedGroups] = useState({ capability: true });
@@ -286,6 +287,17 @@ export const MarketplacePage = () => {
   const [deployModel, setDeployModel] = useState(null);
   const [testedModels, setTestedModels] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
+
+  // Give natural-language discovery a small, visible handoff before revealing the match.
+  useEffect(() => {
+    if (!search.trim()) {
+      setIsSearching(false);
+      return undefined;
+    }
+    setIsSearching(true);
+    const timer = window.setTimeout(() => setIsSearching(false), 650);
+    return () => window.clearTimeout(timer);
+  }, [search]);
 
   // Fetch evaluated models live from MongoDB Atlas
   useEffect(() => {
@@ -631,26 +643,37 @@ export const MarketplacePage = () => {
                 )}
               </div>
 
+              {isSearching && (
+                <div className="marketplace-search-scan" role="status" aria-live="polite">
+                  <span className="marketplace-search-orbit"><HiOutlineSparkles /></span>
+                  <div>
+                    <p className="font-mono text-[11px] font-bold uppercase tracking-wide text-zinc-900">Searching the model catalog</p>
+                    <p className="text-xs text-zinc-500">Understanding your use case and ranking verified capabilities...</p>
+                  </div>
+                  <span className="marketplace-search-dots" aria-hidden="true"><i /><i /><i /></span>
+                </div>
+              )}
+
             </div>
 
-            {/* AI Intent Recommendation Banner */}
-            {detectedIntent && (
-              <div className="p-3.5 bg-[#eff6ff] border border-[#bfdbfe] flex items-center justify-between font-mono text-xs text-blue-950 shadow-xs animate-fadeIn">
-                <div className="flex items-center gap-2.5">
-                  <span className="text-lg select-none">{detectedIntent.icon}</span>
-                  <div>
-                    <div className="font-bold flex items-center gap-1.5">
-                      <span>Semantic Intent:</span>
-                      <span className="text-[#ea580c]">{detectedIntent.intent}</span>
-                    </div>
-                    <p className="text-[11px] text-blue-700 font-sans">
-                      Recommending top models ranked by verified domain capability ({detectedIntent.description}).
-                    </p>
-                  </div>
+            {!isSearching && search.trim() && filtered.length > 0 && (
+              <div className="border border-orange-200 bg-[#fffaf5] p-4 shadow-xs animate-fadeIn">
+                <div className="flex items-center gap-2">
+                  <HiOutlineSparkles className="text-[#ea580c]" />
+                  <p className="font-mono text-[10px] font-bold uppercase tracking-wide text-[#ea580c]">Top suggestions for your request</p>
                 </div>
-                <span className="text-[10px] px-2 py-0.5 bg-blue-100 border border-blue-200 text-blue-800 font-bold shrink-0 hidden sm:inline">
-                  AI RECOMMENDATION ACTIVE
-                </span>
+                <div className="mt-3 grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  {filtered.slice(0, 2).map((model, index) => (
+                    <div key={model.id} className="flex flex-col justify-between gap-3 border border-orange-100 bg-white p-3">
+                      <div>
+                        <p className="font-mono text-[10px] text-zinc-400">0{index + 1} / RECOMMENDED</p>
+                        <p className="mt-1 text-sm font-bold text-zinc-950">{model.displayName}</p>
+                        <p className="mt-1 text-xs leading-relaxed text-zinc-600 line-clamp-2">{model.description}</p>
+                      </div>
+                      <Link to={`/models/${model.id}`} className="self-start bg-zinc-900 px-3 py-2 text-xs font-bold text-white hover:bg-[#ea580c]">Explore model →</Link>
+                    </div>
+                  ))}
+                </div>
               </div>
             )}
 

@@ -617,9 +617,21 @@ const getAgentFilterValues = (agent) => {
 export const AgentMarketplacePage = () => {
   const [submittedAgents, setSubmittedAgents] = useState([]);
   const [search, setSearch] = useState("");
+  const [isSearching, setIsSearching] = useState(false);
   const [sortBy, setSortBy] = useState("relevant");
   const [selectedFilters, setSelectedFilters] = useState({});
   const [expandedGroups, setExpandedGroups] = useState({ capability: true, useCase: true });
+
+  // Let the user see that their description is being interpreted before the match appears.
+  useEffect(() => {
+    if (!search.trim()) {
+      setIsSearching(false);
+      return undefined;
+    }
+    setIsSearching(true);
+    const timer = window.setTimeout(() => setIsSearching(false), 650);
+    return () => window.clearTimeout(timer);
+  }, [search]);
 
   useEffect(() => {
     try { setSubmittedAgents(JSON.parse(localStorage.getItem("modelhub-submitted-agents") || "[]")); } catch { setSubmittedAgents([]); }
@@ -726,6 +738,38 @@ export const AgentMarketplacePage = () => {
                 className="w-full bg-white focus:border-[#ea580c] pl-11 pr-4 py-4 outline-none text-sm text-zinc-900 placeholder:text-zinc-400"
               />
             </div>
+
+            {isSearching && (
+              <div className="marketplace-search-scan" role="status" aria-live="polite">
+                <span className="marketplace-search-orbit"><HiOutlineSparkles /></span>
+                <div>
+                  <p className="font-mono text-[11px] font-bold uppercase tracking-wide text-zinc-900">Searching the agent catalog</p>
+                  <p className="text-xs text-zinc-500">Matching your goal with the right tools and workflow...</p>
+                </div>
+                <span className="marketplace-search-dots" aria-hidden="true"><i /><i /><i /></span>
+              </div>
+            )}
+
+            {!isSearching && search.trim() && filtered.length > 0 && (
+              <div className="border border-orange-200 bg-[#fffaf5] p-4 shadow-xs animate-fadeIn">
+                <div className="flex items-center gap-2">
+                  <HiOutlineSparkles className="text-[#ea580c]" />
+                  <p className="font-mono text-[10px] font-bold uppercase tracking-wide text-[#ea580c]">Top suggestions for your request</p>
+                </div>
+                <div className="mt-3 grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  {filtered.slice(0, 2).map((agent, index) => (
+                    <div key={agent.id} className="flex flex-col justify-between gap-3 border border-orange-100 bg-white p-3">
+                      <div>
+                        <p className="font-mono text-[10px] text-zinc-400">0{index + 1} / RECOMMENDED</p>
+                        <p className="mt-1 text-sm font-bold text-zinc-950">{agent.displayName}</p>
+                        <p className="mt-1 text-xs leading-relaxed text-zinc-600 line-clamp-2">{agent.description}</p>
+                      </div>
+                      <Link to={`/agents/${agent.id}`} className="self-start bg-zinc-900 px-3 py-2 text-xs font-bold text-white hover:bg-[#ea580c]">Explore agent →</Link>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
 
             <div className="flex items-center justify-between font-mono text-xs">
               <span className="text-zinc-500"><strong className="text-zinc-900">{filtered.length}</strong> agents found</span>

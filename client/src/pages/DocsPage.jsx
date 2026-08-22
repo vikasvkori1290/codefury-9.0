@@ -233,15 +233,38 @@ const BENCHMARK_QUESTIONS = [
 
 const QUESTION_CATEGORIES = ["All Questions", "Math & Logic", "Coding & Execution", "JSON Schema & Extraction", "Rule Following"];
 
-const SIDEBAR_ITEMS = [
-  { id: "quickstart", label: "Quickstart Guide", icon: HiOutlineCommandLine, badge: "2 min" },
-  { id: "questions", label: "Questions", icon: HiOutlineQuestionMarkCircle, badge: "20" },
-  { id: "judging_criteria", label: "Judging Criteria", icon: HiOutlineScale, badge: "6 Pillars" },
-  { id: "api_keys", label: "API Keys", icon: HiOutlineKey, badge: "Auth" },
-  { id: "ollama", label: "Ollama & Modelfiles", icon: HiOutlineCpuChip, badge: "Local GPU" },
-  { id: "agents", label: "Agent Marketplace", icon: HiOutlineSparkles, badge: "Market" },
-  { id: "faq", label: "FAQ & Troubleshooting", icon: HiOutlineInformationCircle, badge: "Help" },
-  { id: "requests_no_sub", label: "Requests Without Subscription", icon: HiOutlineWrenchScrewdriver, badge: "Engine" },
+const SIDEBAR_GROUPS = [
+  {
+    id: "request-architecture",
+    label: "Request architecture",
+    description: "How the engine works",
+    direct: true,
+    items: [
+      { id: "requests_no_sub", label: "Requests without subscription", icon: HiOutlineWrenchScrewdriver, badge: "Engine" },
+    ],
+  },
+  {
+    id: "test-bench",
+    label: "Test Bench",
+    description: "Evaluate a model",
+    items: [
+      { id: "quickstart", label: "Get started", icon: HiOutlineCommandLine, badge: "2 min" },
+      { id: "submit_model", label: "Add a model", icon: HiOutlineCpuChip, badge: "Upload" },
+      { id: "run_benchmark", label: "Run a benchmark", icon: HiOutlineWrenchScrewdriver, badge: "Guide" },
+      { id: "questions", label: "Benchmark questions", icon: HiOutlineQuestionMarkCircle, badge: "20" },
+      { id: "judging_criteria", label: "Judging criteria", icon: HiOutlineScale, badge: "6" },
+    ],
+  },
+  {
+    id: "reference",
+    label: "Reference",
+    description: "Configuration and help",
+    items: [
+      { id: "api_keys", label: "API keys", icon: HiOutlineKey, badge: "Auth" },
+      { id: "ollama", label: "Ollama & Modelfiles", icon: HiOutlineCpuChip, badge: "Local" },
+      { id: "faq", label: "FAQ & troubleshooting", icon: HiOutlineInformationCircle, badge: "Help" },
+    ],
+  },
 ];
 
 const FAQS = [
@@ -269,6 +292,7 @@ const FAQS = [
 
 const DocsPage = () => {
   const [activeTab, setActiveTab] = useState("quickstart");
+  const [expandedFolders, setExpandedFolders] = useState(new Set(SIDEBAR_GROUPS.map((group) => group.id)));
   const [selectedCategory, setSelectedCategory] = useState("All Questions");
   const [searchQuery, setSearchQuery] = useState("");
   const [expandedIds, setExpandedIds] = useState(new Set());
@@ -294,6 +318,15 @@ const DocsPage = () => {
     setExpandedIds(new Set());
   };
 
+  const toggleFolder = (id) => {
+    setExpandedFolders((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  };
+
   const filteredQuestions = BENCHMARK_QUESTIONS.filter((q) => {
     const matchesCat = selectedCategory === "All Questions" || q.category === selectedCategory;
     const matchesSearch =
@@ -310,39 +343,78 @@ const DocsPage = () => {
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
           {/* ==================== SIDEBAR NAVIGATION ==================== */}
           <aside className="lg:col-span-3 bg-white border border-[#e4e4e7] p-3 sticky top-24 shadow-xs">
-            <span className="text-[10px] font-mono uppercase tracking-widest text-zinc-400 font-bold px-3 py-2 block">
-              Documentation Index
-            </span>
-            <nav className="space-y-1 font-mono text-xs">
-              {SIDEBAR_ITEMS.map((item) => {
-                const Icon = item.icon;
-                const active = activeTab === item.id;
-                return (
-                  <button
-                    key={item.id}
-                    onClick={() => setActiveTab(item.id)}
-                    className={`w-full flex items-center justify-between px-3 py-2.5 text-left transition-all cursor-pointer border ${
-                      active
-                        ? "bg-black text-white font-bold border-black shadow-xs"
-                        : "bg-transparent text-zinc-700 hover:text-black hover:bg-zinc-100 border-transparent"
-                    }`}
-                  >
-                    <div className="flex items-center gap-2.5 truncate">
-                      <Icon className={active ? "text-[#ea580c]" : "text-zinc-400"} />
-                      <span className="truncate">{item.label}</span>
-                    </div>
-                    {item.badge && (
-                      <span
-                        className={`text-[10px] font-mono px-1.5 py-0.5 rounded-none ${
-                          active
-                            ? "bg-zinc-800 text-white"
-                            : "bg-zinc-100 text-zinc-600"
-                        }`}
-                      >
-                        {item.badge}
+            <div className="flex items-center justify-between px-3 py-2">
+              <span className="text-[10px] font-mono uppercase tracking-widest text-zinc-400 font-bold">
+                Documentation Index
+              </span>
+              <span className="text-[10px] font-mono text-zinc-400">/docs</span>
+            </div>
+            <nav className="space-y-2 font-mono text-xs">
+              {SIDEBAR_GROUPS.map((group) => {
+                if (group.direct) {
+                  const active = activeTab === group.items[0].id;
+                  return (
+                    <button
+                      key={group.id}
+                      type="button"
+                      onClick={() => setActiveTab(group.items[0].id)}
+                      className={`w-full flex items-center justify-between px-3 py-2.5 text-left transition-all cursor-pointer border ${
+                        active
+                          ? "bg-black text-white font-bold border-black shadow-xs"
+                          : "bg-transparent text-zinc-700 hover:text-black hover:bg-zinc-100 border-transparent"
+                      }`}
+                    >
+                      <div className="flex items-center gap-2.5 truncate">
+                        <HiOutlineWrenchScrewdriver className={active ? "text-[#ea580c]" : "text-zinc-400"} />
+                        <span className="truncate">{group.label}</span>
+                      </div>
+                      <span className={`text-[10px] font-mono px-1.5 py-0.5 ${active ? "bg-zinc-800 text-white" : "bg-zinc-100 text-zinc-600"}`}>
+                        Engine
                       </span>
+                    </button>
+                  );
+                }
+                const isOpen = expandedFolders.has(group.id);
+                return (
+                  <div key={group.id}>
+                    <button
+                      type="button"
+                      onClick={() => toggleFolder(group.id)}
+                      className="w-full flex items-center gap-2 px-3 py-2 text-left text-zinc-900 hover:bg-zinc-100 cursor-pointer"
+                      aria-expanded={isOpen}
+                    >
+                      <HiOutlineChevronDown className={`text-zinc-400 transition-transform ${isOpen ? "" : "-rotate-90"}`} />
+                      <span className="font-bold">{group.label}</span>
+                      <span className="ml-auto text-[10px] text-zinc-400">{group.description}</span>
+                    </button>
+                    {isOpen && (
+                      <div className="ml-2 border-l border-zinc-200 pl-2 space-y-1">
+                        {group.items.map((item) => {
+                          const Icon = item.icon;
+                          const active = activeTab === item.id;
+                          return (
+                            <button
+                              key={item.id}
+                              onClick={() => setActiveTab(item.id)}
+                              className={`w-full flex items-center justify-between px-3 py-2.5 text-left transition-all cursor-pointer border ${
+                                active
+                                  ? "bg-black text-white font-bold border-black shadow-xs"
+                                  : "bg-transparent text-zinc-700 hover:text-black hover:bg-zinc-100 border-transparent"
+                              }`}
+                            >
+                              <div className="flex items-center gap-2.5 truncate">
+                                <Icon className={active ? "text-[#ea580c]" : "text-zinc-400"} />
+                                <span className="truncate">{item.label}</span>
+                              </div>
+                              <span className={`text-[10px] font-mono px-1.5 py-0.5 ${active ? "bg-zinc-800 text-white" : "bg-zinc-100 text-zinc-600"}`}>
+                                {item.badge}
+                              </span>
+                            </button>
+                          );
+                        })}
+                      </div>
                     )}
-                  </button>
+                  </div>
                 );
               })}
             </nav>
@@ -350,6 +422,69 @@ const DocsPage = () => {
 
           {/* ==================== MAIN CONTENT AREA ==================== */}
           <main className="lg:col-span-9 space-y-6">
+            {/* PRODUCT GUIDES */}
+            {activeTab === "submit_model" && (
+              <div className="space-y-6 font-sans">
+                <div className="bg-white border border-[#e4e4e7] p-6 shadow-xs space-y-2">
+                  <div className="inline-flex items-center gap-2 px-2.5 py-1 bg-orange-50 border border-orange-200 text-xs font-mono text-[#ea580c] font-bold"><HiOutlineCpuChip /> Test Bench / Add a model</div>
+                  <h2 className="text-xl font-bold text-zinc-950">Connect a model to Test Bench</h2>
+                  <p className="text-xs sm:text-sm text-zinc-600 leading-relaxed">Pick one of three connection modes. You can change the mode for every new test without changing your account.</p>
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  {[
+                    ["01", "Ollama local tag", "Run a model on your own machine. Install Ollama, pull a model such as qwen2.5:3b, then enter the exact tag in Test Bench.", "ollama pull qwen2.5:3b"],
+                    ["02", "Modelfile / GGUF", "Upload a Modelfile or GGUF weight file when you want to test custom weights, a system prompt, or sampling parameters.", "FROM ./model.Q4_K_M.gguf"],
+                    ["03", "Remote API key", "Choose Google Gemini, Groq, or OpenAI and provide a key. It is used only while assertions execute and is not stored.", "provider: google"],
+                  ].map(([number, title, text, code]) => (
+                    <div key={title} className="bg-white border border-[#e4e4e7] p-5 shadow-xs space-y-3">
+                      <span className="w-7 h-7 bg-black text-white font-mono text-xs font-bold flex items-center justify-center">{number}</span>
+                      <h3 className="font-bold text-sm text-zinc-950">{title}</h3>
+                      <p className="text-xs text-zinc-600 leading-relaxed">{text}</p>
+                      <code className="block bg-zinc-950 text-emerald-400 p-3 text-[11px] break-words">{code}</code>
+                    </div>
+                  ))}
+                </div>
+                <div className="bg-orange-50 border border-orange-200 p-5 text-xs text-orange-950 leading-relaxed"><strong>Before you submit:</strong> use a stable model name, confirm the provider is reachable, and keep temperature low for deterministic benchmark answers. Continue with <button onClick={() => setActiveTab("run_benchmark")} className="font-bold underline cursor-pointer">Run a benchmark</button>.</div>
+              </div>
+            )}
+
+            {activeTab === "run_benchmark" && (
+              <div className="space-y-6 font-sans">
+                <div className="bg-white border border-[#e4e4e7] p-6 shadow-xs space-y-2"><div className="inline-flex items-center gap-2 px-2.5 py-1 bg-orange-50 border border-orange-200 text-xs font-mono text-[#ea580c] font-bold"><HiOutlineWrenchScrewdriver /> Test Bench / Run</div><h2 className="text-xl font-bold text-zinc-950">Run a benchmark</h2><p className="text-xs sm:text-sm text-zinc-600 leading-relaxed">A benchmark sends 20 standardized prompts, validates each response, and produces a scorecard with the evidence behind every result.</p></div>
+                <div className="bg-white border border-[#e4e4e7] p-6 shadow-xs space-y-4">
+                  {["Connect your model and click Start Automated Benchmark.", "Watch the job monitor as each category moves from queued to running to verified.", "Review failed assertions: the raw response, expected output, and verification method are shown together.", "Open the final scorecard to see pass rate, latency, category scores, and global rank."] .map((step, index) => <div key={step} className="flex gap-4 items-start"><span className="shrink-0 w-7 h-7 bg-black text-white font-mono text-xs font-bold flex items-center justify-center">{index + 1}</span><p className="text-xs text-zinc-700 leading-relaxed pt-1">{step}</p></div>)}
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs"><div className="p-4 bg-emerald-50 border border-emerald-200"><strong className="block text-emerald-900">Verified</strong><span className="text-emerald-800">The assertion matched its deterministic check.</span></div><div className="p-4 bg-orange-50 border border-orange-200"><strong className="block text-orange-900">Needs review</strong><span className="text-orange-800">The response ran but did not match the expected format.</span></div><div className="p-4 bg-zinc-100 border border-zinc-200"><strong className="block text-zinc-900">Unavailable</strong><span className="text-zinc-600">The provider timed out or the local endpoint was unreachable.</span></div></div>
+              </div>
+            )}
+
+            {activeTab === "live_overview" && (
+              <div className="space-y-6 font-sans">
+                <div className="bg-white border border-[#e4e4e7] p-6 shadow-xs space-y-2"><div className="inline-flex items-center gap-2 px-2.5 py-1 bg-emerald-50 border border-emerald-200 text-xs font-mono text-emerald-800 font-bold"><HiOutlineSparkles /> Live AI / Live Bench</div><h2 className="text-xl font-bold text-zinc-950">Read the Live Bench leaderboard</h2><p className="text-xs sm:text-sm text-zinc-600 leading-relaxed">Live Bench is the public reference layer for verified model performance. It combines creator submissions with 44 frontier model baselines.</p></div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4"><div className="bg-white border border-[#e4e4e7] p-5 shadow-xs space-y-2"><h3 className="font-bold text-sm">What the score means</h3><p className="text-xs text-zinc-600 leading-relaxed">The composite score is the percentage of assertions passed across math, coding, schema extraction, and rule following. It is not an LLM opinion score.</p></div><div className="bg-white border border-[#e4e4e7] p-5 shadow-xs space-y-2"><h3 className="font-bold text-sm">How to read a row</h3><p className="text-xs text-zinc-600 leading-relaxed">Use rank for relative position, pass rate for correctness, latency for speed, and category scores to understand where a model is strong.</p></div></div>
+                <div className="bg-zinc-950 text-zinc-300 p-5 font-mono text-xs leading-relaxed"><span className="text-emerald-400">TIP //</span> A higher rank is not always the best choice. Filter by your workload, then inspect the category breakdown before selecting a model.</div>
+              </div>
+            )}
+
+            {activeTab === "live_compare" && (
+              <div className="space-y-6 font-sans">
+                <div className="bg-white border border-[#e4e4e7] p-6 shadow-xs space-y-2"><div className="inline-flex items-center gap-2 px-2.5 py-1 bg-emerald-50 border border-emerald-200 text-xs font-mono text-emerald-800 font-bold"><HiOutlineScale /> Live AI / Compare</div><h2 className="text-xl font-bold text-zinc-950">Compare models for a task</h2><p className="text-xs sm:text-sm text-zinc-600 leading-relaxed">Compare up to four models side by side using the same score, latency, context, provider, and category metrics.</p></div>
+                <div className="bg-white border border-[#e4e4e7] p-6 shadow-xs space-y-3 text-xs text-zinc-700 leading-relaxed"><p><strong>1. Start with intent.</strong> Search for coding, reasoning, extraction, or another capability.</p><p><strong>2. Select candidates.</strong> Add models from the catalog or tested submissions to the comparison tray.</p><p><strong>3. Check tradeoffs.</strong> Read the matrix rather than sorting only by rank. A smaller model may win on latency and cost.</p><p><strong>4. Open the winner.</strong> Use its model page or Playground action to continue testing with your own prompt.</p></div>
+              </div>
+            )}
+
+            {activeTab === "models_overview" && (
+              <div className="space-y-6 font-sans"><div className="bg-white border border-[#e4e4e7] p-6 shadow-xs space-y-2"><div className="inline-flex items-center gap-2 px-2.5 py-1 bg-orange-50 border border-orange-200 text-xs font-mono text-[#ea580c] font-bold"><HiOutlineDocumentText /> AI Models / Catalog</div><h2 className="text-xl font-bold text-zinc-950">Find the right model</h2><p className="text-xs sm:text-sm text-zinc-600 leading-relaxed">The catalog is the discovery layer. Search by name or capability, filter by provider and category, then open a model page for the complete context.</p></div><div className="grid grid-cols-1 sm:grid-cols-3 gap-4">{[["Discover", "Search models by task, provider, or creator."],["Validate", "Use verified benchmark evidence to check claims."],["Use", "Open Playground, Compare, or Test Bench from the model page."]].map(([title, text]) => <div key={title} className="bg-white border border-[#e4e4e7] p-5 shadow-xs space-y-2"><h3 className="font-bold text-sm">{title}</h3><p className="text-xs text-zinc-600 leading-relaxed">{text}</p></div>)}</div></div>
+            )}
+
+            {activeTab === "model_detail" && (
+              <div className="space-y-6 font-sans"><div className="bg-white border border-[#e4e4e7] p-6 shadow-xs space-y-2"><div className="inline-flex items-center gap-2 px-2.5 py-1 bg-orange-50 border border-orange-200 text-xs font-mono text-[#ea580c] font-bold"><HiOutlineInformationCircle /> AI Models / Model pages</div><h2 className="text-xl font-bold text-zinc-950">Understand a model page</h2><p className="text-xs sm:text-sm text-zinc-600 leading-relaxed">Model pages are the handoff point between discovery and evaluation.</p></div><div className="bg-white border border-[#e4e4e7] p-6 shadow-xs space-y-4 text-xs leading-relaxed text-zinc-700"><div><strong className="text-zinc-950">Overview:</strong> creator, intended tasks, provider, model size, context window, and access type.</div><div><strong className="text-zinc-950">Evidence:</strong> verified pass rate, global placement, latency, and category-level results when available.</div><div><strong className="text-zinc-950">Next action:</strong> use Playground for a prompt, Compare for alternatives, or Test Bench to create a reproducible score.</div></div></div>
+            )}
+
+            {activeTab === "agent_run" && (
+              <div className="space-y-6 font-sans"><div className="bg-white border border-[#e4e4e7] p-6 shadow-xs space-y-2"><div className="inline-flex items-center gap-2 px-2.5 py-1 bg-emerald-50 border border-emerald-200 text-xs font-mono text-emerald-800 font-bold"><HiOutlineCommandLine /> Agents / Run</div><h2 className="text-xl font-bold text-zinc-950">Run an agent safely</h2><p className="text-xs sm:text-sm text-zinc-600 leading-relaxed">Agents are workflows with a role, tools, and an expected output. Treat the Playground as a review step before deployment.</p></div><div className="bg-white border border-[#e4e4e7] p-6 shadow-xs space-y-4 text-xs text-zinc-700 leading-relaxed">{["Open an agent from the marketplace and read its tools and input/output contract.", "Start with a small, non-sensitive prompt in the Playground.", "Inspect tool calls, citations, and the final response. Repeat with an edge case.", "Only then connect the agent to production data or request a custom pipeline."].map((step, index) => <div key={step} className="flex gap-3"><span className="font-mono font-bold text-[#ea580c]">0{index + 1}</span><span>{step}</span></div>)}</div></div>
+            )}
+
             {/* 1. QUESTIONS SECTION */}
             {activeTab === "questions" && (
               <div className="space-y-4">
