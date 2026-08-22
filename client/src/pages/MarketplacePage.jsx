@@ -370,49 +370,77 @@ export const MarketplacePage = () => {
     };
   };
 
-  // Detect active semantic intent from query
-  const detectedIntent = useMemo(() => {
-    const q = search.toLowerCase().trim();
-    if (!q || q.length < 3) return null;
+  const stopWords = new Set([
+    "a", "an", "and", "can", "for", "i", "in", "is", "me", "model", "need", "of", "please", "the", "to", "want", "with",
+  ]);
 
-    for (const item of INTENT_TAXONOMY) {
-      if (item.keywords.some((kw) => q.includes(kw))) {
-        return item;
-      }
-    }
-    return null;
+  // Detect all relevant intents so descriptions can combine needs like speed and coding.
+  const detectedIntents = useMemo(() => {
+    const q = search.toLowerCase().trim();
+    if (!q || q.length < 3) return [];
+
+    const matches = INTENT_TAXONOMY.map((item) => ({
+      ...item,
+      queryMatches: item.keywords.filter((keyword) => q.includes(keyword)).length,
+    }))
+      .filter((item) => item.queryMatches > 0)
+      .sort((a, b) => b.queryMatches - a.queryMatches);
+
+    return matches;
   }, [search]);
+  const detectedIntent = detectedIntents[0] || null;
 
   // Semantic Relevance & Multi-Factor Model Filtering
   const filtered = useMemo(() => {
     const q = search.toLowerCase().trim();
-    const queryWords = q.split(/\s+/).filter((w) => w.length > 1);
+    const queryWords = q
+      .split(/\s+/)
+      .map((word) => word.replace(/[^a-z0-9-]/g, ""))
+      .filter((word) => word.length > 1 && !stopWords.has(word));
 
     // Calculate semantic score for each model
     const scoredList = allMarketplaceModels.map((m) => {
       const meta = getModelFilterMeta(m);
+      const searchableText = [
+        m.name,
+        m.displayName,
+        m.creator,
+        m.provider,
+        m.category,
+        m.description,
+        ...(m.capabilities || []),
+        ...(m.tools || []),
+        ...(m.sampleQueries || []).map((query) => query.prompt),
+      ].join(" ").toLowerCase();
       let matchScore = 0;
       let matchedBy = "catalog";
+      let directMatch = false;
 
       // 1. Direct Name/Creator/Description match
       if (q) {
         if (m.name.toLowerCase().includes(q) || m.displayName.toLowerCase().includes(q)) {
           matchScore += 200;
           matchedBy = "exact_name";
+          directMatch = true;
         } else if (m.creator.toLowerCase().includes(q)) {
           matchScore += 120;
           matchedBy = "creator";
+          directMatch = true;
         } else if (m.description.toLowerCase().includes(q)) {
           matchScore += 80;
           matchedBy = "description";
+          directMatch = true;
         }
 
         // Individual word hits
         queryWords.forEach((word) => {
+          if (searchableText.includes(word)) {
+            directMatch = true;
+          }
           if (m.name.toLowerCase().includes(word) || m.displayName.toLowerCase().includes(word)) {
             matchScore += 35;
           }
-          if (m.description.toLowerCase().includes(word)) {
+          if (searchableText.includes(word)) {
             matchScore += 15;
           }
           if (m.category.toLowerCase().includes(word)) {
@@ -421,10 +449,11 @@ export const MarketplacePage = () => {
         });
 
         // 2. Semantic Intent matching
-        if (detectedIntent) {
-          const intentBoost = detectedIntent.matchScore(m);
-          matchScore += intentBoost;
-          matchedBy = detectedIntent.intent;
+        if (detectedIntents.length > 0) {
+          detectedIntents.forEach((intent) => {
+            matchScore += intent.matchScore(m) * (intent.queryMatches > 1 ? 1.2 : 0.8);
+          });
+          matchedBy = detectedIntents.map((intent) => intent.intent).join(" + ");
         }
       } else {
         // Default base score
@@ -441,6 +470,7 @@ export const MarketplacePage = () => {
         ...m,
         _matchScore: matchScore,
         _matchedBy: matchedBy,
+        _directMatch: directMatch,
         _matchesFilters: matchesFilters,
       };
     });
@@ -449,8 +479,8 @@ export const MarketplacePage = () => {
     let list = scoredList.filter((m) => {
       if (!m._matchesFilters) return false;
       if (!q) return true;
-      // If query entered, keep any model with positive relevance score
-      return m._matchScore > 20 || m.name.toLowerCase().includes(q);
+      // Intent scores rank domain-fit models, while direct matches handle specific model searches.
+      return m._directMatch || Boolean(detectedIntent);
     });
 
     // Sorting
@@ -468,8 +498,10 @@ export const MarketplacePage = () => {
       list.sort((a, b) => b._matchScore - a._matchScore);
     }
 
-    return list;
-  }, [allMarketplaceModels, search, sortBy, selectedFilters, detectedIntent]);
+    return detectedIntent && !list.some((model) => model._directMatch)
+      ? list.slice(0, 12)
+      : list;
+  }, [allMarketplaceModels, search, sortBy, selectedFilters, detectedIntents, detectedIntent]);
 
   return (
     <div className="min-h-screen bg-[#fafafa] text-zinc-900 font-sans selection:bg-[#ea580c] selection:text-white py-8 px-4 sm:px-8">
@@ -586,7 +618,7 @@ export const MarketplacePage = () => {
                 <input
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
-                  placeholder="Describe your goal (e.g. 'i want to build a website', 'solve math logic', 'fastest models')..."
+                  placeholder="Describe the model you need (e.g. build a website, extract invoices, solve math)..."
                   className="w-full bg-white focus:border-[#ea580c] pl-11 pr-10 py-4 outline-none text-sm text-zinc-900 placeholder:text-zinc-400"
                 />
                 {search && (
