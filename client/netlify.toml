@@ -3,6 +3,10 @@
   publish = "dist"
   command = "npm run build"
 
+[build.environment]
+  NPM_FLAGS = "--legacy-peer-deps"
+  NODE_VERSION = "20"
+
 [[redirects]]
   from = "/*"
   to = "/index.html"

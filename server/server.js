@@ -54,6 +54,25 @@ if (process.env.NODE_ENV === "development") {
 }
 
 // --------------- Routes ---------------
+app.get("/", (req, res) => {
+  res.json({
+    status: "ok",
+    service: "ModelHub CodeFury 9.0 API",
+    health: "/api/health",
+    version: "1.0.0",
+    timestamp: new Date().toISOString(),
+  });
+});
+
+app.get("/health", (req, res) => {
+  res.json({
+    status: "ok",
+    message: "ModelHub CodeFury 9.0 API is active and healthy 🚀",
+    timestamp: new Date().toISOString(),
+    uptime: process.uptime(),
+  });
+});
+
 app.get("/api/health", (req, res) => {
   res.json({
     status: "ok",
