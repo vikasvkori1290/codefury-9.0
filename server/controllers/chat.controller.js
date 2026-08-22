@@ -22,7 +22,77 @@ export const chatWithModel = async (req, res, next) => {
 
     const opencodeKey = process.env.OPENCODE_API_KEY || process.env.DEEPSEEK_API_KEY || "";
     const platformGroqKey = process.env.GROQ_API_KEY || process.env.GROK_API_KEY || "";
-    const effectiveKey = (userApiKey ? String(userApiKey).trim() : "") || opencodeKey || platformGroqKey;
+    const userKeyTrimmed = userApiKey ? String(userApiKey).trim() : "";
+
+    // ──────────────────────────────────────────────────────────────────────────
+    // EARLY RETURN: If NO user API key → always route directly to Groq LPU.
+    // The model name is kept as-is (shown in UI) but Groq handles the inference.
+    // ──────────────────────────────────────────────────────────────────────────
+    if (!userKeyTrimmed) {
+      const formattedMessages = [
+        { role: "system", content: systemPrompt || `You are ${modelName || "an AI assistant"}. Answer questions accurately, concisely and helpfully using markdown.` },
+        ...messages.map((m) => ({
+          role: m.role === "user" ? "user" : "assistant",
+          content: String(m.content || ""),
+        })),
+      ];
+
+      const groqCandidateModels = [
+        "openai/gpt-oss-120b",
+        "openai/gpt-oss-20b",
+        "qwen/qwen3.6-27b",
+        "groq/compound",
+        "groq/compound-mini",
+      ];
+
+      for (const groqModel of groqCandidateModels) {
+        try {
+          const groqRes = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${platformGroqKey}`,
+            },
+            body: JSON.stringify({
+              model: groqModel,
+              messages: formattedMessages,
+              temperature: Number(temperature) || 0.7,
+              max_tokens: 600,
+              stream: false,
+            }),
+          });
+
+          if (groqRes.ok) {
+            const data = await groqRes.json();
+            const latencyMs = Date.now() - startTime;
+            let output = data.choices?.[0]?.message?.content || "";
+            output = output.replace(/<think>[\s\S]*?<\/think>/gi, "").trim();
+
+            if (output) {
+              const tokenCount = data.usage?.completion_tokens || Math.ceil(output.length / 4) || 1;
+              const tps = Math.max(1, Math.round(tokenCount / (Math.max(1, latencyMs) / 1000)));
+              return res.json({
+                success: true,
+                output,
+                latency_ms: latencyMs,
+                tokens_per_sec: tps,
+                tokens_used: data.usage || { total_tokens: tokenCount },
+                model_used: modelName || groqModel,   // show original model name in UI
+                engine: "Groq LPU Free Engine",
+              });
+            }
+          }
+        } catch (_) {}
+      }
+
+      // Final fallback if all Groq models fail
+      return res.status(503).json({ success: false, message: "Service temporarily unavailable. Please add your API key or try again." });
+    }
+
+    // ──────────────────────────────────────────────────────────────────────────
+    // USER PROVIDED THEIR OWN API KEY → route by key type (unlimited)
+    // ──────────────────────────────────────────────────────────────────────────
+    const effectiveKey = userKeyTrimmed || opencodeKey || platformGroqKey;
 
     const isGeminiKey = effectiveKey.startsWith("AIza");
     const isGroqKey = effectiveKey.startsWith("gsk_");
@@ -47,6 +117,7 @@ export const chatWithModel = async (req, res, next) => {
         ).join("\n");
       }
     } catch (_) {}
+
 
     const defaultSystem = systemPrompt || `You are Forge AI Assistant, the official real-time intelligent co-pilot for this website (Forge - https://forge.ai).
 You possess complete, 360-degree knowledge of the entire Forge platform, its architecture, pages, models, and benchmark methodologies.
@@ -218,7 +289,7 @@ CRITICAL INSTRUCTIONS:
     }
 
     // =========================================================================
-    // 3. GROQ CLOUD LPU INFERENCE (Ultra-Fast <120ms Real-Time Engine)
+    // 3. GROQ CLOUD LPU INFERENCE (Automatic Fallback when DeepSeek limit/error occurs)
     // =========================================================================
     if (platformGroqKey) {
       const formattedMessages = [
@@ -230,8 +301,8 @@ CRITICAL INSTRUCTIONS:
       ];
 
       const groqCandidateModels = [
-        "openai/gpt-oss-20b",
         "openai/gpt-oss-120b",
+        "openai/gpt-oss-20b",
         "qwen/qwen3.6-27b",
         "groq/compound",
         "groq/compound-mini",
@@ -275,12 +346,14 @@ CRITICAL INSTRUCTIONS:
                   completion_tokens: Math.ceil(output.length / 4),
                   total_tokens: Math.ceil(output.length / 4) + 40,
                 },
-                model_used: modelName || "DeepSeek V4 Flash (Groq LPU)",
-                engine: "Groq LPU Ultra-Fast Real-Time Engine",
+                model_used: modelName || "DeepSeek V4 Flash (Groq LPU Fallback)",
+                engine: "Groq LPU Ultra-Fast Engine (DeepSeek Fallback)",
               });
             }
           }
-        } catch (_) {}
+        } catch (groqErr) {
+          console.warn("[Chatbot] Groq attempt failed for model", groqModel, groqErr.message);
+        }
       }
     }
 

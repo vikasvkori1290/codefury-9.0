@@ -317,11 +317,11 @@ export const CreatorModelSubmitForm = () => {
               1. Select Submission Mode
             </label>
             <span className="text-[11px] font-mono text-zinc-400">
-              Ollama Local • Modelfile / GGUF • Hugging Face • Remote API Key
+              Ollama Local • Hugging Face • Remote API Key
             </span>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2 p-1 bg-[#fafafa] border border-[#e4e4e7] rounded-none font-mono text-xs">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 p-1 bg-[#fafafa] border border-[#e4e4e7] rounded-none font-mono text-xs">
             {/* Mode A: Ollama Tag */}
             <button
               type="button"
@@ -339,20 +339,6 @@ export const CreatorModelSubmitForm = () => {
             >
               <HiOutlineCpuChip className={`text-sm ${submissionMode === "ollama" ? "text-[#ea580c]" : "text-zinc-500"}`} />
               <span>Ollama Model Tag</span>
-            </button>
-
-            {/* Mode B: Modelfile / GGUF */}
-            <button
-              type="button"
-              onClick={() => setSubmissionMode("file")}
-              className={`py-3 px-3 rounded-none transition-all flex items-center justify-center gap-2 cursor-pointer border ${
-                submissionMode === "file"
-                  ? "bg-white text-zinc-950 font-bold border-[#e4e4e7] shadow-xs"
-                  : "bg-transparent text-zinc-600 hover:text-zinc-950 border-transparent hover:bg-zinc-100"
-              }`}
-            >
-              <HiOutlineDocumentArrowUp className={`text-sm ${submissionMode === "file" ? "text-[#ea580c]" : "text-zinc-500"}`} />
-              <span>Upload Modelfile / .gguf</span>
             </button>
 
             {/* Mode C: Hugging Face */}
@@ -439,45 +425,6 @@ export const CreatorModelSubmitForm = () => {
           </div>
         )}
 
-        {/* B. UPLOAD MODELFILE / GGUF */}
-        {submissionMode === "file" && (
-          <div className="space-y-3 pt-1">
-            <label className="text-xs font-mono font-semibold text-zinc-800">
-              Modelfile / Quantized GGUF Weights File:
-            </label>
-
-            <div
-              onDragOver={(e) => e.preventDefault()}
-              onDrop={handleFileDrop}
-              onClick={() => document.getElementById("modelfile-upload-input").click()}
-              className="border-2 border-dashed border-zinc-300 hover:border-[#ea580c] p-8 rounded-none text-center bg-[#fafafa] hover:bg-orange-50/20 transition-all cursor-pointer space-y-2"
-            >
-              <input
-                id="modelfile-upload-input"
-                type="file"
-                onChange={handleFileSelect}
-                className="hidden"
-              />
-              <div className="w-10 h-10 rounded-none bg-zinc-100 border border-zinc-200 text-[#ea580c] mx-auto flex items-center justify-center text-xl">
-                <HiOutlineDocumentArrowUp />
-              </div>
-              <div>
-                <p className="text-xs font-mono text-zinc-800">
-                  {uploadedFile ? (
-                    <span className="text-[#ea580c] font-bold">
-                      {uploadedFile.name} ({(uploadedFile.size / (1024 * 1024)).toFixed(2)} MB)
-                    </span>
-                  ) : (
-                    "Drag & drop your Modelfile or .gguf here, or click to browse"
-                  )}
-                </p>
-                <p className="text-[10px] font-mono text-zinc-400 mt-1">
-                  Accepts Modelfile, .gguf, .bin, or quantized weights (up to 5GB)
-                </p>
-              </div>
-            </div>
-          </div>
-        )}
 
         {/* C. HUGGING FACE INFERENCE */}
         {submissionMode === "huggingface" && (

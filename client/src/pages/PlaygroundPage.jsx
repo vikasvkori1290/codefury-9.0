@@ -44,15 +44,19 @@ export default function PlaygroundPage() {
   const [isKeyModalOpen, setIsKeyModalOpen] = useState(false);
   const [tempApiKey, setTempApiKey] = useState("");
 
-  // Pay as you go / Playground Credits state
-  const [userCredits, setUserCredits] = useState(() => {
-    const saved = localStorage.getItem("MODELHUB_USER_CREDITS");
-    return saved !== null ? parseFloat(saved) : 0.0;
-  });
+  // Pay as you go / Playground Credits — balance is always $0 (no gateway)
+  const [userCredits, setUserCredits] = useState(0.0);
   const [isPayModalOpen, setIsPayModalOpen] = useState(false);
   const [selectedPlan, setSelectedPlan] = useState("starter"); // 'starter' | 'pro'
   const [isProcessingPayment, setIsProcessingPayment] = useState(false);
   const [paymentSuccessMsg, setPaymentSuccessMsg] = useState("");
+
+  // Free tier: 3 requests without API key
+  const FREE_REQUEST_LIMIT = 3;
+  const [freeRequestsUsed, setFreeRequestsUsed] = useState(() => {
+    return parseInt(localStorage.getItem("FORGE_FREE_REQS") || "0", 10);
+  });
+  const [isLimitModalOpen, setIsLimitModalOpen] = useState(false);
 
   // Chat conversation state for Model A & Model B
   const [prompt, setPrompt] = useState("");
@@ -66,6 +70,11 @@ export default function PlaygroundPage() {
 
   const messagesContainerRefA = useRef(null);
   const messagesContainerRefB = useRef(null);
+
+  // Clear any stale balance from localStorage on mount (no payment gateway)
+  useEffect(() => {
+    localStorage.removeItem("MODELHUB_USER_CREDITS");
+  }, []);
 
   // Fetch evaluated models live from MongoDB Atlas
   useEffect(() => {
@@ -199,19 +208,9 @@ export default function PlaygroundPage() {
   };
 
   const handlePayForCredits = () => {
-    setIsProcessingPayment(true);
-    setTimeout(() => {
-      const addedAmount = selectedPlan === "starter" ? 5.0 : 15.0;
-      const newTotal = +(userCredits + addedAmount).toFixed(2);
-      setUserCredits(newTotal);
-      localStorage.setItem("MODELHUB_USER_CREDITS", String(newTotal));
-      setIsProcessingPayment(false);
-      setPaymentSuccessMsg(`Successfully added $${addedAmount.toFixed(2)} credits to your playground balance!`);
-      setTimeout(() => {
-        setPaymentSuccessMsg("");
-        setIsPayModalOpen(false);
-      }, 1500);
-    }, 800);
+    toast.error("No payment gateway initialized. Please add your API key to chat directly.");
+    setIsPayModalOpen(false);
+    setIsKeyModalOpen(true);
   };
 
   const copyMessage = (text, idx, isA = true) => {
@@ -255,7 +254,20 @@ export default function PlaygroundPage() {
 
     const effectiveKeyA = grokApiKey ? grokApiKey.trim() : "";
     const effectiveKeyB = modelBApiKey ? modelBApiKey.trim() : "";
-    const hasPaidCredits = userCredits > 0;
+    // Always treat as free/platform-sponsored — server uses its own env keys (Groq/Gemini)
+    const hasPaidCredits = true;
+
+    // Enforce free request limit (3 requests without own API key)
+    const isUsingOwnKey = Boolean(effectiveKeyA);
+    if (!isUsingOwnKey) {
+      if (freeRequestsUsed >= FREE_REQUEST_LIMIT) {
+        setIsLimitModalOpen(true);
+        return;
+      }
+      const newCount = freeRequestsUsed + 1;
+      setFreeRequestsUsed(newCount);
+      localStorage.setItem("FORGE_FREE_REQS", String(newCount));
+    }
 
     // Send Model A
     setLoadingA(true);
@@ -279,9 +291,7 @@ export default function PlaygroundPage() {
             {
               role: "assistant",
               content: res.data.output,
-              meta: `${latency}ms · ${tps} tokens/sec · ${
-                hasPaidCredits && !effectiveKeyA ? "Paid Credits" : res.data.engine || "Live Engine"
-              }`,
+              meta: `${latency}ms · ${tps} tokens/sec · ${effectiveKeyA ? "Your API Key" : res.data.engine || "Free Engine"}`,
             },
           ]);
         } else {
@@ -321,9 +331,7 @@ export default function PlaygroundPage() {
               {
                 role: "assistant",
                 content: res.data.output,
-                meta: `${latency}ms · ${tps} tokens/sec · ${
-                  hasPaidCredits && !effectiveKeyB ? "Paid Credits" : res.data.engine || "Live Engine"
-                }`,
+                meta: `${latency}ms · ${tps} tokens/sec · ${effectiveKeyB ? "Your API Key" : res.data.engine || "Free Engine"}`,
               },
             ]);
           } else {
@@ -343,12 +351,7 @@ export default function PlaygroundPage() {
         .finally(() => setLoadingB(false));
     }
 
-    if (hasPaidCredits && !effectiveKeyA) {
-      const deduction = isSplitView ? 0.004 : 0.002;
-      const updatedBalance = Math.max(0, +(userCredits - deduction).toFixed(4));
-      setUserCredits(updatedBalance);
-      localStorage.setItem("MODELHUB_USER_CREDITS", String(updatedBalance));
-    }
+    // No balance deduction — free inference via platform env keys
   };
 
   return (
@@ -419,20 +422,24 @@ export default function PlaygroundPage() {
               </button>
             )}
 
-            {/* Button 3: Pay / Instant Access Button */}
+            {/* Button 3: Free Access / Requests Remaining */}
             <button
               onClick={() => setIsPayModalOpen(true)}
               className={`px-3 py-1.5 border text-xs font-mono font-bold flex items-center gap-1.5 transition-all cursor-pointer ${
-                userCredits > 0
+                grokApiKey
                   ? "bg-emerald-50 border-emerald-300 text-emerald-800"
+                  : freeRequestsUsed >= FREE_REQUEST_LIMIT
+                  ? "bg-red-50 border-red-300 text-red-700 hover:bg-red-100 shadow-xs"
                   : "bg-[#ea580c] border-[#ea580c] text-white hover:bg-[#c2410c] shadow-xs"
               }`}
             >
               <HiOutlineCreditCard />
               <span>
-                {userCredits > 0
-                  ? `● Balance: $${userCredits.toFixed(2)}`
-                  : "💳 Pay / Instant Access"}
+                {grokApiKey
+                  ? `● API Key Active`
+                  : freeRequestsUsed >= FREE_REQUEST_LIMIT
+                  ? `🔒 Limit Reached (${FREE_REQUEST_LIMIT}/${FREE_REQUEST_LIMIT})`
+                  : `⚡ Free (${FREE_REQUEST_LIMIT - freeRequestsUsed} left)`}
               </span>
             </button>
 
@@ -1128,15 +1135,16 @@ export default function PlaygroundPage() {
         </div>
       )}
 
-      {/* ==================== PAY AS YOU GO MODAL ==================== */}
+      {/* ==================== FREE ACCESS MODAL ==================== */}
       {isPayModalOpen && (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-xs z-50 flex items-center justify-center p-4">
-          <div className="bg-white border-2 border-[#ea580c] max-w-md w-full p-6 space-y-5 shadow-2xl font-mono text-xs animate-fadeIn">
+          <div className="bg-white border-2 border-emerald-500 max-w-md w-full p-6 space-y-5 shadow-2xl font-mono text-xs animate-fadeIn">
+            {/* Header */}
             <div className="flex items-center justify-between border-b border-[#f4f4f5] pb-3">
               <div className="flex items-center gap-2">
-                <HiOutlineCreditCard className="text-[#ea580c] text-base" />
+                <HiOutlineCheckCircle className="text-emerald-500 text-xl" />
                 <h3 className="font-bold text-sm font-sans text-zinc-950">
-                  Instant Playground Access (No API Key)
+                  No Payment Needed! 🎉
                 </h3>
               </div>
               <button
@@ -1147,85 +1155,120 @@ export default function PlaygroundPage() {
               </button>
             </div>
 
-            <p className="text-zinc-600 font-sans text-xs leading-relaxed">
-              Top up playground credits to chat with any frontier model instantly without needing an API key.
-            </p>
+            {/* Free Access Banner */}
+            <div className="p-4 bg-emerald-50 border border-emerald-200 rounded-sm text-center space-y-2">
+              <div className="text-3xl">🚀</div>
+              <p className="font-bold text-emerald-800 text-sm font-sans">
+                You can use the Playground completely for FREE!
+              </p>
+              <p className="text-emerald-700 text-xs font-sans leading-relaxed">
+                No API key needed. No credit card. No signup.
+                Just type your question and the platform's built-in AI engine will respond instantly.
+              </p>
+            </div>
 
-            {/* Plan Choice */}
-            <div className="grid grid-cols-2 gap-3 font-sans">
-              <div
-                onClick={() => setSelectedPlan("starter")}
-                className={`p-3.5 border cursor-pointer transition-all space-y-1.5 ${
-                  selectedPlan === "starter"
-                    ? "bg-orange-50/70 border-[#ea580c] shadow-xs"
-                    : "bg-[#fafafa] border-[#e4e4e7] hover:border-zinc-400"
-                }`}
-              >
-                <div className="text-xs font-bold text-zinc-950">Starter Pack</div>
-                <div className="text-xl font-bold text-[#ea580c] font-mono">$5.00</div>
-                <div className="text-[10px] text-zinc-500 font-mono">500,000 Tokens</div>
+            {/* Info Box */}
+            <div className="p-3 bg-[#fafafa] border border-[#e4e4e7] space-y-2 text-[11px] font-mono">
+              <div className="flex items-center gap-2 text-zinc-600">
+                <span className="text-emerald-500">✓</span>
+                <span>Powered by <b className="text-zinc-900">Groq LPU</b> ultra-fast inference engine</span>
               </div>
-
-              <div
-                onClick={() => setSelectedPlan("pro")}
-                className={`p-3.5 border cursor-pointer transition-all space-y-1.5 ${
-                  selectedPlan === "pro"
-                    ? "bg-orange-50/70 border-[#ea580c] shadow-xs"
-                    : "bg-[#fafafa] border-[#e4e4e7] hover:border-zinc-400"
-                }`}
-              >
-                <div className="text-xs font-bold text-zinc-950">Pro Pack</div>
-                <div className="text-xl font-bold text-zinc-900 font-mono">$15.00</div>
-                <div className="text-[10px] text-zinc-500 font-mono">2,000,000 Tokens</div>
+              <div className="flex items-center gap-2 text-zinc-600">
+                <span className="text-emerald-500">✓</span>
+                <span>Falls back to <b className="text-zinc-900">Google Gemini</b> automatically</span>
+              </div>
+              <div className="flex items-center gap-2 text-zinc-600">
+                <span className="text-emerald-500">✓</span>
+                <span>Or add your own API key for a personalized model</span>
               </div>
             </div>
 
-            {/* Payment Summary */}
-            <div className="p-3 bg-[#fafafa] border border-[#e4e4e7] space-y-1.5 text-[11px] font-mono">
-              <div className="flex justify-between text-zinc-600">
-                <span>Access Plan:</span>
-                <b className="text-zinc-900">{selectedPlan === "starter" ? "Starter ($5.00)" : "Pro ($15.00)"}</b>
-              </div>
-              <div className="flex justify-between text-zinc-600">
-                <span>Current Balance:</span>
-                <b className="text-emerald-700">${userCredits.toFixed(2)}</b>
-              </div>
-              <div className="flex justify-between text-zinc-600 pt-1 border-t border-[#edf0f5]">
-                <span>Total Charge:</span>
-                <b className="text-[#ea580c] text-xs font-bold">{selectedPlan === "starter" ? "$5.00" : "$15.00"}</b>
-              </div>
-            </div>
-
-            {paymentSuccessMsg && (
-              <div className="p-3 bg-emerald-50 border border-emerald-300 text-emerald-800 text-xs font-mono flex items-center gap-2">
-                <HiOutlineCheckCircle className="text-base shrink-0" />
-                <span>{paymentSuccessMsg}</span>
-              </div>
-            )}
-
-            <div className="flex items-center justify-end gap-2.5 pt-2">
+            <div className="flex items-center justify-end gap-2.5 pt-1">
               <button
                 onClick={() => setIsPayModalOpen(false)}
-                disabled={isProcessingPayment}
+                className="px-4 py-2 border border-zinc-300 text-zinc-700 text-xs font-bold hover:bg-zinc-50 cursor-pointer"
+              >
+                Close
+              </button>
+              <button
+                onClick={() => setIsPayModalOpen(false)}
+                className="px-5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold transition-all shadow-xs flex items-center gap-1.5 cursor-pointer"
+              >
+                <HiOutlineCheckCircle className="text-sm" />
+                <span>Got it — Start Chatting Free!</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ==================== FREE LIMIT REACHED MODAL ==================== */}
+      {isLimitModalOpen && (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-xs z-50 flex items-center justify-center p-4">
+          <div className="bg-white border-2 border-[#ea580c] max-w-md w-full p-6 space-y-5 shadow-2xl font-mono text-xs animate-fadeIn">
+            {/* Header */}
+            <div className="flex items-center justify-between border-b border-[#f4f4f5] pb-3">
+              <div className="flex items-center gap-2">
+                <span className="text-xl">🔒</span>
+                <h3 className="font-bold text-sm font-sans text-zinc-950">
+                  Free Limit Reached ({FREE_REQUEST_LIMIT}/{FREE_REQUEST_LIMIT})
+                </h3>
+              </div>
+              <button
+                onClick={() => setIsLimitModalOpen(false)}
+                className="text-zinc-400 hover:text-black cursor-pointer"
+              >
+                <HiOutlineXMark className="text-lg" />
+              </button>
+            </div>
+
+            {/* Message */}
+            <div className="p-4 bg-orange-50 border border-orange-200 space-y-2 text-center">
+              <p className="font-bold text-[#c2410c] text-sm font-sans">
+                You've used all {FREE_REQUEST_LIMIT} free requests!
+              </p>
+              <p className="text-zinc-600 text-xs font-sans leading-relaxed">
+                To continue chatting, add your own free API key from{" "}
+                <a href="https://console.groq.com" target="_blank" rel="noreferrer" className="text-[#ea580c] underline font-bold">Groq Console</a>{" "}
+                or{" "}
+                <a href="https://aistudio.google.com/app/apikey" target="_blank" rel="noreferrer" className="text-[#ea580c] underline font-bold">Google AI Studio</a>.
+                Both are 100% free to sign up.
+              </p>
+            </div>
+
+            {/* Steps */}
+            <div className="p-3 bg-[#fafafa] border border-[#e4e4e7] space-y-2 text-[11px] font-mono">
+              <div className="flex items-start gap-2 text-zinc-600">
+                <span className="text-[#ea580c] font-bold shrink-0">1.</span>
+                <span>Go to <b className="text-zinc-900">console.groq.com</b> → Create free account → Copy API key</span>
+              </div>
+              <div className="flex items-start gap-2 text-zinc-600">
+                <span className="text-[#ea580c] font-bold shrink-0">2.</span>
+                <span>Click <b className="text-zinc-900">"Set Model A API Key"</b> button in the top bar</span>
+              </div>
+              <div className="flex items-start gap-2 text-zinc-600">
+                <span className="text-[#ea580c] font-bold shrink-0">3.</span>
+                <span>Paste your key → <b className="text-zinc-900">Unlimited requests!</b></span>
+              </div>
+            </div>
+
+            <div className="flex items-center justify-end gap-2.5 pt-1">
+              <button
+                onClick={() => setIsLimitModalOpen(false)}
                 className="px-4 py-2 border border-zinc-300 text-zinc-700 text-xs font-bold hover:bg-zinc-50 cursor-pointer"
               >
                 Cancel
               </button>
               <button
-                onClick={handlePayForCredits}
-                disabled={isProcessingPayment}
-                className="px-5 py-2 bg-[#ea580c] hover:bg-[#c2410c] text-white text-xs font-bold transition-all shadow-xs flex items-center gap-1.5 cursor-pointer disabled:opacity-60"
+                onClick={() => {
+                  setIsLimitModalOpen(false);
+                  setTempApiKey(grokApiKey);
+                  setIsKeyModalOpen(true);
+                }}
+                className="px-5 py-2 bg-[#ea580c] hover:bg-[#c2410c] text-white text-xs font-bold transition-all shadow-xs flex items-center gap-1.5 cursor-pointer"
               >
-                {isProcessingPayment ? (
-                  <>
-                    <HiOutlineArrowPath className="animate-spin text-sm" />
-                    <span>Processing Payment...</span>
-                  </>
-                ) : (
-                  <>
-                    <span>Pay {selectedPlan === "starter" ? "$5.00" : "$15.00"} & Start Chatting</span>
-                  </>
-                )}
+                <HiOutlineKey className="text-sm" />
+                <span>Add My API Key</span>
               </button>
             </div>
           </div>

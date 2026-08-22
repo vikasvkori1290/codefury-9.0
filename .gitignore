@@ -1,6 +1,9 @@
 # Dependencies
 node_modules/
 
+# Git rewrite temp files
+.git-rewrite/
+
 # Environment
 .env
 .env.local
