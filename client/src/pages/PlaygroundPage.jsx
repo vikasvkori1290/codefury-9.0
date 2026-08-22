@@ -972,6 +972,10 @@ export default function PlaygroundPage() {
               </label>
               <input
                 type="password"
+                name="model_a_api_key_no_autofill"
+                autoComplete="new-password"
+                data-lpignore="true"
+                data-1p-ignore="true"
                 value={tempApiKey}
                 onChange={(e) => setTempApiKey(e.target.value)}
                 placeholder="gsk_... (Groq) or AIzaSy... (Gemini) or xai-..."
@@ -1074,6 +1078,10 @@ export default function PlaygroundPage() {
               </label>
               <input
                 type="password"
+                name="model_b_api_key_no_autofill"
+                autoComplete="new-password"
+                data-lpignore="true"
+                data-1p-ignore="true"
                 value={tempModelBKey}
                 onChange={(e) => setTempModelBKey(e.target.value)}
                 placeholder="gsk_... (Groq) or AIzaSy... (Gemini) or xai-..."

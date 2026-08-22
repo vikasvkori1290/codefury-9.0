@@ -538,6 +538,10 @@ export const CreatorModelSubmitForm = () => {
                 </div>
                 <input
                   type={showApiKey ? "text" : "password"}
+                  name="hf_token_no_autofill"
+                  autoComplete="new-password"
+                  data-lpignore="true"
+                  data-1p-ignore="true"
                   value={apiKey}
                   onChange={(e) => setApiKey(e.target.value)}
                   placeholder="hf_xxxxxxxxxxxxxxxxxxxxxxx"
@@ -696,6 +700,10 @@ export const CreatorModelSubmitForm = () => {
                 </div>
                 <input
                   type={showApiKey ? "text" : "password"}
+                  name="api_secret_key_no_autofill"
+                  autoComplete="new-password"
+                  data-lpignore="true"
+                  data-1p-ignore="true"
                   value={apiKey}
                   onChange={(e) => {
                     const trimmed = e.target.value.trim();
