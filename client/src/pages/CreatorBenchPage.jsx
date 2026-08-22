@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
+import API from "../api/axios";
 import {
   HiOutlineCpuChip,
   HiOutlineDocumentArrowUp,
@@ -81,7 +82,7 @@ export const CreatorBenchPage = () => {
     const toastId = toast.loading("Enqueuing model for automated evaluation...");
 
     try {
-      let res;
+      let data;
       if (activeTab === "file" && uploadedFile) {
         const formData = new FormData();
         formData.append("modelName", modelName.trim());
@@ -90,34 +91,30 @@ export const CreatorBenchPage = () => {
         formData.append("pricing", pricing);
         formData.append("file", uploadedFile);
 
-        res = await fetch("http://localhost:5000/api/models/register", {
-          method: "POST",
-          body: formData,
+        const response = await API.post("/models/register", formData, {
+          headers: { "Content-Type": "multipart/form-data" },
         });
+        data = response.data;
       } else {
-        res = await fetch("http://localhost:5000/api/models/register", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            modelName: modelName.trim(),
-            creator: creatorHandle.trim(),
-            category,
-            pricing: parseFloat(pricing) || 0.00015,
-            provider: "ollama_local",
-          }),
+        const response = await API.post("/models/register", {
+          modelName: modelName.trim(),
+          creator: creatorHandle.trim(),
+          category,
+          pricing: parseFloat(pricing) || 0.00015,
+          provider: "ollama_local",
         });
+        data = response.data;
       }
 
-      const data = await res.json();
-      if (!res.ok || !data.success) {
-        throw new Error(data.message || "Failed to register model for benchmark");
+      if (!data?.success) {
+        throw new Error(data?.message || "Failed to register model for benchmark");
       }
 
       toast.success("Benchmark job queued!", { id: toastId });
       navigate(`/creator/benchmark/${data.jobId}`);
     } catch (err) {
       console.error(err);
-      toast.error(err.message || "Could not connect to server.", { id: toastId });
+      toast.error(err.response?.data?.message || err.message || "Could not connect to server.", { id: toastId });
     } finally {
       setIsSubmitting(false);
     }

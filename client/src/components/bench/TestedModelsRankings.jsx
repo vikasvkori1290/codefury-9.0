@@ -1,5 +1,6 @@
 import React, { useEffect, useState, useMemo } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import API from "../../api/axios";
 import {
   HiOutlineTrophy,
   HiOutlineChevronDown,
@@ -26,8 +27,8 @@ export const TestedModelsRankings = () => {
   const [expandedModelId, setExpandedModelId] = useState(null);
 
   const fetchModels = () => {
-    fetch("http://localhost:5000/api/models")
-      .then((res) => (res.ok ? res.json() : null))
+    API.get("/models")
+      .then((res) => res.data)
       .then((data) => {
         if (data && Array.isArray(data.models)) {
           const completedOnly = data.models.filter(

@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
+import API from "../../api/axios";
 
 import {
   HiOutlineCpuChip,
@@ -150,7 +151,7 @@ export const CreatorModelSubmitForm = () => {
     const toastId = toast.loading("Enqueuing model for automated evaluation...");
 
     try {
-      let res;
+      let data;
       if (submissionMode === "file" && uploadedFile) {
         const formData = new FormData();
         formData.append("modelName", modelName.trim());
@@ -160,10 +161,10 @@ export const CreatorModelSubmitForm = () => {
         formData.append("file", uploadedFile);
         formData.append("provider", "modelfile_upload");
 
-        res = await fetch("http://localhost:5000/api/models/register", {
-          method: "POST",
-          body: formData,
+        const response = await API.post("/models/register", formData, {
+          headers: { "Content-Type": "multipart/form-data" },
         });
+        data = response.data;
       } else {
         const payload = {
           modelName: modelName.trim(),
@@ -179,23 +180,19 @@ export const CreatorModelSubmitForm = () => {
           payload.endpoint = customEndpoint.trim() || undefined;
         }
 
-        res = await fetch("http://localhost:5000/api/models/register", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(payload),
-        });
+        const response = await API.post("/models/register", payload);
+        data = response.data;
       }
 
-      const data = await res.json();
-      if (!res.ok || !data.success) {
-        throw new Error(data.message || "Failed to register model for benchmark");
+      if (!data?.success) {
+        throw new Error(data?.message || "Failed to register model for benchmark");
       }
 
       toast.success("Benchmark job queued!", { id: toastId });
       navigate(`/creator/benchmark/${data.jobId}`);
     } catch (err) {
       console.error(err);
-      toast.error(err.message || "Could not connect to server.", { id: toastId });
+      toast.error(err.response?.data?.message || err.message || "Could not connect to server.", { id: toastId });
     } finally {
       setIsSubmitting(false);
     }
