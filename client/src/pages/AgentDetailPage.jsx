@@ -5,12 +5,16 @@ import {
   HiOutlineArrowDownTray,
   HiOutlineCheck,
   HiOutlineClipboard,
+  HiOutlineGlobeAlt,
+  HiOutlineBookOpen,
+  HiOutlineCodeBracket,
   HiOutlineCpuChip,
   HiOutlinePuzzlePiece,
   HiOutlineShieldCheck,
   HiOutlineWrenchScrewdriver,
 } from "react-icons/hi2";
 import { AGENTS } from "./AgentMarketplacePage";
+import AgentLogo from "../components/AgentLogo";
 
 const PLATFORM_LABELS = [
   ["macos", "macOS"],
@@ -33,21 +37,13 @@ export const AgentDetailPage = () => {
     );
   }
 
-  const commands = {
-    macos: `curl -fsSL https://downloads.modelhub.dev/agents/${agent.id}/install.sh | sh`,
-    linux: `curl -fsSL https://downloads.modelhub.dev/agents/${agent.id}/install.sh | sh`,
-    windows: `powershell -ExecutionPolicy Bypass -c "irm https://downloads.modelhub.dev/agents/${agent.id}/install.ps1 | iex"`,
+  const install = agent.install || {
+    label: "Open installation instructions",
+    commands: { macos: "See the publisher's installation instructions", linux: "See the publisher's installation instructions", windows: "See the publisher's installation instructions" },
+    packageUrl: agent.links?.docs || agent.links?.website,
+    note: "This publisher does not provide a universal local installer.",
   };
-  const packageUrls = {
-    macos: `https://downloads.modelhub.dev/agents/${agent.id}/macos.dmg`,
-    linux: `https://downloads.modelhub.dev/agents/${agent.id}/linux.AppImage`,
-    windows: `https://downloads.modelhub.dev/agents/${agent.id}/windows.msi`,
-  };
-  if (agent.installCommand) {
-    commands.macos = agent.installCommand;
-    commands.linux = agent.installCommand;
-    commands.windows = agent.installCommand;
-  }
+  const commands = install.commands;
 
   const copyCommand = () => {
     navigator.clipboard.writeText(commands[platform]);
@@ -73,7 +69,7 @@ export const AgentDetailPage = () => {
               <span className="px-2 py-1 bg-zinc-100 border border-[#e4e4e7] text-zinc-600 text-[11px] font-mono">{agent.type}</span>
             </div>
             <div className="flex items-center gap-3">
-              <div className="w-12 h-12 bg-white border border-[#e4e4e7] flex items-center justify-center overflow-hidden"><img src={agent.icon || `https://api.dicebear.com/9.x/initials/svg?seed=${encodeURIComponent(agent.company || agent.creator)}&backgroundColor=18181b&fontFamily=monospace&fontWeight=700`} alt="" className="h-full w-full object-contain p-1.5" /></div>
+               <AgentLogo agent={agent} large />
               <div>
                 <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-zinc-950">{agent.displayName}</h1>
                 <p className="text-xs text-zinc-500 font-mono mt-1">Built by <strong className="text-zinc-800">{agent.company || agent.creator}</strong></p>
@@ -90,7 +86,18 @@ export const AgentDetailPage = () => {
           </div>
         </section>
 
-        {agent.links && <section className="flex flex-wrap gap-4 bg-white border border-[#e4e4e7] shadow-xs p-5 font-mono text-xs">{[[agent.links.website, "Website"], [agent.links.docs, "Documentation"], [agent.links.repository, "Source repository"]].filter(([url]) => url).map(([url, label]) => <a key={label} href={url} target="_blank" rel="noreferrer" className="text-[#ea580c] hover:underline">{label} ↗</a>)}</section>}
+         {agent.links && <section className="grid grid-cols-1 sm:grid-cols-3 gap-3 bg-white border border-[#e4e4e7] shadow-xs p-4 font-mono text-xs">
+           {[
+             [agent.links.website, "Website", HiOutlineGlobeAlt],
+             [agent.links.docs, "Documentation", HiOutlineBookOpen],
+             [agent.links.repository, "Source repository", HiOutlineCodeBracket],
+           ].filter(([url]) => url).map(([url, label, Icon]) => (
+             <a key={label} href={url} target="_blank" rel="noreferrer" className="group flex min-h-14 items-center justify-between gap-3 border border-[#e4e4e7] bg-[#fafafa] px-4 py-3 text-zinc-700 transition-colors hover:border-orange-200 hover:bg-[#fff7ed] hover:text-[#ea580c]">
+               <span className="flex min-w-0 items-center gap-3"><Icon className="shrink-0 text-lg text-[#ea580c]" /><span className="truncate">{label}</span></span>
+               <span className="shrink-0 text-base text-zinc-400 transition-transform group-hover:translate-x-0.5 group-hover:text-[#ea580c]">↗</span>
+             </a>
+           ))}
+         </section>}
 
         <section className="bg-white border border-[#e4e4e7] shadow-xs p-6 sm:p-8 space-y-6">
           <div className="flex items-center gap-2 border-b border-[#e4e4e7] pb-4"><HiOutlinePuzzlePiece className="text-[#ea580c]" /><h2 className="text-base font-bold">Overview</h2></div>
@@ -110,7 +117,7 @@ export const AgentDetailPage = () => {
           <div className="text-center space-y-2">
             <span className="text-[10px] font-mono uppercase tracking-widest text-[#ea580c] font-bold">Get started</span>
             <h2 className="text-xl font-bold">Install {agent.displayName}</h2>
-            <p className="text-xs text-zinc-500">Select your operating system, then copy the command or download the package.</p>
+             <p className="text-xs text-zinc-500">Use the publisher's documented install method for your operating system.</p>
           </div>
 
           <div className="flex justify-center">
@@ -120,12 +127,12 @@ export const AgentDetailPage = () => {
           </div>
 
           <div className="bg-[#0c0c0e] border border-zinc-800 overflow-hidden">
-            <div className="flex items-center justify-between px-4 py-2 bg-[#141418] border-b border-zinc-800 text-[11px] text-zinc-400 font-mono"><span>{platform} / install</span><div className="flex items-center gap-2"><button onClick={copyCommand} className="flex items-center gap-1 px-2 py-1 bg-[#24242a] text-zinc-200 cursor-pointer">{copied ? <HiOutlineCheck className="text-emerald-400" /> : <HiOutlineClipboard />}{copied ? "Copied" : "Copy"}</button><a href={packageUrls[platform]} download className="flex items-center gap-1 px-2 py-1 bg-[#ea580c] text-white hover:bg-[#c2410c]"><HiOutlineArrowDownTray />Download</a></div></div>
-            <pre className="p-5 text-xs text-zinc-200 font-mono leading-6 overflow-x-auto"><code>{commands[platform]}</code></pre>
-          </div>
+             <div className="flex items-center justify-between px-4 py-2 bg-[#141418] border-b border-zinc-800 text-[11px] text-zinc-400 font-mono"><span>{platform} / {install.label}</span><div className="flex items-center gap-2"><button onClick={copyCommand} className="flex items-center gap-1 px-2 py-1 bg-[#24242a] text-zinc-200 cursor-pointer">{copied ? <HiOutlineCheck className="text-emerald-400" /> : <HiOutlineClipboard />}{copied ? "Copied" : "Copy"}</button>{install.packageUrl && <a href={install.packageUrl} target="_blank" rel="noreferrer" className="flex items-center gap-1 px-2 py-1 bg-[#ea580c] text-white hover:bg-[#c2410c]"><HiOutlineArrowDownTray />Official docs</a>}</div></div>
+             <pre className="p-5 text-xs text-zinc-200 font-mono leading-6 overflow-x-auto"><code>{commands[platform]}</code></pre>
+           </div>
 
-          <div className="flex flex-col sm:flex-row items-center justify-between gap-3 p-4 bg-[#fafafa] border border-[#e4e4e7] text-xs">
-            <span className="text-zinc-500 font-mono">ModelHub CLI, auth, logs, and billing are included.</span>
+           <div className="flex flex-col sm:flex-row items-center justify-between gap-3 p-4 bg-[#fafafa] border border-[#e4e4e7] text-xs">
+             <span className="text-zinc-500 font-mono">{install.note}</span>
             <span className="text-[#ea580c] font-mono font-bold">{agent.pricingFormatted}</span>
           </div>
         </section>

@@ -14,10 +14,89 @@ import {
   HiOutlinePlay,
   HiOutlinePuzzlePiece,
 } from "react-icons/hi2";
+import AgentLogo from "../components/AgentLogo";
 
 export const AGENT_CATEGORIES = ["All", "Coding", "Research", "Automation", "Customer Support", "Data & Analytics"];
 
-export const AGENTS = [
+const CATALOG_AGENTS = [
+  {
+    id: "openhands",
+    name: "OpenHands",
+    displayName: "OpenHands",
+    company: "OpenHands",
+    creator: "OpenHands",
+    avatar: "OH",
+    category: "Coding",
+    type: "autonomous agent",
+    rating: 4.8,
+    installs: "Open source",
+    installsRaw: 90000,
+    successRate: 92.0,
+    latencyMs: 720,
+    pricingPer1k: 0,
+    pricingFormatted: "Free / bring your own model",
+    priceTier: "Free",
+    verified: true,
+    featured: true,
+    description: "Open-source AI software engineer that edits code, runs commands, browses, and works in a sandbox.",
+    longDescription: "OpenHands runs locally or in the cloud with a web UI and CLI. Connect your own model provider and keep execution inside a Docker sandbox.",
+    capabilities: ["Code Generation", "Browser Automation", "Terminal", "Sandboxed Execution"],
+    tools: ["GitHub", "Terminal", "Docker", "Browser"],
+    useCases: ["Fix repository issues", "Build features", "Explore a codebase"],
+    tags: ["Open source", "Self-hosted", "Docker"],
+  },
+  {
+    id: "cline",
+    name: "Cline",
+    displayName: "Cline",
+    company: "Cline",
+    creator: "Cline",
+    avatar: "CL",
+    category: "Coding",
+    type: "coding agent",
+    rating: 4.7,
+    installs: "VS Code extension",
+    installsRaw: 180000,
+    successRate: 90.0,
+    latencyMs: 460,
+    pricingPer1k: 0,
+    pricingFormatted: "Free extension / model costs apply",
+    priceTier: "Free",
+    verified: true,
+    featured: true,
+    description: "Open-source coding agent for VS Code that creates files, runs terminal commands, and uses a browser.",
+    longDescription: "Cline is an extension for VS Code and compatible editors. Bring an API key or local model and approve tool actions from your workspace.",
+    capabilities: ["Multi-file Editing", "Terminal Commands", "Browser Use", "Human Approval"],
+    tools: ["VS Code", "GitHub", "Terminal", "Browser"],
+    useCases: ["Build an app from a prompt", "Refactor a project", "Debug a failing test"],
+    tags: ["Open source", "VS Code", "Bring your own key"],
+  },
+  {
+    id: "aider",
+    name: "Aider",
+    displayName: "Aider",
+    company: "Aider AI",
+    creator: "Aider AI",
+    avatar: "AI",
+    category: "Coding",
+    type: "coding agent",
+    rating: 4.7,
+    installs: "Open source",
+    installsRaw: 70000,
+    successRate: 89.0,
+    latencyMs: 380,
+    pricingPer1k: 0,
+    pricingFormatted: "Free / model costs apply",
+    priceTier: "Free",
+    verified: true,
+    featured: false,
+    description: "Terminal pair-programming agent that edits your Git repository and creates clean commits.",
+    longDescription: "Aider works in an existing Git repository, maps the codebase, edits files through chat, and uses your configured model API or local model.",
+    capabilities: ["Code Editing", "Repo Map", "Git Commits", "Test Driven Changes"],
+    tools: ["Git", "Terminal", "GitHub", "Python"],
+    useCases: ["Make a focused code change", "Add tests", "Explain and refactor code"],
+    tags: ["Open source", "CLI", "Git native"],
+  },
   {
     id: "codepilot-autonomous",
     name: "CodePilot Autonomous",
@@ -354,6 +433,33 @@ export const AGENTS = [
   },
 ];
 
+const REAL_AGENT_IDS = new Set(["openhands", "cline", "aider", "claude-code", "openai-codex", "devin", "cursor-agent", "gemini-code-assist"]);
+const REAL_AGENT_INSTALLS = {
+  openhands: { label: "Install with uv", commands: { macos: "uv tool install openhands --python 3.12 && openhands", linux: "uv tool install openhands --python 3.12 && openhands", windows: "wsl -d Ubuntu -e bash -lc 'uv tool install openhands --python 3.12 && openhands'" }, packageUrl: "https://docs.openhands.dev/openhands/usage/cli/installation", note: "Requires Python 3.12+ and uv. Docker is recommended when you need a sandbox." },
+  cline: { label: "Install from VS Code", commands: { macos: "code --install-extension saoudrizwan.claude-dev", linux: "code --install-extension saoudrizwan.claude-dev", windows: "code --install-extension saoudrizwan.claude-dev" }, packageUrl: "https://marketplace.visualstudio.com/items?itemName=saoudrizwan.claude-dev", note: "Open Cline from the VS Code activity bar and configure your preferred model provider." },
+  aider: { label: "Install with pip", commands: { macos: "python -m pip install aider-install && aider-install", linux: "python -m pip install aider-install && aider-install", windows: "python -m pip install aider-install && aider-install" }, packageUrl: "https://aider.chat/docs/install.html", note: "Configure an API key, then run aider inside a Git repository." },
+  "claude-code": { label: "Install Claude Code", commands: { macos: "curl -fsSL https://claude.ai/install.sh | bash", linux: "curl -fsSL https://claude.ai/install.sh | bash", windows: "irm https://claude.ai/install.ps1 | iex" }, packageUrl: "https://code.claude.com/docs/en/install", note: "Run claude in a project directory and sign in with your Anthropic account." },
+  "openai-codex": { label: "Install Codex CLI", commands: { macos: "npm install -g @openai/codex", linux: "npm install -g @openai/codex", windows: "npm install -g @openai/codex" }, packageUrl: "https://developers.openai.com/codex", note: "Run codex in a project directory, then sign in with ChatGPT or an API key." },
+  devin: { label: "Open Devin", commands: { macos: "open https://devin.ai", linux: "xdg-open https://devin.ai", windows: "start https://devin.ai" }, packageUrl: "https://devin.ai", note: "Devin is a hosted service. Request access or sign in on the official website; there is no local package." },
+  "cursor-agent": { label: "Install Cursor", commands: { macos: "brew install --cask cursor", linux: "See the Linux download", windows: "winget install Anysphere.Cursor" }, packageUrl: "https://www.cursor.com/downloads", note: "Cursor Agent is included in the Cursor desktop editor. Open a folder after installation to start." },
+  "gemini-code-assist": { label: "Install the IDE extension", commands: { macos: "code --install-extension Google.geminicodeassist", linux: "code --install-extension Google.geminicodeassist", windows: "code --install-extension Google.geminicodeassist" }, packageUrl: "https://marketplace.visualstudio.com/items?itemName=Google.geminicodeassist", note: "Install the extension in VS Code or JetBrains, then sign in with your Google account." },
+};
+
+const REAL_AGENT_LINKS = {
+  openhands: { website: "https://openhands.dev", docs: "https://docs.openhands.dev", repository: "https://github.com/All-Hands-AI/OpenHands" },
+  cline: { website: "https://cline.bot", docs: "https://docs.cline.bot", repository: "https://github.com/cline/cline" },
+  aider: { website: "https://aider.chat", docs: "https://aider.chat/docs", repository: "https://github.com/Aider-AI/aider" },
+  "claude-code": { website: "https://www.anthropic.com/claude-code", docs: "https://code.claude.com/docs/en/overview", repository: "https://github.com/anthropics/claude-code" },
+  "openai-codex": { website: "https://openai.com/codex", docs: "https://developers.openai.com/codex", repository: "https://github.com/openai/codex" },
+  devin: { website: "https://devin.ai", docs: "https://docs.devin.ai" },
+  "cursor-agent": { website: "https://www.cursor.com", docs: "https://docs.cursor.com" },
+  "gemini-code-assist": { website: "https://codeassist.google", docs: "https://cloud.google.com/gemini/docs/codeassist/overview" },
+};
+
+export const AGENTS = CATALOG_AGENTS
+  .filter((agent) => REAL_AGENT_IDS.has(agent.id))
+  .map((agent) => ({ ...agent, install: REAL_AGENT_INSTALLS[agent.id], links: REAL_AGENT_LINKS[agent.id] }));
+
 const FILTER_GROUPS = [
   { key: "capability", label: "Capability", options: ["Coding & Development", "Research & Web", "Writing & Content", "Data & Analytics", "Automation", "Customer Support", "Marketing & Sales", "Productivity", "Design & Creative", "Security", "Finance", "Education"] },
   { key: "worksOn", label: "Works on", options: ["GitHub", "VS Code", "Terminal", "Browser", "GUI", "TUI / CLI", "Workflow UI", "Chat UI", "Docker"] },
@@ -385,7 +491,7 @@ const AGENT_FILTER_META = {
 const getAgentFilterValues = (agent) => {
   const meta = AGENT_FILTER_META[agent.id] || {};
   const capabilityFallback = agent.category === "Coding" ? ["Coding & Development"] : [agent.category];
-  const typeFallback = agent.type === "autonomous" ? ["Autonomous Agent"] : agent.type === "assistant" ? ["Copilot"] : ["Workflow Agent"];
+  const typeFallback = agent.type.includes("autonomous") ? ["Autonomous Agent"] : agent.type.includes("assistant") || agent.type.includes("copilot") ? ["Copilot"] : agent.type.includes("coding") ? ["Coding Agent"] : ["Workflow Agent"];
   const worksOnFallback = [
     agent.tools.includes("GitHub") && "GitHub",
     agent.tools.includes("VS Code") && "VS Code",
@@ -559,14 +665,7 @@ export const AgentMarketplacePage = () => {
                 return (
                 <article key={agent.id} className="bg-white border border-[#e4e4e7] hover:border-zinc-400 p-5 transition-all group shadow-xs">
                   <div className="flex items-start gap-3">
-                    <div className="w-11 h-11 bg-white border border-[#e4e4e7] flex items-center justify-center shrink-0 overflow-hidden">
-                      <img
-                        src={agent.icon || `https://api.dicebear.com/9.x/initials/svg?seed=${encodeURIComponent(agent.company || agent.creator)}&backgroundColor=f4f4f5&fontFamily=monospace&fontWeight=700`}
-                        alt={`${agent.company || agent.creator} logo`}
-                        className="w-full h-full object-contain p-1.5"
-                        loading="lazy"
-                      />
-                    </div>
+                     <AgentLogo agent={agent} />
                     <div className="min-w-0 flex-1">
                       <div className="flex items-start justify-between gap-2">
                         <div className="min-w-0">

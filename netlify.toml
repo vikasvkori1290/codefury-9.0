@@ -1,0 +1,12 @@
+[build]
+  command = "npm --prefix client ci --legacy-peer-deps && npm --prefix client run build"
+  publish = "client/dist"
+
+[build.environment]
+  NPM_FLAGS = "--legacy-peer-deps"
+  NODE_VERSION = "20"
+
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
