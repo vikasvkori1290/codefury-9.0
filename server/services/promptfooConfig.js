@@ -403,7 +403,7 @@ export const getBenchmarkTestCases = () => {
 /**
  * Generates promptfoo config for local CLI runs if executed directly
  */
-export const generatePromptfooConfig = async (modelName = "qwen2.5:3b") => {
+export const generatePromptfooConfig = async (modelName = "qwen2.5:3b", outputPath = null) => {
   const testCases = getBenchmarkTestCases();
   const config = {
     description: `Deterministic LiveBench Standard Benchmark for ${modelName}`,
@@ -416,7 +416,11 @@ export const generatePromptfooConfig = async (modelName = "qwen2.5:3b") => {
     })),
   };
 
-  const configPath = path.join(process.cwd(), "server", "temp", "promptfoo.config.json");
+  const configPath = outputPath || path.join(
+    process.env.VERCEL ? "/tmp" : process.cwd(),
+    process.env.VERCEL ? "codefury-benchmarks" : "server/temp",
+    "promptfoo.config.json",
+  );
   const tempDir = path.dirname(configPath);
   if (!fs.existsSync(tempDir)) fs.mkdirSync(tempDir, { recursive: true });
 
