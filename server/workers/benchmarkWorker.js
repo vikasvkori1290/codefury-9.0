@@ -8,7 +8,6 @@ import BenchmarkJob from "../models/BenchmarkJob.model.js";
 import ModelListing from "../models/ModelListing.model.js";
 import { generatePromptfooConfig, getBenchmarkTestCases } from "../services/promptfooConfig.js";
 import { runCommand } from "../services/command.service.js";
-import jobStore from "../services/jobStore.js";
 import { runRegisteredModel } from "../services/registeredModel.service.js";
 import { redactSecret } from "../services/credential.service.js";
 
@@ -62,6 +61,9 @@ const verifyDeterministicAssertion = (output, assertion) => {
 
   // 1. Math & Numeric Extraction
   if (assertion.type === "regex_numeric") {
+    if (assertion.exact && !/^-?\d+(?:\.\d+)?$/.test(rawText)) {
+      return { passed: false, reason: "Expected only one numeric value with no explanation or extra text." };
+    }
     // Check if expected number exists in regex or as isolated number
     const re = new RegExp(assertion.regex, "i");
     if (re.test(rawText)) return { passed: true, reason: `Matched expected numeric answer: ${assertion.expectedNumber}` };
@@ -80,6 +82,11 @@ const verifyDeterministicAssertion = (output, assertion) => {
   // 2. Code Execution with Sandboxed VM Unit Tests
   if (assertion.type === "code_unit_test") {
     const code = extractCode(rawText);
+    for (const forbidden of assertion.forbiddenPatterns || []) {
+      if (new RegExp(forbidden).test(code)) {
+        return { passed: false, reason: `Forbidden construct detected: ${forbidden}` };
+      }
+    }
     try {
       const sandbox = { console: { log: () => {} } };
       const context = vm.createContext(sandbox);
@@ -121,6 +128,13 @@ const verifyDeterministicAssertion = (output, assertion) => {
     const parsed = extractJson(rawText);
     if (!parsed || typeof parsed !== "object") {
       return { passed: false, reason: "Output was not valid parseable JSON." };
+    }
+    if (assertion.exactKeys) {
+      const actualKeys = Object.keys(parsed).sort();
+      const expectedKeys = [...assertion.requiredKeys].sort();
+      if (actualKeys.length !== expectedKeys.length || actualKeys.some((key, index) => key !== expectedKeys[index])) {
+        return { passed: false, reason: `Expected exactly these keys: [${expectedKeys.join(", ")}]` };
+      }
     }
     // Check all required keys exist
     for (const k of assertion.requiredKeys) {
@@ -263,7 +277,7 @@ const findJob = async (jobId) => {
       if (job) return job;
     } catch (_) {}
   }
-  return jobStore.getJob(jobId);
+  return null;
 };
 
 export const runPromptfooBenchmarkWorker = async (jobId, modelName) => {
@@ -271,7 +285,7 @@ export const runPromptfooBenchmarkWorker = async (jobId, modelName) => {
   if (!job) return console.warn(`[BenchmarkWorker] Job ${jobId} not found.`);
   const isMongooseConnected = mongoose.connection.readyState === 1;
 
-  let registeredModel = jobStore.getModel(job.modelListingId?.toString());
+  let registeredModel = null;
   if (isMongooseConnected && job.modelListingId && mongoose.Types.ObjectId.isValid(job.modelListingId)) {
     registeredModel = await ModelListing.findById(job.modelListingId).select("+apiKeyEncrypted").catch(() => registeredModel);
   }
@@ -280,7 +294,6 @@ export const runPromptfooBenchmarkWorker = async (jobId, modelName) => {
     job.progress = progress;
     job.logs = job.logs || [];
     if (message) job.logs.push(`[${new Date().toISOString()}] ${message}`);
-    jobStore.setJob(jobId, job);
     if (isMongooseConnected && mongoose.Types.ObjectId.isValid(jobId)) {
       await BenchmarkJob.findByIdAndUpdate(jobId, {
         progress,
@@ -296,6 +309,7 @@ export const runPromptfooBenchmarkWorker = async (jobId, modelName) => {
     await generatePromptfooConfig(modelName);
 
     const isRemoteModel = registeredModel?.provider === "custom_api";
+    const isGeminiRemote = isRemoteModel && registeredModel.apiProvider === "google";
     let ollamaAvailable = false;
 
     if (isRemoteModel) {
@@ -303,16 +317,21 @@ export const runPromptfooBenchmarkWorker = async (jobId, modelName) => {
       try {
         await runRegisteredModel({ model: registeredModel, prompt: "Reply with: OK" });
         await update(11, "Provider credentials validated. Starting deterministic test suite.");
+        if (isGeminiRemote) await sleep(6000);
       } catch (error) {
         const safeError = redactSecret(error.message);
-        if (/\((401|403)\)/.test(safeError)) {
+        if (/\((400|401|403|404|429)\)/.test(safeError) || safeError.includes("No API credential")) {
           job.status = "failed";
           job.progress = 0;
-          job.error = `Provider authentication failed: ${safeError}`;
+          const isAuthFailure = /\(401\)/.test(safeError) || safeError.includes("No API credential");
+          job.error = isAuthFailure
+            ? `Provider authentication failed: ${safeError}`
+            : /\(403\)/.test(safeError)
+              ? `Model access denied by OpenCode. The key is valid, but this model is restricted for the workspace or region: ${safeError}`
+              : `Provider validation failed: ${safeError}`;
           job.logs = job.logs || [];
           job.logs.push(`[${new Date().toISOString()}] Benchmark stopped: ${safeError}`);
-          jobStore.setJob(jobId, job);
-          if (isMongooseConnected && registeredModel?._id) {
+          if (isAuthFailure && isMongooseConnected && registeredModel?._id) {
             await ModelListing.findByIdAndUpdate(registeredModel._id, { credentialStatus: "invalid" }).catch(() => {});
           }
           if (isMongooseConnected && mongoose.Types.ObjectId.isValid(jobId)) {
@@ -325,7 +344,7 @@ export const runPromptfooBenchmarkWorker = async (jobId, modelName) => {
           }
           return;
         }
-        await update(11, `Provider probe noted: ${safeError.slice(0, 80)}. Proceeding with evaluation.`);
+        throw new Error(`Provider validation failed: ${safeError}`);
       }
     } else {
       try {
@@ -351,39 +370,21 @@ export const runPromptfooBenchmarkWorker = async (jobId, modelName) => {
       let usage = null;
 
       if (isRemoteModel) {
-        let retries = 2;
-        while (retries >= 0) {
-          try {
-            const remoteResult = await runRegisteredModel({ model: registeredModel, prompt: testCase.vars.prompt });
-            output = remoteResult.output;
-            usage = remoteResult.tokens;
-            break;
-          } catch (error) {
-            const safeError = redactSecret(error.message);
-            if (/\(429\)/.test(safeError) && retries > 0) {
-              retries -= 1;
-              await sleep(1000);
-              continue;
-            }
-            output = getSimulatedGroundTruth(testCase);
-            source = `live:${registeredModel.apiProvider || "openai"}:verified`;
-            break;
-          }
-        }
+        const remoteResult = await runRegisteredModel({ model: registeredModel, prompt: testCase.vars.prompt });
+        output = remoteResult.output;
+        usage = remoteResult.tokens;
       } else if (ollamaAvailable) {
         try {
           const result = await runCommand("ollama", ["run", modelName, testCase.vars.prompt], { timeoutMs: 60000, maxOutputBytes: 256 * 1024 });
           output = result.stdout.trim();
-        } catch (_) {
-          output = getSimulatedGroundTruth(testCase);
-          source = "deterministic-verifier";
+        } catch (err) {
+          throw new Error(`Local Ollama execution failed: ${err.message}`);
         }
       } else {
+        // Only if user explicitly submits mock/synthetic test without local Ollama installed
         output = getSimulatedGroundTruth(testCase);
-        await sleep(15);
+        await sleep(60);
       }
-
-      if (!output) output = getSimulatedGroundTruth(testCase);
 
       const evaluated = evaluateCase(testCase, output, Math.round(performance.now() - started), source);
       results[index] = {
@@ -399,7 +400,7 @@ export const runPromptfooBenchmarkWorker = async (jobId, modelName) => {
         Math.min(95, 10 + Math.round((completedCases / testCases.length) * 85)),
         `[Case ${completedCases}/20: ${testCase.metadata?.title}] Result: ${evaluated.passed ? "PASS ✓" : "FAIL ✗"} | ${evaluated.reason}`
       );
-      if (isRemoteModel && index < testCases.length - 1) await sleep(200);
+      if (isRemoteModel && index < testCases.length - 1) await sleep(isGeminiRemote ? 6000 : 200);
     };
 
     for (let i = 0; i < testCases.length; i++) {
@@ -471,21 +472,13 @@ export const runPromptfooBenchmarkWorker = async (jobId, modelName) => {
       },
       testResults: results,
       standard: "LiveBench Deterministic Ground-Truth Engine",
+      evaluationVersion: "strict-2.0",
       evaluator: isRemoteModel ? `live-${registeredModel.apiProvider || "openai"}` : (ollamaAvailable ? "ollama" : "deterministic-sandbox"),
     };
 
     job.logs.push(`[${new Date().toISOString()}] Evaluation complete: ${passedTotal}/20 passed | ${compositeLiveBenchScore}% Composite LiveBench Score | ${avgLatencyMs}ms latency.`);
 
     // Persist final job state
-    jobStore.setJob(jobId, job);
-    if (job.modelListingId) {
-      const model = jobStore.getModel(job.modelListingId.toString());
-      if (model) {
-        model.latestBenchmark = job;
-        jobStore.setModel(job.modelListingId.toString(), model);
-      }
-    }
-
     if (isMongooseConnected && mongoose.Types.ObjectId.isValid(jobId)) {
       await BenchmarkJob.findByIdAndUpdate(jobId, {
         status: "completed",
@@ -509,7 +502,6 @@ export const runPromptfooBenchmarkWorker = async (jobId, modelName) => {
     job.error = error.message;
     job.logs = job.logs || [];
     job.logs.push(`[${new Date().toISOString()}] ERROR: ${error.message}`);
-    jobStore.setJob(jobId, job);
     if (isMongooseConnected && mongoose.Types.ObjectId.isValid(jobId)) {
       await BenchmarkJob.findByIdAndUpdate(jobId, {
         status: "failed",

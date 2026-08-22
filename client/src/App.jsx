@@ -23,6 +23,7 @@ import DocsPage from "./pages/DocsPage";
 
 import ScrollToTop from "./components/ScrollToTop";
 import ProtectedRoute from "./components/ProtectedRoute";
+import ChatbotWidget from "./components/chat/ChatbotWidget";
 
 function AppLayout() {
   const location = useLocation();
@@ -132,6 +133,7 @@ function AppLayout() {
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </div>
+      <ChatbotWidget />
       {!isAuthPage && <Footer />}
     </div>
   );

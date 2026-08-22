@@ -55,12 +55,16 @@ export const registerModel = async (req, res, next) => {
         message: "Model name ('modelName') is required.",
       });
     }
+    if (finalModelName.toLowerCase() !== "grok-4.6") {
+      return res.status(400).json({ success: false, message: "Only the creator-tested model grok-4.6 is currently enabled." });
+    }
 
     const uploadedFile = req.file;
     let finalProvider = provider;
     let uploadedFilePath = null;
     const isApiModel = Boolean(finalApiKey) || provider === "custom_api";
-    if (isApiModel && !finalApiKey) {
+    const hasServerOpenCodeKey = Boolean((apiProvider || "").startsWith("opencode") && (process.env.OPENCODE_API_KEY || process.env.DEEPSEEK_API_KEY));
+    if (isApiModel && !finalApiKey && !hasServerOpenCodeKey) {
       return res.status(400).json({ success: false, message: "An API key is required for remote model benchmarking." });
     }
     const encryptedApiKey = finalApiKey ? encryptCredential(finalApiKey) : null;
@@ -118,37 +122,12 @@ export const registerModel = async (req, res, next) => {
         modelListing.latestBenchmark = benchmarkJob._id;
         await modelListing.save();
       } catch (dbErr) {
-        console.warn("MongoDB write fallback:", dbErr.message);
+        throw dbErr;
       }
     }
 
     if (!modelListing || !benchmarkJob) {
-      modelListing = {
-        _id: fallbackId,
-        name: finalModelName.trim(),
-        creator: creator.trim(),
-        provider: finalProvider,
-        category: category.trim(),
-        pricingPer1kTokens: Number(pricing || pricingPer1kTokens) || 0.00015,
-        uploadedFilePath,
-        apiProvider: apiProvider || "openai",
-        modelIdentifier: finalModelName.trim(),
-        endpoint: endpoint || null,
-        apiKeyEncrypted: encryptedApiKey,
-        credentialStatus: isApiModel ? "pending" : "not_required",
-        latestBenchmark: jobFallbackId,
-        createdAt: new Date().toISOString(),
-      };
-
-      benchmarkJob = {
-        _id: jobFallbackId,
-        modelListingId: fallbackId,
-        modelName: modelListing.name,
-        status: "queued",
-        progress: 0,
-        logs: [`[${new Date().toISOString()}] Benchmark job queued for model '${modelListing.name}' via ${finalProvider}.`],
-        createdAt: new Date().toISOString(),
-      };
+      return res.status(500).json({ success: false, message: "MongoDB could not create the model benchmark records." });
     }
 
     const jobIdStr = (benchmarkJob._id || jobFallbackId).toString();
@@ -184,14 +163,11 @@ export const getBenchmarkStatus = async (req, res, next) => {
   try {
     const { jobId } = req.params;
     const isMongooseConnected = mongoose.connection.readyState === 1;
+    if (!isMongooseConnected) return res.status(503).json({ success: false, message: "MongoDB is unavailable." });
 
     let job = null;
     if (isMongooseConnected && mongoose.Types.ObjectId.isValid(jobId)) {
       job = await BenchmarkJob.findById(jobId).populate("modelListingId").catch(() => null);
-    }
-
-    if (!job) {
-      job = jobStore.getJob(jobId);
     }
 
     if (!job) {

@@ -19,7 +19,7 @@ export const getBenchmarkTestCases = () => {
       vars: {
         prompt: "A store sells notebooks for $4 each and pens for $2 each. Janet buys 5 notebooks and 6 pens. She pays with a $50 bill. How much change does she receive in dollars? Output only the final numeric integer value.",
       },
-      assert: [{ type: "regex_numeric", expectedNumber: 18, regex: "\\b18(\\b|\\.00)" }],
+       assert: [{ type: "regex_numeric", expectedNumber: 18, regex: "^18(?:\\.0+)?$", exact: true }],
       metadata: {
         category: "math_logic",
         title: "GSM8K Multi-Step Transaction Arithmetic",
@@ -31,7 +31,7 @@ export const getBenchmarkTestCases = () => {
       vars: {
         prompt: "A train travels at 60 mph for 2.5 hours and then 80 mph for 1.5 hours. What is the total distance traveled in miles? Output only the numeric value.",
       },
-      assert: [{ type: "regex_numeric", expectedNumber: 270, regex: "\\b270(\\b|\\.0)" }],
+       assert: [{ type: "regex_numeric", expectedNumber: 270, regex: "^270(?:\\.0+)?$", exact: true }],
       metadata: {
         category: "math_logic",
         title: "Compound Speed-Time Integration",
@@ -43,7 +43,7 @@ export const getBenchmarkTestCases = () => {
       vars: {
         prompt: "A bakery made 240 cookies. They sold 3/4 of them in the morning and 1/3 of the remainder in the afternoon. How many cookies are left? Output only the integer number.",
       },
-      assert: [{ type: "regex_numeric", expectedNumber: 40, regex: "\\b40\\b" }],
+       assert: [{ type: "regex_numeric", expectedNumber: 40, regex: "^40$", exact: true }],
       metadata: {
         category: "math_logic",
         title: "Sequential Fractional Depletion Logic",
@@ -55,7 +55,7 @@ export const getBenchmarkTestCases = () => {
       vars: {
         prompt: "In a round-robin tournament of 8 teams, every team plays every other team exactly once. How many total matches are played? Output only the numeric answer.",
       },
-      assert: [{ type: "regex_numeric", expectedNumber: 28, regex: "\\b28\\b" }],
+       assert: [{ type: "regex_numeric", expectedNumber: 28, regex: "^28$", exact: true }],
       metadata: {
         category: "math_logic",
         title: "Combinatorics & Graph Clique Sizing",
@@ -67,7 +67,7 @@ export const getBenchmarkTestCases = () => {
       vars: {
         prompt: "If a 12-hour clock shows exactly 8:00 right now, what hour will it show in exactly 150 hours? Give only the number from 1 to 12.",
       },
-      assert: [{ type: "regex_numeric", expectedNumber: 2, regex: "\\b2\\b" }],
+       assert: [{ type: "regex_numeric", expectedNumber: 2, regex: "^2$", exact: true }],
       metadata: {
         category: "math_logic",
         title: "Modular Arithmetic Cycle Resolution",
@@ -85,11 +85,12 @@ export const getBenchmarkTestCases = () => {
         {
           type: "code_unit_test",
           fnName: "isPalindrome",
-          testCases: [
+           testCases: [
             { input: ["A man, a plan, a canal: Panama"], expected: true },
             { input: ["race a car"], expected: false },
             { input: ["Was it a car or a cat I saw?"], expected: true },
-          ],
+           ],
+           forbiddenPatterns: ["JSON\\.parse", "eval\\s*\\(", "Function\\s*\\("],
         },
       ],
       metadata: {
@@ -205,9 +206,16 @@ export const getBenchmarkTestCases = () => {
       assert: [
         {
           type: "json_schema_validation",
-          requiredKeys: ["invoice_id", "date", "recipient", "total", "paid"],
-          validateFn: (obj) =>
-            obj.invoice_id === "INV-2026-88" &&
+           requiredKeys: ["invoice_id", "date", "recipient", "total", "paid"],
+           exactKeys: true,
+           validateFn: (obj) =>
+             typeof obj.invoice_id === "string" &&
+             /^\\d{4}-\\d{2}-\\d{2}$/.test(obj.date) &&
+             typeof obj.recipient === "string" &&
+             typeof obj.total === "number" &&
+             typeof obj.paid === "boolean" &&
+             obj.invoice_id === "INV-2026-88" &&
+             obj.date === "2026-04-15" &&
             obj.total === 1450 &&
             obj.paid === true &&
             obj.recipient.toLowerCase().includes("acme"),
@@ -227,8 +235,14 @@ export const getBenchmarkTestCases = () => {
       assert: [
         {
           type: "json_schema_validation",
-          requiredKeys: ["level", "service", "user_id", "ip", "status_code"],
-          validateFn: (obj) =>
+           requiredKeys: ["level", "service", "user_id", "ip", "status_code"],
+           exactKeys: true,
+           validateFn: (obj) =>
+             obj.level === "ERROR" &&
+             typeof obj.service === "string" &&
+             typeof obj.user_id === "string" &&
+             /^\\d{1,3}(?:\\.\\d{1,3}){3}$/.test(obj.ip) &&
+             typeof obj.status_code === "number" &&
             obj.status_code === 401 &&
             obj.service === "auth-service" &&
             obj.user_id === "usr_9984" &&
@@ -249,8 +263,14 @@ export const getBenchmarkTestCases = () => {
       assert: [
         {
           type: "json_schema_validation",
-          requiredKeys: ["model_name", "price_usd", "in_stock", "vram_gb", "tdp_watts"],
-          validateFn: (obj) =>
+           requiredKeys: ["model_name", "price_usd", "in_stock", "vram_gb", "tdp_watts"],
+           exactKeys: true,
+           validateFn: (obj) =>
+             obj.model_name === "Titan RTX Pro" &&
+             typeof obj.price_usd === "number" &&
+             typeof obj.in_stock === "boolean" &&
+             typeof obj.vram_gb === "number" &&
+             typeof obj.tdp_watts === "number" &&
             obj.price_usd === 2499 &&
             obj.in_stock === true &&
             obj.vram_gb === 24 &&
@@ -271,13 +291,17 @@ export const getBenchmarkTestCases = () => {
       assert: [
         {
           type: "json_schema_validation",
-          requiredKeys: ["sentiment", "rating", "pros", "cons"],
-          validateFn: (obj) =>
-            typeof obj.rating === "number" &&
-            Array.isArray(obj.pros) &&
-            Array.isArray(obj.cons) &&
-            obj.pros.length >= 1 &&
-            obj.cons.length >= 1,
+           requiredKeys: ["sentiment", "rating", "pros", "cons"],
+           exactKeys: true,
+           validateFn: (obj) =>
+             obj.sentiment === "mixed" &&
+             typeof obj.rating === "number" &&
+             obj.rating >= 1 && obj.rating <= 5 &&
+             Array.isArray(obj.pros) &&
+             Array.isArray(obj.cons) &&
+             obj.rating === 3 &&
+             obj.pros.some((item) => /battery charging/i.test(item)) &&
+             obj.cons.some((item) => /display brightness|sunlight/i.test(item)),
         },
       ],
       metadata: {
@@ -294,12 +318,17 @@ export const getBenchmarkTestCases = () => {
       assert: [
         {
           type: "json_schema_validation",
-          requiredKeys: ["people", "locations"],
-          validateFn: (obj) =>
-            Array.isArray(obj.people) &&
-            Array.isArray(obj.locations) &&
-            obj.people.length >= 2 &&
-            obj.locations.length >= 1,
+           requiredKeys: ["people", "locations"],
+           exactKeys: true,
+           validateFn: (obj) =>
+             Array.isArray(obj.people) &&
+             Array.isArray(obj.locations) &&
+             obj.people.length === 2 &&
+             obj.locations.length === 2 &&
+             obj.people.includes("Dr. Sarah Connor") &&
+             obj.people.includes("Dr. Miles Dyson") &&
+             obj.locations.includes("Cyberdyne Systems") &&
+             obj.locations.includes("Sunnyvale, California"),
         },
       ],
       metadata: {

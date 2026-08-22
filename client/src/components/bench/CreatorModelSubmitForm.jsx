@@ -28,18 +28,93 @@ const POPULAR_OLLAMA_MODELS = [
 
 const API_PROVIDERS = [
   {
+    id: "opencode-zen-compatible",
+    name: "OpenCode Zen / Compatible",
+    defaultModel: "kimi-k3",
+    defaultEndpoint: "https://opencode.ai/zen/v1",
+    models: [
+      "kimi-k3", "kimi-k2.7-code", "kimi-k2.6", "kimi-k2.5",
+      "deepseek-v4-pro",
+      "deepseek-v4-flash",
+      "minimax-m3", "minimax-m2.7", "minimax-m2.5",
+      "glm-5.2", "glm-5.1", "glm-5",
+      "big-pickle", "x-preview-f-free", "mimo-v2.5-free", "hy3-free",
+      "nemotron-3-ultra-free", "nemotron-3.5-lightning-free",
+    ],
+  },
+  {
+    id: "opencode-zen-openai",
+    name: "OpenCode Zen / OpenAI Responses",
+    defaultModel: "gpt-5.6-luna",
+    defaultEndpoint: "https://opencode.ai/zen/v1",
+    models: ["gpt-5.6-sol", "gpt-5.6-terra", "gpt-5.6-luna", "gpt-5.5", "gpt-5.5-pro", "gpt-5.4", "gpt-5.4-pro", "gpt-5.4-mini", "gpt-5.4-nano", "gpt-5.3-codex", "gpt-5.3-codex-spark", "gpt-5.2", "gpt-5.2-codex", "gpt-5.1", "gpt-5.1-codex", "gpt-5.1-codex-max", "gpt-5.1-codex-mini", "gpt-5", "gpt-5-codex", "gpt-5-nano", "grok-4.6", "grok-4.5", "grok-build-0.1", "muse-spark-1.2"],
+  },
+  {
+    id: "opencode-zen-anthropic",
+    name: "OpenCode Zen / Anthropic Messages",
+    defaultModel: "claude-haiku-4-5",
+    defaultEndpoint: "https://opencode.ai/zen/v1",
+    models: ["claude-fable-5", "claude-opus-5", "claude-opus-4-8", "claude-opus-4-7", "claude-opus-4-6", "claude-opus-4-5", "claude-sonnet-5", "claude-sonnet-4-6", "claude-sonnet-4-5", "claude-haiku-4-5", "qwen3.7-max", "qwen3.7-plus", "qwen3.6-plus", "qwen3.5-plus"],
+  },
+  {
+    id: "opencode-zen-google",
+    name: "OpenCode Zen / Google Generate Content",
+    defaultModel: "gemini-3-flash",
+    defaultEndpoint: "https://opencode.ai/zen/v1",
+    models: ["gemini-3.7-flash", "gemini-3.6-flash", "gemini-3.5-flash", "gemini-3.5-flash-lite", "gemini-3.1-pro", "gemini-3-flash"],
+  },
+  {
+    id: "opencode-go-compatible",
+    name: "OpenCode Go / Compatible",
+    defaultModel: "kimi-k3",
+    defaultEndpoint: "https://opencode.ai/zen/go/v1",
+    models: ["kimi-k3", "kimi-k2.7-code", "kimi-k2.6", "glm-5.3", "glm-5.2", "glm-5.1", "deepseek-v4-pro", "deepseek-v4-flash", "deepseek-v4-flash-vision-exp", "mimo-v2.5", "mimo-v2.5-pro", "hy3", "ox-alpha-free"],
+  },
+  {
+    id: "opencode-go-anthropic",
+    name: "OpenCode Go / Anthropic Messages",
+    defaultModel: "minimax-m3",
+    defaultEndpoint: "https://opencode.ai/zen/go/v1",
+    models: ["minimax-m3", "minimax-m2.7", "minimax-m2.5", "qwen3.8-max", "qwen3.7-max", "qwen3.7-plus", "qwen3.6-plus"],
+  },
+  {
+    id: "opencode-go-openai",
+    name: "OpenCode Go / OpenAI Responses",
+    defaultModel: "gpt-5.6-luna",
+    defaultEndpoint: "https://opencode.ai/zen/go/v1",
+    models: ["gpt-5.6-luna", "grok-4.5", "muse-spark-1.2-contributor"],
+  },
+  {
+    id: "moonshot",
+    name: "Moonshot AI / Kimi",
+    defaultModel: "kimi-k3",
+    defaultEndpoint: "https://api.moonshot.ai/v1",
+    models: ["kimi-k3", "kimi-k3-256k", "kimi-k2.7"],
+  },
+  {
+    id: "opencode-go",
+    name: "OpenCode Go / Kimi",
+    defaultModel: "kimi-k3",
+    defaultEndpoint: "https://opencode.ai/zen/go/v1",
+    models: ["kimi-k3", "kimi-k2.7-code", "kimi-k2.6"],
+  },
+  {
     id: "google",
     name: "Google Gemini",
-    defaultModel: "gemini-2.0-flash",
+    defaultModel: "gemini-2.5-flash",
     models: [
+      "gemini-2.5-flash",
       "gemini-2.0-flash",
       "gemini-1.5-flash",
-      "gemini-pro-latest",
-      "gemini-flash-latest",
       "gemini-1.5-pro",
-      "gemini-3-flash-preview",
-      "gemini-2.5-flash",
     ],
+  },
+  {
+    id: "xai",
+    name: "xAI / Grok",
+    defaultModel: "grok-4.6",
+    defaultEndpoint: "https://api.x.ai/v1",
+    models: ["grok-4.6", "grok-4.5", "grok-4.3", "grok-build-0.1"],
   },
   {
     id: "openai",
@@ -54,6 +129,19 @@ const API_PROVIDERS = [
     models: ["claude-3-5-haiku-20241022", "claude-3-5-sonnet-20241022", "claude-3-haiku-20240307"],
   },
   {
+    id: "groq",
+    name: "Groq Cloud LPU",
+    defaultModel: "openai/gpt-oss-120b",
+    models: [
+      "llama-3.1-8b-instant",
+      "llama-3.3-70b-versatile",
+      "openai/gpt-oss-120b",
+      "openai/gpt-oss-20b",
+      "qwen/qwen3.6-27b",
+      "groq/compound",
+    ],
+  },
+  {
     id: "huggingface",
     name: "Hugging Face Serverless",
     defaultModel: "mistralai/Mistral-7B-Instruct-v0.3",
@@ -61,9 +149,9 @@ const API_PROVIDERS = [
   },
   {
     id: "custom",
-    name: "Custom REST / vLLM Endpoint",
-    defaultModel: "custom-model",
-    models: ["custom-model"],
+    name: "⚡ Choose Your Own Provider (Custom REST / vLLM / OpenCode)",
+    defaultModel: "deepseek-v4-pro",
+    models: ["deepseek-v4-pro", "custom-model"],
   },
 ];
 
@@ -142,7 +230,7 @@ export const CreatorModelSubmitForm = () => {
       return;
     }
 
-    if (submissionMode === "api_key" && !apiKey.trim()) {
+    if (submissionMode === "api_key" && !apiKey.trim() && !apiProvider.startsWith("opencode")) {
       toast.error("Please enter a valid API key for model access.");
       return;
     }
@@ -175,7 +263,7 @@ export const CreatorModelSubmitForm = () => {
         };
 
         if (submissionMode === "api_key") {
-          payload.apiKey = apiKey.trim();
+          if (apiKey.trim()) payload.apiKey = apiKey.trim();
           payload.apiProvider = apiProvider;
           payload.endpoint = customEndpoint.trim() || undefined;
         }
@@ -366,7 +454,7 @@ export const CreatorModelSubmitForm = () => {
                 onChange={(e) => handleSelectApiProvider(e.target.value)}
                 className="w-full bg-[#fafafa] border border-[#e4e4e7] focus:border-[#ea580c] text-zinc-900 text-xs font-mono rounded-none px-3 py-2.5 outline-none cursor-pointer"
               >
-                {API_PROVIDERS.map((p) => (
+                {API_PROVIDERS.filter((p) => p.id === "google" || p.id === "xai").map((p) => (
                   <option key={p.id} value={p.id}>
                     {p.name}
                   </option>
@@ -471,7 +559,24 @@ export const CreatorModelSubmitForm = () => {
                 <input
                   type={showApiKey ? "text" : "password"}
                   value={apiKey}
-                  onChange={(e) => setApiKey(e.target.value)}
+                  onChange={(e) => {
+                    const trimmed = e.target.value.trim();
+                    setApiKey(trimmed);
+
+                    if (trimmed.startsWith("gsk_") && apiProvider !== "groq") {
+                      setApiProvider("groq");
+                      setModelName("openai/gpt-oss-120b");
+                      toast.success("Detected Groq API Key! Automatically switched provider to Groq Cloud LPU.");
+                    } else if (trimmed.startsWith("AIza") && apiProvider !== "google") {
+                      setApiProvider("google");
+                      setModelName("gemini-2.0-flash");
+                      toast.success("Detected Google Gemini Key! Automatically switched provider to Google Gemini.");
+                    } else if (trimmed.startsWith("sk-") && apiProvider === "google") {
+                      setApiProvider("opencode");
+                      setModelName("deepseek-v4-pro");
+                      toast.success("Detected OpenCode / DeepSeek Key! Automatically switched provider to OpenCode / DeepSeek.");
+                    }
+                  }}
                   placeholder="Paste API key here (AIzaSy..., gsk_..., sk-...)"
                   className="w-full bg-[#fafafa] border border-[#e4e4e7] focus:border-[#ea580c] text-zinc-900 text-xs font-mono rounded-none px-3 py-2 outline-none"
                   required

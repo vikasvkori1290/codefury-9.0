@@ -201,7 +201,7 @@ export default function LiveJobMonitorPage() {
             <span>
               {status === "completed"
                 ? "All 20 objective test cases verified against ground truth."
-                : `Executing deterministic suite: ${Math.min(20, Math.floor(Math.max(0, progress - 10) / 85 * 20))}/20 cases completed.`}
+                : `Executing deterministic suite: ${Math.min(20, Math.floor(Math.max(0, progress - 10) / 85 * 20))}/20 cases completed. Gemini calls wait 6 seconds between requests.`}
             </span>
             <span className={status === "completed" ? "font-bold text-emerald-700" : "text-[#ea580c]"}>
               {status === "completed" ? "DETERMINISTIC VERIFIED" : "LIVE"}

@@ -90,6 +90,17 @@ const FEATURED_MODELS = [
     mmlu: "92.1%",
     downloads: "34.0k",
   },
+  {
+    id: "grok-4.6",
+    name: "grok-4.6",
+    creator: "@my_creator_org",
+    type: "creator",
+    domain: "Math, Code, Schema & Rules",
+    latency: "Live result",
+    cost: "MongoDB",
+    mmlu: "Verified",
+    downloads: "20 cases",
+  },
 ];
 
 const About = () => {
@@ -206,7 +217,7 @@ const About = () => {
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          {FEATURED_MODELS.map((model) => (
+          {FEATURED_MODELS.filter((model) => model.id === "grok-4.6").map((model) => (
             <div
               key={model.id}
               className="bg-white border border-[#e4e4e7] hover:border-zinc-400 p-5 rounded-none flex flex-col justify-between transition-all group shadow-xs"
