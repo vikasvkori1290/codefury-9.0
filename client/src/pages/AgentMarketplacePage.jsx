@@ -750,7 +750,7 @@ export const AgentMarketplacePage = () => {
                     <div key={agent.id} className="flex flex-col justify-between gap-3 border border-orange-100 bg-white p-3">
                       <div>
                         <p className="font-mono text-[10px] text-zinc-400">0{index + 1} / RECOMMENDED</p>
-                        <p className="mt-1 text-sm font-bold text-zinc-950">{agent.displayName}</p>
+                        <p className="mt-1 text-sm font-bold font-mono text-zinc-950">{agent.displayName}</p>
                         <p className="mt-1 text-xs leading-relaxed text-zinc-600 line-clamp-2">{agent.description}</p>
                       </div>
                       <Link to={`/agents/${agent.id}`} className="self-start bg-zinc-900 px-3 py-2 text-xs font-bold text-white hover:bg-[#ea580c]">Explore agent →</Link>
@@ -797,7 +797,7 @@ export const AgentMarketplacePage = () => {
                     <div className="min-w-0 flex-1">
                       <div className="flex items-start justify-between gap-2">
                         <div className="min-w-0">
-                          <h3 className="text-base font-bold text-zinc-950 group-hover:text-[#ea580c] transition-colors truncate">{agent.displayName}</h3>
+                          <h3 className="text-base font-bold font-mono text-zinc-950 group-hover:text-[#ea580c] transition-colors truncate">{agent.displayName}</h3>
                           <p className="text-xs text-zinc-500 font-mono flex items-center gap-1 mt-0.5"><HiOutlinePuzzlePiece className="text-zinc-400" /> Built by {agent.company || agent.creator}</p>
                         </div>
                         {agent.verified && <HiOutlineShieldCheck className="text-emerald-600 text-lg shrink-0" title="Verified publisher" />}

@@ -71,7 +71,7 @@ export const AgentDetailPage = () => {
             <div className="flex items-center gap-3">
                <AgentLogo agent={agent} large />
               <div>
-                <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-zinc-950">{agent.displayName}</h1>
+                <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-zinc-950 font-mono">{agent.displayName}</h1>
                 <p className="text-xs text-zinc-500 font-mono mt-1">Built by <strong className="text-zinc-800">{agent.company || agent.creator}</strong></p>
               </div>
             </div>
@@ -116,7 +116,7 @@ export const AgentDetailPage = () => {
         <section id="agent-install" className="bg-white border border-[#e4e4e7] shadow-xs p-6 sm:p-8 space-y-6 scroll-mt-6">
           <div className="text-center space-y-2">
             <span className="text-[10px] font-mono uppercase tracking-widest text-[#ea580c] font-bold">Get started</span>
-            <h2 className="text-xl font-bold">Install {agent.displayName}</h2>
+            <h2 className="text-xl font-bold font-mono">Install {agent.displayName}</h2>
              <p className="text-xs text-zinc-500">Use the publisher's documented install method for your operating system.</p>
           </div>
 

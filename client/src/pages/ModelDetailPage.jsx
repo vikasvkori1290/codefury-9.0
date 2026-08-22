@@ -169,7 +169,7 @@ console.log(await response.json());`,
                 </span>
               </div>
 
-              <h1 className="text-3xl sm:text-4xl font-bold tracking-tight text-zinc-950 font-sans">
+              <h1 className="text-3xl sm:text-4xl font-bold tracking-tight text-zinc-950 font-mono">
                 {model.displayName}
               </h1>
 

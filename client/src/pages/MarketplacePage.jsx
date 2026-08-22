@@ -657,7 +657,7 @@ export const MarketplacePage = () => {
                       <div>
                         <p className="font-mono text-[10px] text-zinc-400">0{index + 1} / RECOMMENDED</p>
                         <Link to={`/models/${model.id}`} className="block mt-1">
-                          <p className="text-sm font-bold text-zinc-950 hover:text-[#ea580c] transition-colors">{model.displayName}</p>
+                          <p className="text-sm font-bold font-mono text-zinc-950 hover:text-[#ea580c] transition-colors">{model.displayName}</p>
                         </Link>
                         <p className="mt-1 text-xs leading-relaxed text-zinc-600 line-clamp-2">{model.description}</p>
                       </div>
@@ -772,7 +772,7 @@ export const MarketplacePage = () => {
                                   className="block cursor-pointer"
                                   title={`View details for ${model.displayName}`}
                                 >
-                                  <h3 className="text-base font-bold text-zinc-950 hover:text-[#ea580c] group-hover:text-[#ea580c] transition-colors truncate">
+                                  <h3 className="text-base font-bold font-mono text-zinc-950 hover:text-[#ea580c] group-hover:text-[#ea580c] transition-colors truncate">
                                     {model.displayName}
                                   </h3>
                                 </Link>

@@ -1012,7 +1012,7 @@ export const LiveBenchPage = () => {
                             <div className="flex items-center gap-2.5 min-w-0">
                               <BrandLogo brand={brandInfo.brand} logo={brandInfo.logo} />
                               <div className="flex items-center gap-1.5 min-w-0 flex-wrap">
-                                <span className="font-bold text-xs text-zinc-950 truncate group-hover:text-[#ea580c] transition-colors">
+                                <span className="font-bold font-mono text-xs text-zinc-950 truncate group-hover:text-[#ea580c] transition-colors">
                                   {model.name.toLowerCase()}
                                 </span>
                                 <span className="text-[10px] text-zinc-400 font-normal">
@@ -1277,7 +1277,7 @@ export const LiveBenchPage = () => {
                                 </span>
                                 <div>
                                   <div className="flex items-center gap-1.5 flex-wrap">
-                                    <span className="font-bold text-zinc-950 text-xs">
+                                    <span className="font-bold font-mono text-zinc-950 text-xs">
                                       {model.name}
                                     </span>
                                     {model.isOpen && (
