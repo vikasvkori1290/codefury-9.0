@@ -23,6 +23,47 @@
 /* ---- Components ---- */
 @layer components {
 
+  .marketplace-search-scan {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    overflow: hidden;
+    padding: 0.75rem 1rem;
+    border: 1px solid #fed7aa;
+    background: #fffaf5;
+    animation: marketplace-scan-in 180ms ease-out;
+  }
+  .marketplace-search-scan::after {
+    content: "";
+    position: absolute;
+    inset: 0 auto 0 -35%;
+    width: 30%;
+    background: linear-gradient(90deg, transparent, rgba(234, 88, 12, 0.12), transparent);
+    animation: marketplace-scan 900ms ease-in-out infinite;
+  }
+  .marketplace-search-orbit {
+    z-index: 1;
+    display: flex;
+    width: 2rem;
+    height: 2rem;
+    align-items: center;
+    justify-content: center;
+    color: #ea580c;
+    border: 1px solid #fdba74;
+    border-radius: 999px;
+    animation: marketplace-orbit 900ms linear infinite;
+  }
+  .marketplace-search-dots { z-index: 1; display: flex; gap: 3px; margin-left: auto; }
+  .marketplace-search-dots i { width: 4px; height: 4px; background: #ea580c; border-radius: 50%; animation: marketplace-dot 800ms ease-in-out infinite; }
+  .marketplace-search-dots i:nth-child(2) { animation-delay: 120ms; }
+  .marketplace-search-dots i:nth-child(3) { animation-delay: 240ms; }
+
+  @keyframes marketplace-scan-in { from { opacity: 0; transform: translateY(-4px); } to { opacity: 1; transform: translateY(0); } }
+  @keyframes marketplace-scan { to { transform: translateX(460%); } }
+  @keyframes marketplace-orbit { to { transform: rotate(360deg); } }
+  @keyframes marketplace-dot { 0%, 100% { opacity: 0.25; transform: translateY(0); } 50% { opacity: 1; transform: translateY(-3px); } }
+
   .modelhub-texture {
     background-color: #f4f8fd;
     background-image:

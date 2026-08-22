@@ -279,6 +279,7 @@ const INTENT_TAXONOMY = [
 
 export const MarketplacePage = () => {
   const [search, setSearch] = useState("");
+  const [isSearching, setIsSearching] = useState(false);
   const [sortBy, setSortBy] = useState("relevant");
   const [selectedFilters, setSelectedFilters] = useState({});
   const [expandedGroups, setExpandedGroups] = useState({ capability: true });
@@ -286,6 +287,17 @@ export const MarketplacePage = () => {
   const [deployModel, setDeployModel] = useState(null);
   const [testedModels, setTestedModels] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
+
+  // Give natural-language discovery a small, visible handoff before revealing the match.
+  useEffect(() => {
+    if (!search.trim()) {
+      setIsSearching(false);
+      return undefined;
+    }
+    setIsSearching(true);
+    const timer = window.setTimeout(() => setIsSearching(false), 650);
+    return () => window.clearTimeout(timer);
+  }, [search]);
 
   // Fetch evaluated models live from MongoDB Atlas
   useEffect(() => {
@@ -631,6 +643,17 @@ export const MarketplacePage = () => {
                 )}
               </div>
 
+              {isSearching && (
+                <div className="marketplace-search-scan" role="status" aria-live="polite">
+                  <span className="marketplace-search-orbit"><HiOutlineSparkles /></span>
+                  <div>
+                    <p className="font-mono text-[11px] font-bold uppercase tracking-wide text-zinc-900">Searching the model catalog</p>
+                    <p className="text-xs text-zinc-500">Understanding your use case and ranking verified capabilities...</p>
+                  </div>
+                  <span className="marketplace-search-dots" aria-hidden="true"><i /><i /><i /></span>
+                </div>
+              )}
+
             </div>
 
             {/* AI Intent Recommendation Banner */}
@@ -651,6 +674,22 @@ export const MarketplacePage = () => {
                 <span className="text-[10px] px-2 py-0.5 bg-blue-100 border border-blue-200 text-blue-800 font-bold shrink-0 hidden sm:inline">
                   AI RECOMMENDATION ACTIVE
                 </span>
+              </div>
+            )}
+
+            {!isSearching && search.trim() && filtered[0] && (
+              <div className="border border-orange-200 bg-[#fffaf5] p-4 shadow-xs animate-fadeIn">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                  <div className="flex items-start gap-3">
+                    <span className="flex h-9 w-9 items-center justify-center bg-[#ea580c] text-white"><HiOutlineSparkles /></span>
+                    <div>
+                      <p className="font-mono text-[10px] font-bold uppercase tracking-wide text-[#ea580c]">Best match for your request</p>
+                      <p className="mt-1 text-sm font-bold text-zinc-950">{filtered[0].displayName}</p>
+                      <p className="mt-0.5 text-xs text-zinc-600">{filtered[0].description}</p>
+                    </div>
+                  </div>
+                  <Link to={`/models/${filtered[0].id}`} className="shrink-0 bg-zinc-900 px-3 py-2 text-xs font-bold text-white hover:bg-[#ea580c]">Explore suggestion →</Link>
+                </div>
               </div>
             )}
 
