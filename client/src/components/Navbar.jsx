@@ -88,6 +88,13 @@ const Navbar = () => {
               <span className="w-1.5 h-1.5 bg-emerald-500 rounded-none hidden sm:inline" />
               <span>Agent Marketplace</span>
             </Link>
+
+            <Link
+              to="/docs"
+                className={navLinkClass(location.pathname === "/docs")}
+            >
+              <span>Docs</span>
+            </Link>
           </nav>
         </div>
 
@@ -175,6 +182,7 @@ const Navbar = () => {
             <Link to="/live-bench" onClick={closeMenu} className={navLinkClass(location.pathname === "/live-bench")}>Live Bench</Link>
             <Link to="/models" onClick={closeMenu} className={navLinkClass(location.pathname === "/models" || location.pathname.startsWith("/models/"))}>AI Models</Link>
             <Link to="/agents" onClick={closeMenu} className={navLinkClass(location.pathname === "/agents" || location.pathname.startsWith("/agents/"))}>Agent Marketplace</Link>
+            <Link to="/docs" onClick={closeMenu} className={navLinkClass(location.pathname === "/docs")}>Docs</Link>
             {!user && <div className="pt-3 mt-2 border-t border-zinc-100 sm:hidden">
               <Link to="/login" onClick={closeMenu} className="block bg-[#ea580c] px-3 py-2 text-center font-bold text-white">Sign in</Link>
             </div>}
