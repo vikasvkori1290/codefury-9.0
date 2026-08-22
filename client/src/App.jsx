@@ -1,6 +1,8 @@
+import React, { useEffect } from "react";
 import { BrowserRouter as Router, Routes, Route, useLocation, Navigate } from "react-router-dom";
 import { Toaster } from "react-hot-toast";
 import { AuthProvider } from "./context/AuthContext";
+import API from "./api/axios";
 import Navbar from "./components/Navbar";
 import Footer from "./components/Footer";
 import Home from "./pages/Home";
@@ -23,6 +25,20 @@ import ProtectedRoute from "./components/ProtectedRoute";
 function AppLayout() {
   const location = useLocation();
   const isAuthPage = location.pathname === "/login" || location.pathname === "/register";
+
+  // Automated backend warm-up & 8-minute activity pulse
+  useEffect(() => {
+    const pulseBackend = () => {
+      API.get("/health").catch(() => {});
+    };
+
+    // Trigger immediately on load
+    pulseBackend();
+
+    // Repeat every 8 minutes (480,000 ms) while app is open
+    const interval = setInterval(pulseBackend, 8 * 60 * 1000);
+    return () => clearInterval(interval);
+  }, []);
 
   return (
     <div className="min-h-screen flex flex-col bg-[#fafafa] text-zinc-900">

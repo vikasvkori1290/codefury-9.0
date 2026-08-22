@@ -8,6 +8,7 @@ import chatRoutes from "./routes/chat.routes.js";
 import benchmarkRoutes from "./routes/benchmark.routes.js";
 import modelRoutes from "./routes/model.routes.js";
 import deploymentRoutes from "./routes/deployment.routes.js";
+import { startSelfPingService } from "./services/selfPing.service.js";
 
 // Load env vars
 dotenv.config();
@@ -15,14 +16,35 @@ dotenv.config();
 // Connect to database
 connectDB();
 
+// Start automatic 8-minute self-ping heartbeat
+startSelfPingService();
+
 const app = express();
 
 // --------------- Middleware ---------------
 app.use(express.json({ limit: "50mb" }));
 app.use(express.urlencoded({ extended: true, limit: "50mb" }));
+
+const allowedOrigins = [
+  process.env.CLIENT_URL,
+  "http://localhost:5173",
+  "http://localhost:3000",
+].filter(Boolean);
+
 app.use(
   cors({
-    origin: process.env.CLIENT_URL || "http://localhost:5173",
+    origin: (origin, callback) => {
+      // Allow requests with no origin (like health checks, curl, mobile) or Netlify / Vercel domains
+      if (
+        !origin ||
+        allowedOrigins.includes(origin) ||
+        origin.endsWith(".netlify.app") ||
+        origin.endsWith(".vercel.app")
+      ) {
+        return callback(null, true);
+      }
+      return callback(null, true);
+    },
     credentials: true,
   })
 );
@@ -33,7 +55,12 @@ if (process.env.NODE_ENV === "development") {
 
 // --------------- Routes ---------------
 app.get("/api/health", (req, res) => {
-  res.json({ status: "ok", message: "CodeFury API is running 🚀" });
+  res.json({
+    status: "ok",
+    message: "ModelHub CodeFury 9.0 API is active and healthy 🚀",
+    timestamp: new Date().toISOString(),
+    uptime: process.uptime(),
+  });
 });
 
 app.use("/api/auth", authRoutes);
@@ -53,6 +80,10 @@ app.use((err, req, res, next) => {
 
 // --------------- Start Server ---------------
 const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => {
-  console.log(`🚀 Server running on port ${PORT}`);
-});
+if (process.env.NODE_ENV !== "test") {
+  app.listen(PORT, () => {
+    console.log(`🚀 Server running on port ${PORT}`);
+  });
+}
+
+export default app;
