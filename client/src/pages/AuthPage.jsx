@@ -91,7 +91,8 @@ const AuthPage = () => {
     try {
       await login(loginEmail, loginPassword);
       toast.success("Welcome back! 🎉");
-      navigate("/");
+      const redirectPath = location.state?.from || "/";
+      navigate(redirectPath);
     } catch (err) {
       toast.error(err.response?.data?.message || "Invalid email or password");
     } finally {
@@ -136,7 +137,8 @@ const AuthPage = () => {
     try {
       await verifySignupOtp(regEmail, otpCode.trim());
       toast.success("Email verified! Account created successfully! 🚀");
-      navigate("/");
+      const redirectPath = location.state?.from || "/";
+      navigate(redirectPath);
     } catch (err) {
       toast.error(err.response?.data?.message || "Invalid or expired verification code");
     } finally {
