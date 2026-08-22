@@ -521,18 +521,18 @@ export const CreatorModelSubmitForm = () => {
             </div>
 
             {/* HF Access Token */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-1">
-              <div className="space-y-1.5">
-                <div className="flex items-center justify-between">
-                  <label className="text-xs font-mono font-semibold text-zinc-800">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 pt-1 items-start">
+              <div className="space-y-1.5 flex flex-col">
+                <div className="flex items-center justify-between min-h-[20px]">
+                  <label className="text-xs font-mono font-semibold text-zinc-800 leading-none">
                     Hugging Face Access Token (hf_...):
                   </label>
                   <button
                     type="button"
                     onClick={() => setShowApiKey(!showApiKey)}
-                    className="text-[10px] font-mono text-zinc-500 hover:text-zinc-900 flex items-center gap-1 cursor-pointer"
+                    className="text-[10px] font-mono text-zinc-500 hover:text-zinc-900 flex items-center gap-1 cursor-pointer shrink-0 leading-none"
                   >
-                    {showApiKey ? <HiOutlineEyeSlash /> : <HiOutlineEye />}
+                    {showApiKey ? <HiOutlineEyeSlash className="text-xs" /> : <HiOutlineEye className="text-xs" />}
                     <span>{showApiKey ? "Hide" : "Show"}</span>
                   </button>
                 </div>
@@ -541,26 +541,32 @@ export const CreatorModelSubmitForm = () => {
                   value={apiKey}
                   onChange={(e) => setApiKey(e.target.value)}
                   placeholder="hf_xxxxxxxxxxxxxxxxxxxxxxx"
-                  className="w-full bg-[#fafafa] border border-[#e4e4e7] focus:border-[#ea580c] text-zinc-900 text-xs font-mono rounded-none px-3.5 py-2.5 outline-none"
+                  className="w-full h-[40px] bg-[#fafafa] border border-[#e4e4e7] focus:border-[#ea580c] text-zinc-900 text-xs font-mono rounded-none px-3.5 outline-none"
                 />
-                <p className="text-[10px] font-mono text-zinc-400">
+                <p className="text-[10px] font-mono text-zinc-400 leading-relaxed min-h-[16px]">
                   Required for gated/private models. Encrypted with AES-256-GCM.
                 </p>
               </div>
 
               {/* Optional Custom Dedicated Endpoint */}
-              <div className="space-y-1.5">
-                <label className="text-xs font-mono font-semibold text-zinc-800">
-                  Custom Dedicated Endpoint URL (Optional):
-                </label>
+              <div className="space-y-1.5 flex flex-col">
+                <div className="flex items-center min-h-[20px]">
+                  <label className="text-xs font-mono font-semibold text-zinc-800 leading-none">
+                    Custom Dedicated Endpoint URL (Optional):
+                  </label>
+                  <span className="ml-auto text-[10px] font-mono invisible flex items-center gap-1 leading-none select-none" aria-hidden="true">
+                    <HiOutlineEye className="text-xs" />
+                    <span>Show</span>
+                  </span>
+                </div>
                 <input
                   type="text"
                   value={customEndpoint}
                   onChange={(e) => setCustomEndpoint(e.target.value)}
                   placeholder="https://xxxx.us-east-1.aws.endpoints.huggingface.cloud"
-                  className="w-full bg-[#fafafa] border border-[#e4e4e7] focus:border-[#ea580c] text-zinc-900 text-xs font-mono rounded-none px-3.5 py-2.5 outline-none"
+                  className="w-full h-[40px] bg-[#fafafa] border border-[#e4e4e7] focus:border-[#ea580c] text-zinc-900 text-xs font-mono rounded-none px-3.5 outline-none"
                 />
-                <p className="text-[10px] font-mono text-zinc-400">
+                <p className="text-[10px] font-mono text-zinc-400 leading-relaxed min-h-[16px]">
                   Leave empty to use Hugging Face Serverless Inference Router.
                 </p>
               </div>
@@ -589,11 +595,11 @@ export const CreatorModelSubmitForm = () => {
               </select>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 items-start">
               {/* AI Model Name / Selection */}
-              <div className="space-y-1.5">
-                <div className="flex items-center justify-between">
-                  <label className="text-xs font-mono font-semibold text-zinc-800">
+              <div className="space-y-1.5 flex flex-col">
+                <div className="flex items-center justify-between min-h-[20px]">
+                  <label className="text-xs font-mono font-semibold text-zinc-800 leading-none">
                     AI Model:
                   </label>
                   {isCustomModel ? (
@@ -603,7 +609,7 @@ export const CreatorModelSubmitForm = () => {
                         setIsCustomModel(false);
                         setModelName(selectedProviderObj.defaultModel);
                       }}
-                      className="text-[10px] font-mono text-[#ea580c] hover:underline cursor-pointer"
+                      className="text-[10px] font-mono text-[#ea580c] hover:underline cursor-pointer leading-none shrink-0"
                     >
                       ← Back to Presets
                     </button>
@@ -614,7 +620,7 @@ export const CreatorModelSubmitForm = () => {
                         setIsCustomModel(true);
                         setModelName("");
                       }}
-                      className="text-[10px] font-mono text-zinc-500 hover:text-black cursor-pointer"
+                      className="text-[10px] font-mono text-zinc-500 hover:text-black cursor-pointer leading-none shrink-0"
                     >
                       + Custom Name
                     </button>
@@ -644,7 +650,7 @@ export const CreatorModelSubmitForm = () => {
                       }
                     }}
                     placeholder="Type custom model name (e.g. gemini-pro-latest, gpt-4o-2024-08-06)..."
-                    className="w-full bg-[#fafafa] border border-[#ea580c] focus:ring-1 focus:ring-[#ea580c] text-zinc-900 text-xs font-mono rounded-none px-3 py-2.5 outline-none"
+                    className="w-full h-[40px] bg-[#fafafa] border border-[#ea580c] focus:ring-1 focus:ring-[#ea580c] text-zinc-900 text-xs font-mono rounded-none px-3.5 outline-none"
                     required
                   />
                 ) : (
@@ -658,7 +664,7 @@ export const CreatorModelSubmitForm = () => {
                         setModelName(e.target.value);
                       }
                     }}
-                    className="w-full bg-[#fafafa] border border-[#e4e4e7] focus:border-[#ea580c] text-zinc-900 text-xs font-mono rounded-none px-3 py-2.5 outline-none cursor-pointer"
+                    className="w-full h-[40px] bg-[#fafafa] border border-[#e4e4e7] focus:border-[#ea580c] text-zinc-900 text-xs font-mono rounded-none px-3.5 outline-none cursor-pointer"
                   >
                     {selectedProviderObj.models.map((m) => (
                       <option key={m} value={m}>
@@ -668,21 +674,26 @@ export const CreatorModelSubmitForm = () => {
                     <option value="__custom__">+ Enter Custom Model Name...</option>
                   </select>
                 )}
+                <p className="text-[10px] font-mono text-zinc-400 leading-relaxed min-h-[16px] invisible select-none" aria-hidden="true">
+                  placeholder
+                </p>
               </div>
 
               {/* API Key Input (Encrypted / Masked) */}
-              <div className="space-y-1.5">
-                <label className="text-xs font-mono font-semibold text-zinc-800 flex items-center justify-between">
-                  <span>API Secret Key (Never displayed publicly):</span>
+              <div className="space-y-1.5 flex flex-col">
+                <div className="flex items-center justify-between min-h-[20px]">
+                  <label className="text-xs font-mono font-semibold text-zinc-800 leading-none">
+                    API Secret Key (Never displayed publicly):
+                  </label>
                   <button
                     type="button"
                     onClick={() => setShowApiKey(!showApiKey)}
-                    className="text-[10px] text-zinc-500 hover:text-[#ea580c] flex items-center gap-1 cursor-pointer"
+                    className="text-[10px] font-mono text-zinc-500 hover:text-[#ea580c] flex items-center gap-1 cursor-pointer shrink-0 leading-none"
                   >
-                    {showApiKey ? <HiOutlineEyeSlash /> : <HiOutlineEye />}
+                    {showApiKey ? <HiOutlineEyeSlash className="text-xs" /> : <HiOutlineEye className="text-xs" />}
                     <span>{showApiKey ? "Hide" : "Show"}</span>
                   </button>
-                </label>
+                </div>
                 <input
                   type={showApiKey ? "text" : "password"}
                   value={apiKey}
@@ -705,12 +716,12 @@ export const CreatorModelSubmitForm = () => {
                     }
                   }}
                   placeholder="Paste API key here (AIzaSy..., gsk_..., sk-...)"
-                  className="w-full bg-[#fafafa] border border-[#e4e4e7] focus:border-[#ea580c] text-zinc-900 text-xs font-mono rounded-none px-3 py-2 outline-none"
+                  className="w-full h-[40px] bg-[#fafafa] border border-[#e4e4e7] focus:border-[#ea580c] text-zinc-900 text-xs font-mono rounded-none px-3.5 outline-none"
                   required
                 />
-                <span className="text-[10px] text-zinc-500 font-mono block">
+                <p className="text-[10px] text-zinc-500 font-mono leading-relaxed min-h-[16px]">
                   Encrypted securely and never exposed in telemetry or logs.
-                </span>
+                </p>
               </div>
             </div>
 
@@ -734,11 +745,11 @@ export const CreatorModelSubmitForm = () => {
         )}
 
         {/* ==================== 2. CREATOR METADATA ROW ==================== */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-3 border-t border-[#e4e4e7]">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-5 pt-4 border-t border-[#e4e4e7] items-start">
           {/* Author Handle */}
-          <div className="space-y-1.5">
-            <label className="text-xs font-mono font-semibold text-zinc-800 flex items-center gap-1">
-              <HiOutlineUserCircle className="text-[#ea580c]" />
+          <div className="space-y-1.5 flex flex-col">
+            <label className="text-xs font-mono font-semibold text-zinc-800 flex items-center gap-1.5 min-h-[20px] leading-none">
+              <HiOutlineUserCircle className="text-[#ea580c] text-[14px] shrink-0" />
               <span>Author Handle:</span>
             </label>
             <input
@@ -746,20 +757,20 @@ export const CreatorModelSubmitForm = () => {
               value={creatorHandle}
               onChange={(e) => setCreatorHandle(e.target.value)}
               placeholder="@AIArchitect"
-              className="w-full bg-[#fafafa] border border-[#e4e4e7] focus:border-[#ea580c] text-zinc-900 text-xs font-mono rounded-none px-3 py-2 outline-none"
+              className="w-full h-[40px] bg-[#fafafa] border border-[#e4e4e7] focus:border-[#ea580c] text-zinc-900 text-xs font-mono rounded-none px-3.5 outline-none"
             />
           </div>
 
           {/* Domain Category */}
-          <div className="space-y-1.5">
-            <label className="text-xs font-mono font-semibold text-zinc-800 flex items-center gap-1">
-              <HiOutlineTag className="text-[#ea580c]" />
+          <div className="space-y-1.5 flex flex-col">
+            <label className="text-xs font-mono font-semibold text-zinc-800 flex items-center gap-1.5 min-h-[20px] leading-none">
+              <HiOutlineTag className="text-[#ea580c] text-[14px] shrink-0" />
               <span>Domain Category:</span>
             </label>
             <select
               value={category}
               onChange={(e) => setCategory(e.target.value)}
-              className="w-full bg-[#fafafa] border border-[#e4e4e7] focus:border-[#ea580c] text-zinc-900 text-xs font-mono rounded-none px-3 py-2 outline-none cursor-pointer"
+              className="w-full h-[40px] bg-[#fafafa] border border-[#e4e4e7] focus:border-[#ea580c] text-zinc-900 text-xs font-mono rounded-none px-3.5 outline-none cursor-pointer"
             >
               {CATEGORIES.map((c) => (
                 <option key={c} value={c}>
@@ -770,9 +781,9 @@ export const CreatorModelSubmitForm = () => {
           </div>
 
           {/* Rate ($/1k) */}
-          <div className="space-y-1.5">
-            <label className="text-xs font-mono font-semibold text-zinc-800 flex items-center gap-1">
-              <HiOutlineCurrencyDollar className="text-[#ea580c]" />
+          <div className="space-y-1.5 flex flex-col">
+            <label className="text-xs font-mono font-semibold text-zinc-800 flex items-center gap-1.5 min-h-[20px] leading-none">
+              <HiOutlineCurrencyDollar className="text-[#ea580c] text-[14px] shrink-0" />
               <span>Rate ($/1k tokens):</span>
             </label>
             <input
@@ -781,7 +792,7 @@ export const CreatorModelSubmitForm = () => {
               value={pricing}
               onChange={(e) => setPricing(e.target.value)}
               placeholder="0.00015"
-              className="w-full bg-[#fafafa] border border-[#e4e4e7] focus:border-[#ea580c] text-zinc-900 text-xs font-mono rounded-none px-3 py-2 outline-none"
+              className="w-full h-[40px] bg-[#fafafa] border border-[#e4e4e7] focus:border-[#ea580c] text-zinc-900 text-xs font-mono rounded-none px-3.5 outline-none"
             />
           </div>
         </div>
