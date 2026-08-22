@@ -7,11 +7,8 @@ import {
   HiOutlineShieldCheck,
   HiOutlineSparkles,
   HiOutlineArrowRight,
-  HiOutlinePlay,
   HiOutlineScale,
-  HiOutlineWrenchScrewdriver,
   HiOutlineChartBar,
-  HiOutlineChatBubbleLeftRight,
   HiOutlineCheckCircle,
   HiOutlineCurrencyDollar,
   HiOutlineClock,
@@ -19,6 +16,7 @@ import {
   HiOutlineArrowTrendingUp,
 } from "react-icons/hi2";
 import DeployModal from "../components/modals/DeployModal";
+import ModelLogo from "../components/atoms/ModelLogo";
 import API from "../api/axios";
 import { PRELOADED_FRONTIER_MODELS } from "./LiveBenchPage";
 
@@ -193,20 +191,10 @@ const MODEL_FILTER_GROUPS = [
   },
 ];
 
-// Fast, 0-latency local avatar component
-const ModelAvatar = ({ creator, displayName }) => {
-  const label = (creator || displayName || "AI").replace(/[@_.-]/g, " ").trim();
-  const parts = label.split(/\s+/).filter(Boolean);
-  const initials = parts.length >= 2
-    ? (parts[0][0] + parts[1][0]).toUpperCase()
-    : label.slice(0, 2).toUpperCase() || "AI";
-
-  return (
-    <div className="w-11 h-11 bg-zinc-950 text-white flex items-center justify-center shrink-0 font-mono font-bold text-xs tracking-wider select-none">
-      {initials}
-    </div>
-  );
-};
+// Unified brutalist avatar – delegates to shared ModelLogo for same design language as detail page
+const ModelAvatar = ({ creator, displayName, category }) => (
+  <ModelLogo creator={creator} displayName={displayName} category={category} />
+);
 
 // Intent Taxonomy & Semantic Keyword Dictionary for Natural Language Discovery
 const INTENT_TAXONOMY = [
@@ -772,7 +760,7 @@ export const MarketplacePage = () => {
                       <div>
                         {/* Top Header with Avatar & Verified Shield */}
                         <div className="flex items-start gap-3">
-                          <ModelAvatar creator={model.creator} displayName={model.displayName} />
+                          <ModelAvatar creator={model.creator} displayName={model.displayName} category={model.category} />
 
                           <div className="min-w-0 flex-1">
                             <div className="flex items-start justify-between gap-2">
@@ -797,8 +785,8 @@ export const MarketplacePage = () => {
                         {model.description}
                       </p>
 
-                      {/* Capabilities & Tools Rows (Identical to Agent Marketplace) */}
-                      <div className="mt-4 pt-3 border-t border-[#e4e4e7] space-y-3">
+                      {/* Capabilities — Works with removed per design request */}
+                      <div className="mt-4 pt-3 border-t border-[#e4e4e7]">
                         <div>
                           <span className="text-[10px] font-mono text-zinc-400 uppercase font-bold">
                             What it does
@@ -810,22 +798,6 @@ export const MarketplacePage = () => {
                                 className="px-2 py-1 bg-zinc-100 border border-[#e4e4e7] text-[10px] font-mono text-zinc-700"
                               >
                                 {capability}
-                              </span>
-                            ))}
-                          </div>
-                        </div>
-
-                        <div>
-                          <span className="text-[10px] font-mono text-zinc-400 uppercase font-bold flex items-center gap-1">
-                            <HiOutlineWrenchScrewdriver /> Works with
-                          </span>
-                          <div className="flex flex-wrap gap-1.5 mt-1.5">
-                            {model.tools.slice(0, 4).map((tool) => (
-                              <span
-                                key={tool}
-                                className="px-2 py-1 bg-white border border-[#e4e4e7] text-[10px] font-mono text-zinc-700"
-                              >
-                                {tool}
                               </span>
                             ))}
                             {model.isOpen && (
@@ -850,22 +822,6 @@ export const MarketplacePage = () => {
                       </div>
 
                       <div className="flex items-center gap-1.5 shrink-0">
-                        <Link
-                          to={`/playground/${model.id}`}
-                          className="p-2 bg-white hover:bg-zinc-100 border border-[#e4e4e7] hover:border-zinc-400 text-zinc-700 text-xs font-bold transition-colors"
-                          title="Chat in Playground"
-                        >
-                          <HiOutlineChatBubbleLeftRight className="text-xs" />
-                        </Link>
-
-                        <button
-                          onClick={() => setDeployModel(model)}
-                          className="p-2 bg-orange-50 hover:bg-orange-100 text-[#ea580c] border border-orange-200 text-xs font-bold transition-colors cursor-pointer"
-                          title="1-Click API Run"
-                        >
-                          <HiOutlinePlay className="text-xs" />
-                        </button>
-
                         <Link
                           to={`/models/${model.id}`}
                           className="px-4 py-2 bg-zinc-900 hover:bg-[#ea580c] text-white text-xs font-bold transition-colors shrink-0"

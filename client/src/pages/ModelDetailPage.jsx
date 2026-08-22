@@ -2,13 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useParams, Link } from "react-router-dom";
 import {
   HiOutlineArrowLeft,
-  HiOutlineRocketLaunch,
-  HiOutlineCheckCircle,
   HiOutlineShieldCheck,
-  HiOutlineCpuChip,
-  HiOutlineBolt,
-  HiOutlineClock,
-  HiOutlineCurrencyDollar,
   HiOutlineSparkles,
   HiOutlineClipboard,
   HiOutlineCheck,
@@ -29,6 +23,7 @@ import {
 } from "recharts";
 import { MARKETPLACE_MODELS, normalizeModel } from "./MarketplacePage";
 import DeployModal from "../components/modals/DeployModal";
+import ModelLogo from "../components/atoms/ModelLogo";
 import API from "../api/axios";
 
 export const ModelDetailPage = () => {
@@ -153,61 +148,56 @@ console.log(await response.json());`,
           <span className="text-zinc-400">Model UID: {model.id}</span>
         </div>
 
-        {/* 1. HERO HEADER */}
-        <div className="p-6 sm:p-8 bg-white border border-[#e4e4e7] rounded-none shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-6">
-          <div className="space-y-3">
-            <div className="flex items-center gap-2 flex-wrap">
-              <span className="px-3 py-1 bg-emerald-50 border border-emerald-300 text-emerald-800 font-mono text-xs font-bold rounded-none flex items-center gap-1.5 shadow-xs">
-                <HiOutlineShieldCheck className="text-base text-emerald-600" />
-                <span>Verified by Deterministic Ground-Truth Engine (LiveBench Standard)</span>
-              </span>
-              <span className="text-xs font-mono text-zinc-600 bg-zinc-100 px-2.5 py-1 rounded-none">
-                {model.category}
-              </span>
+        {/* 1. HERO HEADER — redesigned with unified ModelLogo, no CTAs, brutalist style */}
+        <div className="bg-white border-2 border-zinc-900 shadow-[4px_4px_0_#1a1a1a] p-6 sm:p-7 flex flex-col lg:flex-row gap-6 relative overflow-hidden">
+          <div className="absolute top-0 left-0 right-0 h-[4px] bg-[#ea580c]" />
+          <div className="flex gap-5 flex-1 min-w-0">
+            <div className="hidden sm:flex shrink-0 pt-1">
+              <ModelLogo large displayName={model.displayName} creator={model.creator} category={model.category} />
             </div>
-
-            <h1 className="text-3xl sm:text-4xl font-bold tracking-tight text-zinc-950 font-sans">
-              {model.displayName}
-            </h1>
-
-            <div className="flex items-center gap-3 font-mono text-xs text-zinc-500">
-              <span className="text-zinc-800 font-bold">{model.creator}</span>
-              <span>•</span>
-              <span>Tag: {model.name}</span>
-              <span>•</span>
-              <span className="text-[#ea580c] font-semibold">85% Creator Revenue Share</span>
+            <div className="flex sm:hidden shrink-0">
+              <ModelLogo displayName={model.displayName} creator={model.creator} category={model.category} />
             </div>
+            <div className="flex-1 min-w-0 space-y-3">
+              <div className="flex items-center gap-2 flex-wrap">
+                <span className="px-3 py-1 bg-emerald-50 border border-emerald-300 text-emerald-800 font-mono text-xs font-bold rounded-none flex items-center gap-1.5 shadow-xs">
+                  <HiOutlineShieldCheck className="text-base text-emerald-600" />
+                  <span>Verified by Deterministic Ground-Truth Engine (LiveBench Standard)</span>
+                </span>
+                <span className="text-xs font-mono text-zinc-700 bg-zinc-100 border border-zinc-200 px-2.5 py-1 rounded-none">
+                  {model.category}
+                </span>
+              </div>
 
-            <p className="text-xs sm:text-sm text-zinc-600 max-w-xl leading-relaxed font-sans">
-              {model.description}
-            </p>
+              <h1 className="text-3xl sm:text-4xl font-bold tracking-tight text-zinc-950 font-sans">
+                {model.displayName}
+              </h1>
+
+              <div className="flex items-center gap-2.5 font-mono text-xs text-zinc-500 flex-wrap">
+                <span className="text-zinc-900 font-bold">{model.creator}</span>
+                <span className="w-1 h-1 bg-zinc-400 rounded-full" />
+                <span>Tag: {model.name}</span>
+                <span className="w-1 h-1 bg-zinc-400 rounded-full" />
+                <span className="text-[#ea580c] font-bold">85% Creator Revenue Share</span>
+              </div>
+
+              <p className="text-xs sm:text-sm text-zinc-600 max-w-xl leading-relaxed font-sans">
+                {model.description}
+              </p>
+            </div>
           </div>
 
-          {/* Giant Score Badge & Deploy CTA */}
-          <div className="flex flex-col items-start md:items-end justify-between gap-4 shrink-0">
-            <div className="p-5 bg-white border-2 border-emerald-500 rounded-none text-right font-mono space-y-1 shadow-xs">
-              <span className="text-[10px] text-zinc-500 block uppercase">Composite LiveBench Score</span>
-              <div className="text-3xl sm:text-4xl font-bold text-emerald-700">
+          {/* Score — isolated, no Deploy/Playground CTAs */}
+          <div className="lg:w-[200px] shrink-0 flex flex-col justify-center">
+            <div className="p-5 bg-white border-2 border-emerald-500 shadow-xs text-center font-mono space-y-1">
+              <span className="text-[10px] text-zinc-500 block uppercase tracking-widest font-bold">Composite LiveBench Score</span>
+              <div className="text-4xl font-bold text-emerald-700 tracking-tight">
                 {model.passRate}%
               </div>
               <span className="text-[10px] text-zinc-400 block font-sans">20 Deterministic Test Assertions Verified</span>
             </div>
-
-             <button
-              onClick={() => setIsDeployModalOpen(true)}
-              className="px-6 py-3 bg-[#ea580c] hover:bg-[#c2410c] text-white font-bold text-xs font-mono rounded-none transition-all flex items-center gap-2 cursor-pointer shadow-xs active:scale-95 w-full sm:w-auto justify-center"
-            >
-              <HiOutlineRocketLaunch className="text-sm" />
-               <span>Deploy Model (1-Click)</span>
-             </button>
-             <Link
-               to={`/playground/${model.id}`}
-               className="px-6 py-2.5 bg-zinc-950 hover:bg-zinc-800 text-white text-xs font-bold text-center transition-colors w-full sm:w-auto"
-             >
-               Try Playground
-             </Link>
           </div>
-         </div>
+        </div>
 
          {/* 2. SPEED & THROUGHPUT STATS BAR */}
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 font-mono">
