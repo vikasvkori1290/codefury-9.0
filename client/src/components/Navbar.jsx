@@ -24,10 +24,10 @@ const Navbar = () => {
         <div className="flex items-center gap-6">
           <Link to="/" onClick={closeMenu} className="flex items-center gap-2 group shrink-0">
             <div className="w-8 h-8 bg-[#ea580c] text-white flex items-center justify-center font-bold text-xs font-mono shadow-[3px_3px_0_#111] group-hover:translate-x-0.5 group-hover:translate-y-0.5 group-hover:shadow-[1px_1px_0_#111] transition-all">
-              M
+              F
             </div>
             <span className="font-bold text-base text-black tracking-tight font-sans hidden sm:inline">
-              ModelHub
+              Forge
             </span>
           </Link>
 
@@ -82,15 +82,9 @@ const Navbar = () => {
             <div className="hidden sm:flex items-center gap-2">
               <Link
                 to="/login"
-                className="px-3 py-2 text-zinc-700 hover:text-black font-medium transition-colors"
-              >
-                Log in
-              </Link>
-              <Link
-                to="/register"
                 className="px-4 py-2 bg-[#ea580c] text-white font-bold border border-[#ea580c] shadow-[3px_3px_0_#111] hover:-translate-y-0.5 hover:shadow-[4px_4px_0_#111] transition-all"
               >
-                Sign up
+                Sign in
               </Link>
             </div>
           )}
@@ -112,9 +106,8 @@ const Navbar = () => {
             <Link to="/live-bench" onClick={closeMenu} className={navLinkClass(location.pathname === "/live-bench")}>Live Bench</Link>
             <Link to="/models" onClick={closeMenu} className={navLinkClass(location.pathname === "/models" || location.pathname.startsWith("/models/"))}>AI Models</Link>
             <Link to="/agents" onClick={closeMenu} className={navLinkClass(location.pathname === "/agents" || location.pathname.startsWith("/agents/"))}>Agent Marketplace</Link>
-            {!user && <div className="flex gap-2 pt-3 mt-2 border-t border-zinc-100 sm:hidden">
-              <Link to="/login" onClick={closeMenu} className="flex-1 border border-zinc-300 px-3 py-2 text-center font-medium">Log in</Link>
-              <Link to="/register" onClick={closeMenu} className="flex-1 bg-[#ea580c] px-3 py-2 text-center font-bold text-white">Sign up</Link>
+            {!user && <div className="pt-3 mt-2 border-t border-zinc-100 sm:hidden">
+              <Link to="/login" onClick={closeMenu} className="block bg-[#ea580c] px-3 py-2 text-center font-bold text-white">Sign in</Link>
             </div>}
           </nav>
         </div>

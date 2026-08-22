@@ -10,10 +10,10 @@ const Footer = () => {
         <div className="flex items-center gap-3">
           <Link to="/" className="flex items-center gap-2 group">
             <div className="w-6 h-6 bg-[#ea580c] text-white flex items-center justify-center font-bold font-mono text-xs shadow-xs">
-              M
+              F
             </div>
             <span className="font-bold text-zinc-950 text-sm tracking-tight font-sans">
-              ModelHub
+              Forge
             </span>
           </Link>
           <span className="text-zinc-300">|</span>

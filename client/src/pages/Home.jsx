@@ -16,7 +16,7 @@ const Home = () => (
       <div className="absolute inset-0 bg-gradient-to-b from-[#e6f0fb]/95 via-[#e6f0fb]/55 to-transparent pointer-events-none" />
       <div className="relative z-10 max-w-4xl space-y-7">
         <span className="inline-flex items-center gap-2 bg-white/70 border border-[#cbd5e1] px-3 py-1.5 text-[11px] font-mono uppercase tracking-wider text-zinc-700 select-none">
-          <HiOutlineSparkles className="text-[#ea580c]" /> ModelHub 9.0 / AI platform
+           <HiOutlineSparkles className="text-[#ea580c]" /> Forge 9.0 / AI platform
         </span>
         <h1 className="text-5xl sm:text-7xl lg:text-[84px] font-extrabold tracking-[-0.05em] leading-[1.18] sm:leading-[1.14] flex flex-col items-center select-none">
           <span className="text-zinc-950">Find the model that</span>
