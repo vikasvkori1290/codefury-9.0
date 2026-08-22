@@ -3,9 +3,7 @@ import { Link, useLocation } from "react-router-dom";
 import {
   HiOutlineBars3,
   HiOutlineBeaker,
-  HiOutlineChevronDown,
   HiOutlineCreditCard,
-  HiOutlineUserCircle,
   HiOutlineXMark,
 } from "react-icons/hi2";
 import { useAuth } from "../context/AuthContext";
@@ -102,13 +100,17 @@ const Navbar = () => {
                 aria-label="Open profile menu"
                 aria-expanded={isProfileOpen}
                 onClick={() => setIsProfileOpen((open) => !open)}
-                className="flex items-center gap-1.5 text-zinc-900 hover:text-[#ea580c] transition-colors cursor-pointer"
+                className="flex items-center gap-2 text-zinc-900 hover:text-[#ea580c] transition-colors cursor-pointer"
               >
-                <HiOutlineUserCircle className="text-[#ea580c]" size={29} />
-                <HiOutlineChevronDown
-                  size={14}
-                  className={`transition-transform ${isProfileOpen ? "rotate-180" : ""}`}
-                />
+                <span className="max-w-32 truncate text-xs font-medium text-zinc-700">{user.name}</span>
+                <span className="relative h-8 w-8 border-2 border-black bg-[#ea580c] shadow-[2px_2px_0_#111] transition-transform hover:translate-x-0.5 hover:translate-y-0.5 hover:shadow-none" aria-hidden="true">
+                  <span className="absolute left-[6px] top-[6px] h-1 w-1 bg-white" />
+                  <span className="absolute left-[18px] top-[6px] h-1 w-1 bg-white" />
+                  <span className="absolute left-[6px] top-[10px] h-3 w-4 bg-white" />
+                  <span className="absolute left-[10px] top-[13px] h-1 w-1 bg-black" />
+                  <span className="absolute left-[18px] top-[13px] h-1 w-1 bg-black" />
+                  <span className="absolute left-[14px] top-[17px] h-1 w-1 bg-black" />
+                </span>
               </button>
               {isProfileOpen && (
                 <div className="absolute right-0 top-11 z-50 w-52 border-2 border-black bg-white p-2 text-left shadow-[4px_4px_0_#ea580c]">
