@@ -751,6 +751,7 @@ const getModelBrandInfo = (model) => {
 export const LiveBenchPage = () => {
   const [viewMode, setViewMode] = useState("graph"); // 'graph' | 'table' (graph is default)
   const [activeCategory, setActiveCategory] = useState("all");
+  const [selectedCategories, setSelectedCategories] = useState(["all"]);
   const [searchQuery, setSearchQuery] = useState("");
   const [openWeightFilter, setOpenWeightFilter] = useState("all"); // 'all' | 'open' | 'proprietary'
   const [sortColumn, setSortColumn] = useState("overallPassRate");
@@ -827,6 +828,28 @@ export const LiveBenchPage = () => {
     }
   };
 
+  const toggleCategory = (categoryKey) => {
+    if (categoryKey === "all") {
+      setSelectedCategories(["all"]);
+      setActiveCategory("all");
+      return;
+    }
+
+    setSelectedCategories((current) => {
+      const withoutAll = current.filter((key) => key !== "all");
+      const next = withoutAll.includes(categoryKey)
+        ? withoutAll.filter((key) => key !== categoryKey)
+        : [...withoutAll, categoryKey];
+
+      setActiveCategory(next.at(-1) || "all");
+      if (next.length) {
+        setSortColumn(next.at(-1));
+        setSortDirection("desc");
+      }
+      return next.length ? next : ["all"];
+    });
+  };
+
   // Heatmap background shading matching LiveBench (Top 5 per column + Tiered Heatmap)
   const getCellClass = (score, categoryKey) => {
     if (typeof score !== "number") return "text-zinc-700";
@@ -895,24 +918,30 @@ export const LiveBenchPage = () => {
             {/* View Mode Switcher & Filters */}
             <div className="flex items-center gap-2 flex-wrap">
               <HiOutlineFunnel className="text-zinc-400" />
-              <select
-                value={activeCategory}
-                onChange={(e) => {
-                  const val = e.target.value;
-                  setActiveCategory(val);
-                  if (val !== "all") {
-                    setSortColumn(val);
-                    setSortDirection("desc");
-                  }
-                }}
-                className="bg-[#fafafa] border border-[#e4e4e7] px-3 py-2 text-xs text-zinc-800 outline-none cursor-pointer"
-              >
-                {CATEGORIES.map((cat) => (
-                  <option key={cat.key} value={cat.key}>
-                    Category: {cat.label}
-                  </option>
-                ))}
-              </select>
+
+              {/* Multi-select Category Filter */}
+              <details className="relative">
+                <summary className="list-none flex items-center gap-2 px-3 py-2 bg-zinc-900 text-white font-bold cursor-pointer select-none">
+                  <span>{selectedCategories.includes("all") ? "All Categories" : `${selectedCategories.length} Categories Selected`}</span>
+                  <HiOutlineChevronDown className="text-sm" />
+                </summary>
+                <div className="absolute right-0 z-20 mt-1 w-56 bg-white border border-[#e4e4e7] shadow-lg p-1">
+                  {CATEGORIES.map((cat) => {
+                    const isSelected = selectedCategories.includes(cat.key);
+                    return (
+                      <label key={cat.key} className="flex items-center gap-2 px-2.5 py-2 text-zinc-700 hover:bg-zinc-50 cursor-pointer">
+                        <input
+                          type="checkbox"
+                          checked={isSelected}
+                          onChange={() => toggleCategory(cat.key)}
+                          className="accent-zinc-900"
+                        />
+                        <span>{cat.label}</span>
+                      </label>
+                    );
+                  })}
+                </div>
+              </details>
 
               {/* License Filter */}
               <select
@@ -957,32 +986,6 @@ export const LiveBenchPage = () => {
             </div>
           </div>
 
-          {/* Interactive Category Pills */}
-          <div className="flex items-center gap-1.5 flex-wrap pt-2 border-t border-[#f4f4f5] font-mono text-[11px]">
-            <span className="text-zinc-400 mr-1 text-[10px] uppercase font-bold">Filter By Domain:</span>
-            {CATEGORIES.map((cat) => {
-              const isSelected = activeCategory === cat.key;
-              return (
-                <button
-                  key={cat.key}
-                  onClick={() => {
-                    setActiveCategory(cat.key);
-                    if (cat.key !== "all") {
-                      setSortColumn(cat.key);
-                      setSortDirection("desc");
-                    }
-                  }}
-                  className={`px-2.5 py-1 transition-all cursor-pointer border ${
-                    isSelected
-                      ? "bg-zinc-900 text-white font-bold border-zinc-900 shadow-xs"
-                      : "bg-white text-zinc-600 border-[#e4e4e7] hover:border-zinc-400 hover:text-black"
-                  }`}
-                >
-                  {cat.label}
-                </button>
-              );
-            })}
-          </div>
         </div>
 
         {/* ==================== CONDITIONAL VIEW: GRAPH VS TABLE ==================== */}
