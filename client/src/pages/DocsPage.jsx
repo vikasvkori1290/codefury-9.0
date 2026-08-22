@@ -291,7 +291,7 @@ const FAQS = [
 ];
 
 const DocsPage = () => {
-  const [activeTab, setActiveTab] = useState("quickstart");
+  const [activeTab, setActiveTab] = useState("requests_no_sub");
   const [expandedFolders, setExpandedFolders] = useState(new Set(SIDEBAR_GROUPS.map((group) => group.id)));
   const [selectedCategory, setSelectedCategory] = useState("All Questions");
   const [searchQuery, setSearchQuery] = useState("");
