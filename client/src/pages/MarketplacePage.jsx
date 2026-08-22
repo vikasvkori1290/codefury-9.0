@@ -656,27 +656,6 @@ export const MarketplacePage = () => {
 
             </div>
 
-            {/* AI Intent Recommendation Banner */}
-            {detectedIntent && (
-              <div className="p-3.5 bg-[#eff6ff] border border-[#bfdbfe] flex items-center justify-between font-mono text-xs text-blue-950 shadow-xs animate-fadeIn">
-                <div className="flex items-center gap-2.5">
-                  <span className="text-lg select-none">{detectedIntent.icon}</span>
-                  <div>
-                    <div className="font-bold flex items-center gap-1.5">
-                      <span>Semantic Intent:</span>
-                      <span className="text-[#ea580c]">{detectedIntent.intent}</span>
-                    </div>
-                    <p className="text-[11px] text-blue-700 font-sans">
-                      Recommending top models ranked by verified domain capability ({detectedIntent.description}).
-                    </p>
-                  </div>
-                </div>
-                <span className="text-[10px] px-2 py-0.5 bg-blue-100 border border-blue-200 text-blue-800 font-bold shrink-0 hidden sm:inline">
-                  AI RECOMMENDATION ACTIVE
-                </span>
-              </div>
-            )}
-
             {!isSearching && search.trim() && filtered.length > 0 && (
               <div className="border border-orange-200 bg-[#fffaf5] p-4 shadow-xs animate-fadeIn">
                 <div className="flex items-center gap-2">

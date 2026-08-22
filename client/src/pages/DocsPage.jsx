@@ -238,6 +238,7 @@ const SIDEBAR_GROUPS = [
     id: "request-architecture",
     label: "Request architecture",
     description: "How the engine works",
+    direct: true,
     items: [
       { id: "requests_no_sub", label: "Requests without subscription", icon: HiOutlineWrenchScrewdriver, badge: "Engine" },
     ],
@@ -350,6 +351,29 @@ const DocsPage = () => {
             </div>
             <nav className="space-y-2 font-mono text-xs">
               {SIDEBAR_GROUPS.map((group) => {
+                if (group.direct) {
+                  const active = activeTab === group.items[0].id;
+                  return (
+                    <button
+                      key={group.id}
+                      type="button"
+                      onClick={() => setActiveTab(group.items[0].id)}
+                      className={`w-full flex items-center justify-between px-3 py-2.5 text-left transition-all cursor-pointer border ${
+                        active
+                          ? "bg-black text-white font-bold border-black shadow-xs"
+                          : "bg-transparent text-zinc-700 hover:text-black hover:bg-zinc-100 border-transparent"
+                      }`}
+                    >
+                      <div className="flex items-center gap-2.5 truncate">
+                        <HiOutlineWrenchScrewdriver className={active ? "text-[#ea580c]" : "text-zinc-400"} />
+                        <span className="truncate">{group.label}</span>
+                      </div>
+                      <span className={`text-[10px] font-mono px-1.5 py-0.5 ${active ? "bg-zinc-800 text-white" : "bg-zinc-100 text-zinc-600"}`}>
+                        Engine
+                      </span>
+                    </button>
+                  );
+                }
                 const isOpen = expandedFolders.has(group.id);
                 return (
                   <div key={group.id}>
