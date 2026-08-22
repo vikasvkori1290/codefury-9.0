@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">
+  <!-- Hard black offset shadow -->
+  <rect x="10" y="10" width="48" height="48" fill="#111111" />
+  <!-- Vibrant Orange Forge Brand Square -->
+  <rect x="6" y="6" width="48" height="48" fill="#ea580c" />
+  <!-- White Bold 'F' Letter in Center -->
+  <text x="30" y="41" font-family="ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace" font-size="34" font-weight="900" fill="#ffffff" text-anchor="middle">F</text>
+</svg>

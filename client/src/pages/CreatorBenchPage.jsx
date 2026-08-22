@@ -125,15 +125,15 @@ export const CreatorBenchPage = () => {
       <div className="max-w-4xl mx-auto space-y-8">
         {/* Header Bar (Browserbase dark aesthetic) */}
         <div className="p-6 bg-[#18181b] border border-[#27272a] rounded-none shadow-xl space-y-2">
-          <div className="inline-flex items-center gap-2 px-2.5 py-0.5 bg-emerald-500/10 border border-emerald-500/30 text-xs font-mono text-emerald-400 font-bold">
+          <div className="inline-flex items-center gap-2 px-2.5 py-0.5 bg-orange-500/10 border border-orange-500/30 text-xs font-mono text-[#ea580c] font-bold">
             <HiOutlineSparkles />
-            <span>Creator Test-Bench Engine • Automated Promptfoo Suite</span>
+            <span>// CREATOR EVALUATION ENGINE</span>
           </div>
           <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-white font-sans">
-            Register & Benchmark Local Model
+            Benchmark, Verify, and Monetize Your AI Model
           </h1>
-          <p className="text-xs sm:text-sm text-zinc-400 font-sans">
-            Submit your Ollama tag or Modelfile to trigger 35 standardized test assertions across Reasoning, Knowledge, Coding, and Safety.
+          <p className="text-xs sm:text-sm text-zinc-400 font-sans leading-relaxed">
+            Connect your local Ollama instance, custom GGUF weights, or remote API endpoint. Our engine runs an objective suite of 35 deterministic unit tests—evaluating code execution, exact math logic, JSON adherence, and latency—and automatically publishes a verified scorecard to the marketplace.
           </p>
         </div>
 

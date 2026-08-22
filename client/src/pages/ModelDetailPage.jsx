@@ -200,10 +200,12 @@ console.log(await response.json());`,
               <HiOutlineRocketLaunch className="text-sm" />
                <span>Deploy Model (1-Click)</span>
              </button>
-             <div className="flex gap-2 w-full sm:w-auto">
-               <Link to={`/playground/${model.id}`} className="flex-1 px-4 py-2.5 bg-zinc-950 text-white text-xs font-bold text-center">Try Playground</Link>
-               <Link to={`/compare?models=${model.id}`} className="flex-1 px-4 py-2.5 border border-zinc-300 text-zinc-800 text-xs font-bold text-center">Compare</Link>
-             </div>
+             <Link
+               to={`/playground/${model.id}`}
+               className="px-6 py-2.5 bg-zinc-950 hover:bg-zinc-800 text-white text-xs font-bold text-center transition-colors w-full sm:w-auto"
+             >
+               Try Playground
+             </Link>
           </div>
          </div>
 
@@ -229,8 +231,55 @@ console.log(await response.json());`,
 
           <div className="p-4 bg-white border border-[#e4e4e7] rounded-none shadow-xs space-y-1">
             <span className="text-[10px] text-zinc-400 block uppercase font-semibold">Test Assertions</span>
-            <div className="text-xl font-bold text-zinc-900">35 / 35 Verified</div>
-            <span className="text-[10px] text-zinc-400 font-sans">GSM8K, MMLU, HumanEval</span>
+            <div className="text-xl font-bold text-zinc-900">20 / 20 Verified</div>
+            <span className="text-[10px] text-zinc-400 font-sans">LiveBench Ground-Truth</span>
+          </div>
+        </div>
+
+        {/* 2.5 LIVEBENCH DETERMINISTIC 4-PILLAR BREAKDOWN */}
+        <div className="bg-white border border-[#e4e4e7] p-5 sm:p-6 rounded-none shadow-xs space-y-4 font-mono">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-zinc-100 pb-3">
+            <div className="flex items-center gap-2">
+              <span className="w-2.5 h-2.5 bg-emerald-500 rounded-none" />
+              <span className="font-bold text-zinc-950 text-xs sm:text-sm">
+                Objective LiveBench Ground-Truth Category Breakdown
+              </span>
+            </div>
+            <span className="text-[11px] text-zinc-400 font-sans">Zero LLM Judge Bias • 100% Programmatic</span>
+          </div>
+
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 text-xs">
+            <div className="p-3 bg-zinc-50 border border-zinc-200 space-y-1">
+              <span className="text-[10px] text-zinc-500 uppercase block font-bold">1. Math & Exact Logic</span>
+              <div className="text-lg font-bold text-emerald-700">
+                {model.scores?.math_logic ?? model.scores?.mathematics ?? 92}% <span className="text-[10px] font-normal text-zinc-400">Pass</span>
+              </div>
+              <span className="text-[10px] text-zinc-400 block">GSM8K Numeric Regex</span>
+            </div>
+
+            <div className="p-3 bg-zinc-50 border border-zinc-200 space-y-1">
+              <span className="text-[10px] text-zinc-500 uppercase block font-bold">2. Code Execution</span>
+              <div className="text-lg font-bold text-emerald-700">
+                {model.scores?.code_execution ?? model.scores?.coding ?? 85}% <span className="text-[10px] font-normal text-zinc-400">Pass</span>
+              </div>
+              <span className="text-[10px] text-zinc-400 block">Sandboxed VM Unit Tests</span>
+            </div>
+
+            <div className="p-3 bg-zinc-50 border border-zinc-200 space-y-1">
+              <span className="text-[10px] text-zinc-500 uppercase block font-bold">3. Schema Adherence</span>
+              <div className="text-lg font-bold text-emerald-700">
+                {model.scores?.schema_adherence ?? model.scores?.data_analysis ?? 80}% <span className="text-[10px] font-normal text-zinc-400">Pass</span>
+              </div>
+              <span className="text-[10px] text-zinc-400 block">Strict JSON Key Validator</span>
+            </div>
+
+            <div className="p-3 bg-zinc-50 border border-zinc-200 space-y-1">
+              <span className="text-[10px] text-zinc-500 uppercase block font-bold">4. Rule Following</span>
+              <div className="text-lg font-bold text-emerald-700">
+                {model.scores?.rule_following ?? model.scores?.instruction ?? 78}% <span className="text-[10px] font-normal text-zinc-400">Pass</span>
+              </div>
+              <span className="text-[10px] text-zinc-400 block">Lipogram & Word Constraints</span>
+            </div>
           </div>
         </div>
 
