@@ -1,6 +1,6 @@
 import React from "react";
 import { Link } from "react-router-dom";
-import { HiOutlineArrowDown, HiOutlineArrowRight, HiOutlineCommandLine, HiOutlineSparkles } from "react-icons/hi2";
+import { HiOutlineArrowRight, HiOutlineCommandLine, HiOutlineSparkles } from "react-icons/hi2";
 
 const ArtFrame = ({ children, shadow = "#ea580c" }) => (
   <div className="relative min-h-[360px] overflow-hidden border border-[#cbd5e1] bg-[#e9f0fa] p-5 sm:p-8" style={{ backgroundImage: "radial-gradient(#9db1c8 1.2px, transparent 1.2px)", backgroundSize: "14px 14px" }}>
@@ -26,8 +26,7 @@ const Home = () => (
         </h1>
         <p className="max-w-2xl mx-auto text-base sm:text-xl font-medium leading-relaxed text-zinc-700">Discover specialized AI, benchmark it against real workloads, and deploy the winner with confidence.</p>
         <div className="flex flex-col sm:flex-row justify-center gap-3">
-          <Link to="/live-bench" className="inline-flex items-center justify-center gap-2 border border-zinc-900 bg-black px-5 py-2.5 text-sm font-bold text-white hover:bg-[#ea580c]">Get started in Live Bench <HiOutlineArrowRight /></Link>
-          <Link to="/agents" className="inline-flex items-center justify-center gap-2 border border-zinc-300 bg-white/80 px-5 py-2.5 text-sm font-bold hover:border-black">Explore agents <HiOutlineArrowDown /></Link>
+          <Link to="/live-bench" className="inline-flex items-center justify-center gap-2 border border-zinc-900 bg-black px-5 py-2.5 text-sm font-bold text-white hover:bg-[#ea580c]">Get started <HiOutlineArrowRight /></Link>
         </div>
       </div>
     </section>
