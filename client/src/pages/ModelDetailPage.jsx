@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useParams, Link } from "react-router-dom";
 import {
   HiOutlineArrowLeft,
+  HiOutlineRocketLaunch,
   HiOutlineShieldCheck,
   HiOutlineSparkles,
   HiOutlineClipboard,
@@ -169,7 +170,7 @@ console.log(await response.json());`,
                 </span>
               </div>
 
-              <h1 className="text-3xl sm:text-4xl font-bold tracking-tight text-zinc-950 font-sans">
+              <h1 className="text-3xl sm:text-4xl font-bold tracking-tight text-zinc-950 font-mono">
                 {model.displayName}
               </h1>
 
@@ -187,8 +188,8 @@ console.log(await response.json());`,
             </div>
           </div>
 
-          {/* Score — isolated, no Deploy/Playground CTAs */}
-          <div className="lg:w-[200px] shrink-0 flex flex-col justify-center">
+          {/* Score + CTAs */}
+          <div className="lg:w-[220px] shrink-0 flex flex-col gap-3">
             <div className="p-5 bg-white border-2 border-emerald-500 shadow-xs text-center font-mono space-y-1">
               <span className="text-[10px] text-zinc-500 block uppercase tracking-widest font-bold">Composite LiveBench Score</span>
               <div className="text-4xl font-bold text-emerald-700 tracking-tight">
@@ -196,6 +197,19 @@ console.log(await response.json());`,
               </div>
               <span className="text-[10px] text-zinc-400 block font-sans">20 Deterministic Test Assertions Verified</span>
             </div>
+            <button
+              onClick={() => setIsDeployModalOpen(true)}
+              className="w-full px-6 py-3 bg-[#ea580c] hover:bg-[#c2410c] text-white font-bold text-xs font-mono rounded-none transition-all flex items-center gap-2 cursor-pointer shadow-xs active:scale-95 justify-center"
+            >
+              <HiOutlineRocketLaunch className="text-sm" />
+              <span>Deploy Model (1-Click)</span>
+            </button>
+            <Link
+              to={`/playground/${model.id}`}
+              className="w-full px-6 py-2.5 bg-zinc-950 hover:bg-zinc-800 text-white text-xs font-bold font-mono text-center transition-colors"
+            >
+              Try Playground
+            </Link>
           </div>
         </div>
 
