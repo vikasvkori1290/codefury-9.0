@@ -2,7 +2,7 @@
 
 
 ### 🌐 Live Website
-**[→ https://forgemodel.netlify.app/](https://forgemodel.netlify.app/)** 
+**[ForgeModel](https://forgemodel.netlify.app/)** 
 
 
 
